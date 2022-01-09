@@ -42,7 +42,7 @@ outPath=/project/pr94/rxiang/analysis/EAS$2_$3
 
 cdo mergetime $inPath/$1.nc $outPath/$4_$1_mergetime.nc
 
-if $1=TOT_PREC
+if $1=TOT_PREC; then
   cdo -shifttime,-30minutes $4_$1_mergetime.nc $4_$1_mergetime_sft.nc
   rm $4_$1_mergetime.nc
   mv $4_$1_mergetime_sft.nc $4_$1_mergetime.nc
