@@ -44,7 +44,8 @@ outPath=/project/pr94/rxiang/analysis/EAS$2_$3
 if test -f "$outPath/$4_$1_mergetime.nc"; then
     rm $outPath/$4_$1_mergetime.nc
 fi
-echo "1"
+
+echo "$inPath"
 cdo mergetime $inPath/$1.nc $outPath/$4_$1_mergetime.nc
 echo "files merged"
 
