@@ -37,7 +37,7 @@ fi
 Dir=/project/pr94/rxiang/data_lmp
 simname=$3
 year=$4
-inPath=$Dir/$4*_$3/lm_$reso/$subDir
+inPath=$Dir/$4**_$3/lm_$reso/$subDir
 outPath=/project/pr94/rxiang/analysis/EAS$2_$3
 
 # if file exits, remove it
@@ -45,6 +45,7 @@ if test -f "$outPath/$4_$1_mergetime.nc"; then
     rm $outPath/$4_$1_mergetime.nc
 fi
 
+ls $inPath
 cdo mergetime $inPath/$1.nc $outPath/$4_$1_mergetime.nc
 echo "files merged"
 
