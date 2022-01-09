@@ -27,14 +27,14 @@ else
    echo "variable $1 doesn't exit in cosmo output"
 fi
 
-if $2=11; then
+if [ "$2" == "11" ]; then
   reso=coarse
-elif $2=44; then
+elif [ "$2" == "44" ]; then
   reso=fine
 fi
 
 
-Dir=/project/pr94/rxiang/data_lmp/
+Dir=/project/pr94/rxiang/data_lmp
 simname=$3
 year=$4
 inPath=$Dir/$4*_$3/lm_$reso/$subDir
@@ -42,7 +42,7 @@ outPath=/project/pr94/rxiang/analysis/EAS$2_$3
 
 cdo mergetime $inPath/$1.nc $outPath/$4_$1_mergetime.nc
 
-if [$1=TOT_PREC]; then
+if [ "$1" == "TOT_PREC" ]; then
   cdo -shifttime,-30minutes $4_$1_mergetime.nc $4_$1_mergetime_sft.nc
   rm $4_$1_mergetime.nc
   mv $4_$1_mergetime_sft.nc $4_$1_mergetime.nc
