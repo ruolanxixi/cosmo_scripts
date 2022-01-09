@@ -3,8 +3,12 @@ source cosmoFunctions.sh
 
 #-------------------------------------------------------------------------------
 # 
-var=TOT_PREC
+declare -a var=("TOT_PREC" "T_2M") 
 resolution=11
 sim=ctrl
 year=01
-mergeFiles $var $resolution $sim $year
+
+for i in "${var[@]}"
+do
+  mergeFiles $i $resolution $sim $year
+done
