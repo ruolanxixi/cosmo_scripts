@@ -46,6 +46,7 @@ if test -f "$outPath/$4_$1_mergetime.nc"; then
 fi
 
 cdo mergetime $inPath/$1.nc $outPath/$4_$1_mergetime.nc
+echo "files merged"
 
 if [ "$1" == "TOT_PREC" ]; then
   cdo -shifttime,-30minutes $outPath/$4_$1_mergetime.nc $outPath/$4_$1_mergetime_sft.nc
