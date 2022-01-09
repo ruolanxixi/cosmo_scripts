@@ -46,6 +46,9 @@ if $1=TOT_PREC; then
   cdo -shifttime,-30minutes $4_$1_mergetime.nc $4_$1_mergetime_sft.nc
   rm $4_$1_mergetime.nc
   mv $4_$1_mergetime_sft.nc $4_$1_mergetime.nc
+  echo "shift time"
+  else
+  echo "no shift time"
 fi
 }
 
