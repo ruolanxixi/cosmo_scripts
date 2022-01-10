@@ -113,14 +113,14 @@ do
     for p in "${pressure[@]}"
     do
       echo "$p"
-      cdo -select,season="$s"  $Path/$4_$1_mergetime_$p.nc $Path/$4_$1_mergetime_$p_TS_$s.nc
+      cdo -select,season="$s" $Path/$4_$1_mergetime_$p.nc $Path/$4_$1_mergetime_$p_TS_$s.nc
       if [ "$1" != "U" ] && [ "$1" != "V" ]; then
         cdo timmean $Path/$4_$1_mergetime_$p_TS_$s.nc $Path/$4_$1_mergetime_$p_$s.nc
         rm $Path/$4_$1_mergetime_$p_TS_$s.nc
       fi
     done
   else
-    cdo -select,season="$s"  $Path/$4_$1_mergetime.nc $Path/$4_$1_mergetime_TS_$s.nc
+    cdo -select,season="$s" $Path/$4_$1_mergetime.nc $Path/$4_$1_mergetime_TS_$s.nc
     cdo timmean $Path/$4_$1_mergetime_TS_$s.nc $Path/$4_$1_mergetime_$s.nc
     rm $Path/$4_$1_mergetime_TS_$s.nc
   fi
