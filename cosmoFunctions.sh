@@ -112,6 +112,7 @@ do
   if [[ "${IFS}${list_6h3D[*]}${IFS}" =~ "${IFS}$1${IFS}" ]]; then
     for p in "${pressure[@]}"
     do
+      echo "$p"
       cdo -select,season="$s"  $Path/$4_$1_mergetime_$p.nc $Path/$4_$1_mergetime_$p_TS_$s.nc
       if [ "$1" != "U" ] && [ "$1" != "V" ]; then
         cdo timmean $Path/$4_$1_mergetime_$p_TS_$s.nc $Path/$4_$1_mergetime_$p_$s.nc
