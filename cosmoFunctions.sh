@@ -90,9 +90,9 @@ for s in "${st1[@]}"
 do 
   for p in "${pressure[@]}"
   do
-  cdo sqrt -add -sqr $uPath/$4_U_mergetime_$p_TS_${s}.nc -sqr $vPath/$4_V_mergetime_$p_TS_${s}.nc $outPath/$4_wind_mergetime_$p_TS_${s}.nc
-  cdo timmean $outPath/$4_wind_mergetime_$p_TS_${s}.nc $outPath/$4_wind_mergetime_$p_${s}.nc
-  rm $outPath/$4_wind_mergetime_$p_TS_${s}.nc
+  cdo sqrt -add -sqr $uPath/$4_U_mergetime_${p}_TS_${s}.nc -sqr $vPath/$4_V_mergetime_${p}_TS_${s}.nc $outPath/$4_wind_mergetime_${p}_TS_${s}.nc
+  cdo timmean $outPath/$4_wind_mergetime_${p}_TS_${s}.nc $outPath/$4_wind_mergetime_${p}_${s}.nc
+  rm $outPath/$4_wind_mergetime_${p}_TS_${s}.nc
   done
 done
 }
