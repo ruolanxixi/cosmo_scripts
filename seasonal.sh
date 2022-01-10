@@ -3,16 +3,16 @@ source cosmoFunctions.sh
 
 #-------------------------------------------------------------------------------
 # 
-declare -a var=("TOT_PREC" "T_2M") 
+declare -a var=("TOT_PREC" "T_2M" "T" "TQV" "U" "V") 
 declare -a sim=("ctrl" "topo1")
 resolution=11
 year=01
 
-for i in "${var[@]}"
+for v in "${var[@]}"
 do
-  for j in "${sim[@]}"
+  for c in "${sim[@]}"
   do
-    mergeFiles $i $resolution $j $year
-    seasonal $i $resolution $j $year
+    mergeFiles $v $resolution $c $year
+    seasonal $v $resolution $c $year
   done
 done
