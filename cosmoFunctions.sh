@@ -3,25 +3,29 @@
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
+# define directories
+#
+IFS="|"
+list_1h="SNOW_CON${IFS}SNOW_GSP${IFS}RAIN_CON${IFS}RAIN_GSP${IFS}TOT_PREC${IFS}TD_2M${IFS}T_2M${IFS}U_10M${IFS}V_10M${IFS}CLCT${IFS}CLCL${IFS}CLCM${IFS}CLCH"
+list_3h="ALHFL_S${IFS}ATHD_S${IFS}ATHU_S${IFS}ASHFL_S${IFS}ASOD_T${IFS}ASOB_T${IFS}ASOB_S${IFS}ATHB_T${IFS}ATHB_S${IFS}ASWDIFD_S${IFS}ASWDIFU_S${IFS}ASWDIR_S${IFS}ASOBC_S${IFS}ASOBC_T${IFS}ATHBC_S${IFS}ATHBC_T${IFS}DURSUN${IFS}PMSL${IFS}PS${IFS}QV_2M${IFS}RELHUM_2M${IFS}ALB_RAD${IFS}AEVAP_S"
+list_6h="H_SNOW${IFS}RUNOFF_G${IFS}RUNOFF_S${IFS}TQC${IFS}TQI${IFS}TQV${IFS}TQR${IFS}TQS${IFS}TQG${IFS}HPBL${IFS}SNOW_MELT${IFS}WTDEPTH"
+list_6h3D="FI${IFS}QV${IFS}T${IFS}U${IFS}V"
+list_24h="TMAX_2M${IFS}TMIN_2M${IFS}AER_SO4${IFS}AER_DUST${IFS}AER_BC"
+
+#-------------------------------------------------------------------------------
 # merge ncfiles
 #
 mergeFiles() {
 
-list_1h="SNOW_CON SNOW_GSP RAIN_CON RAIN_GSP TOT_PREC TD_2M T_2M U_10M V_10M CLCT CLCL CLCM CLCH"
-list_3h="ALHFL_S ATHD_S ATHU_S ASHFL_S ASOD_T ASOB_T ASOB_S ATHB_T ATHB_S ASWDIFD_S ASWDIFU_S ASWDIR_S ASOBC_S ASOBC_T ATHBC_S ATHBC_T DURSUN PMSL PS QV_2M RELHUM_2M ALB_RAD AEVAP_S"
-list_6h="H_SNOW RUNOFF_G RUNOFF_S TQC TQI TQV TQR TQS TQG HPBL SNOW_MELT WTDEPTH"
-list_6h3D="FI QV T U V"
-list_24h="TMAX_2M TMIN_2M AER_SO4 AER_DUST AER_BC"
-
-if [[ "$list_1h[*]}" =~ "$1" ]]; then
+if [[ "${IFS}${list_1h[*]}${IFS}" =~ "${IFS}$1${IFS}" ]]; then
   subDir=1h
-elif [[ "$list_3h[*]}" =~ "$1" ]]; then
+elif [[ "${IFS}${list_3h[*]}${IFS}" =~ "${IFS}$1${IFS}" ]]; then
    subDir=3h
-elif [[ "$list_6h[*]}" =~ "$1" ]]; then
+elif [[ "${IFS}${list_6h[*]}${IFS}" =~ "${IFS}$1${IFS}" ]]; then
    subDir=6h
-elif [[ "$list_6h3D[*]}" =~ "$1" ]]; then
+elif [[ "${IFS}${list_6h3D[*]}${IFS}" =~ "${IFS}$1${IFS}" ]]; then
    subDir=6h3D
-elif [[ "$list_24h[*]}" =~ "$1" ]]; then
+elif [[ "${IFS}${list_24h[*]}${IFS}" =~ "${IFS}$1${IFS}" ]]; then
    subDir=24h
 else
    echo "variable $1 doesn't exit in cosmo output"
@@ -38,7 +42,9 @@ Dir=/project/pr94/rxiang/data_lmp
 simname=$3
 year=$4
 inPath=$Dir/$4**_$3/lm_$reso/$subDir
-outPath=/project/pr94/rxiang/analysis/EAS$2_$3
+outPath=/project/pr94/rxiang/analysis/EAS$2_$3/$1
+
+[ ! -d "$outPath" ] && mkdir -p "$outPath"
 
 # if file exits, remove it
 if test -f "$outPath/$4_$1_mergetime.nc"; then
@@ -49,7 +55,7 @@ cdo mergetime $inPath/$1.nc $outPath/$4_$1_mergetime.nc
 echo "files merged"
 
 pressure=(10000 20000 30000 40000 50000 60000 70000 85000 92500)
-if [[ "$list_6h3D[*]}" =~ "$1" ]]; then
+if [[ "${IFS}${list_6h3D[*]}${IFS}" =~ "${IFS}$1${IFS}" ]]; then
   for p in "${pressure[@]}"
   do
     cdo -select,level=$p $outPath/$4_$1_mergetime.nc $outPath/$4_$1_mergetime_$p.nc
@@ -73,7 +79,7 @@ fi
 seasonal() {
 st1=("DJF" "MAM" "JJA" "SON")
 inPath=/project/pr94/rxiang/analysis/EAS$2_$3
-outPath=/project/pr94/rxiang/analysis/EAS$2_$3/seasonal
+outPath=/project/pr94/rxiang/analysis/EAS$2_$3/$1
 
 [ ! -d "$outPath" ] && mkdir -p "$outPath"
 
@@ -81,7 +87,7 @@ pressure=(10000 20000 30000 40000 50000 60000 70000 85000 92500)
 
 for s in "${st1[@]}"
 do 
-  if [[ "$list_6h3D[*]}" =~ "$1" ]]; then
+  if [[ "${IFS}${list_6h3D[*]}${IFS}" =~ "${IFS}$1${IFS}" ]]; then
     for p in "${pressure[@]}"
     do
       cdo -select,season="$s"  $inPath/$4_$1_mergetime_$p.nc $outPath/$4_$1_mergetime_$p_TS_${s}.nc
