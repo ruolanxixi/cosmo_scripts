@@ -45,9 +45,17 @@ if test -f "$outPath/$4_$1_mergetime.nc"; then
     rm $outPath/$4_$1_mergetime.nc
 fi
 
-ls $inPath
 cdo mergetime $inPath/$1.nc $outPath/$4_$1_mergetime.nc
 echo "files merged"
+
+pressure=(10000 20000 30000 40000 50000 60000 70000 85000 92500)
+if [[ "$list_6h3D[*]}" =~ "$1" ]]; then
+  for p in "${pressure[@]}"
+  do
+    cdo -select,level=$p $outPath/$4_$1_mergetime.nc $outPath/$4_$1_mergetime_$p.nc
+  done
+  rm $outPath/$4_$1_mergetime.nc
+fi
 
 if [ "$1" == "TOT_PREC" ]; then
   cdo -shifttime,-30minutes $outPath/$4_$1_mergetime.nc $outPath/$4_$1_mergetime_sft.nc
@@ -69,10 +77,23 @@ outPath=/project/pr94/rxiang/analysis/EAS$2_$3/seasonal
 
 [ ! -d "$outPath" ] && mkdir -p "$outPath"
 
-for k in "${st1[@]}"
-do
-  cdo -select,season="$k"  $inPath/$4_$1_mergetime.nc $outPath/$4_$1_mergetime_TS_${k}.nc
-  cdo timmean $outPath/$4_$1_mergetime_TS_${k}.nc $outPath/$4_$1_mergetime_${k}.nc
-  rm $outPath/$4_$1_mergetime_TS_${k}.nc
+pressure=(10000 20000 30000 40000 50000 60000 70000 85000 92500)
+
+for s in "${st1[@]}"
+do 
+  if [[ "$list_6h3D[*]}" =~ "$1" ]]; then
+    for p in "${pressure[@]}"
+    do
+      cdo -select,season="$s"  $inPath/$4_$1_mergetime_$p.nc $outPath/$4_$1_mergetime_$p_TS_${s}.nc
+      if [ "$1" != "U" ] && [ "$1" != "V" ]; then
+        cdo timmean $outPath/$4_$1_mergetime_$p_TS_${s}.nc $outPath/$4_$1_mergetime_$p_${s}.nc
+        rm $outPath/$4_$1_mergetime_$p_TS_${s}.nc
+      fi
+    done
+  else
+    cdo -select,season="$s"  $inPath/$4_$1_mergetime.nc $outPath/$4_$1_mergetime_TS_${s}.nc
+    cdo timmean $outPath/$4_$1_mergetime_TS_${s}.nc $outPath/$4_$1_mergetime_${s}.nc
+    rm $outPath/$4_$1_mergetime_TS_${s}.nc
+  fi
 done
 }
