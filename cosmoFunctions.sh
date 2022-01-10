@@ -67,8 +67,9 @@ fi
 
 if [ "$1" == "TOT_PREC" ]; then
   cdo -shifttime,-30minutes $outPath/$4_$1_mergetime.nc $outPath/$4_$1_mergetime_sft.nc
-  rm $outPath/$4_$1_mergetime.nc
-  mv $outPath/$4_$1_mergetime_sft.nc $outPath/$4_$1_mergetime.nc
+  cdo daysum $outPath/$4_$1_mergetime_sft.nc $outPath/$4_$1_mergetime_daysum.nc
+  rm $outPath/$4_$1_mergetime.nc $outPath/$4_$1_mergetime_sft.nc
+  mv $outPath/$4_$1_mergetime_daysum.nc $outPath/$4_$1_mergetime.nc
   echo "shift time"
 else
   echo "no shift time"
