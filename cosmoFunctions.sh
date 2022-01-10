@@ -78,7 +78,7 @@ fi
 #
 seasonal() {
 st1=("DJF" "MAM" "JJA" "SON")
-inPath=/project/pr94/rxiang/analysis/EAS$2_$3
+inPath=/project/pr94/rxiang/analysis/EAS$2_$3/$1
 outPath=/project/pr94/rxiang/analysis/EAS$2_$3/$1
 
 [ ! -d "$outPath" ] && mkdir -p "$outPath"
