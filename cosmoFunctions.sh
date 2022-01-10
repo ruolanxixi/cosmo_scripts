@@ -12,6 +12,8 @@ list_6h="H_SNOW${IFS}RUNOFF_G${IFS}RUNOFF_S${IFS}TQC${IFS}TQI${IFS}TQV${IFS}TQR$
 list_6h3D="FI${IFS}QV${IFS}T${IFS}U${IFS}V"
 list_24h="TMAX_2M${IFS}TMIN_2M${IFS}AER_SO4${IFS}AER_DUST${IFS}AER_BC"
 
+pressure=(10000 20000 30000 40000 50000 60000 70000 85000 92500)
+st1=("DJF" "MAM" "JJA" "SON")
 #-------------------------------------------------------------------------------
 # merge ncfiles
 #
@@ -71,6 +73,27 @@ if [ "$1" == "TOT_PREC" ]; then
   else
   echo "no shift time"
 fi
+}
+
+#-------------------------------------------------------------------------------
+# compute horizontal wind
+#
+horizontal() {
+echo "start $1"
+uPath=/project/pr94/rxiang/analysis/EAS$2_$3/u
+vPath=/project/pr94/rxiang/analysis/EAS$2_$3/v
+outPath=/project/pr94/rxiang/analysis/EAS$2_$3/wind
+
+[ ! -d "$outPath" ] && mkdir -p "$outPath"
+for s in "${st1[@]}"
+do 
+  for p in "${pressure[@]}"
+  do
+  cdo sqrt -add -sqr $uPath/$4_U_mergetime_$p_TS_${s}.nc -sqr $vPath/$4_V_mergetime_$p_TS_${s}.nc outPath/$4_wind_mergetime_$p_TS_${s}.nc
+  cdo timmean outPath/$4_wind_mergetime_$p_TS_${s}.nc outPath/$4_wind_mergetime_$p_${s}.nc
+  rm outPath/$4_wind_mergetime_$p_TS_${s}.nc
+  done
+done
 }
 
 #-------------------------------------------------------------------------------
