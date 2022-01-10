@@ -70,7 +70,7 @@ if [ "$1" == "TOT_PREC" ]; then
   rm $outPath/$4_$1_mergetime.nc
   mv $outPath/$4_$1_mergetime_sft.nc $outPath/$4_$1_mergetime.nc
   echo "shift time"
-  else
+else
   echo "no shift time"
 fi
 }
@@ -110,6 +110,7 @@ Path=/project/pr94/rxiang/analysis/EAS$2_$3/$1
 for s in "${st1[@]}"
 do 
   if [[ "${IFS}${list_6h3D[*]}${IFS}" =~ "${IFS}$1${IFS}" ]]; then
+  echo "true"
     for p in "${pressure[@]}"
     do
       echo "$p"
