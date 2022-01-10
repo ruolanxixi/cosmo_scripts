@@ -81,8 +81,8 @@ fi
 horizontal() {
 echo "compute horizontal wind"
 echo "start $1"
-uPath=/project/pr94/rxiang/analysis/EAS$2_$3/u
-vPath=/project/pr94/rxiang/analysis/EAS$2_$3/v
+uPath=/project/pr94/rxiang/analysis/EAS$2_$3/U
+vPath=/project/pr94/rxiang/analysis/EAS$2_$3/V
 outPath=/project/pr94/rxiang/analysis/EAS$2_$3/wind
 
 [ ! -d "$outPath" ] && mkdir -p "$outPath"
