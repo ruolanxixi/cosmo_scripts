@@ -79,6 +79,7 @@ fi
 # compute horizontal wind
 #
 horizontal() {
+echo "compute horizontal wind"
 echo "start $1"
 uPath=/project/pr94/rxiang/analysis/EAS$2_$3/u
 vPath=/project/pr94/rxiang/analysis/EAS$2_$3/v
@@ -100,29 +101,27 @@ done
 # compute seasonalities
 #
 seasonal() {
-st1=("DJF" "MAM" "JJA" "SON")
-inPath=/project/pr94/rxiang/analysis/EAS$2_$3/$1
-outPath=/project/pr94/rxiang/analysis/EAS$2_$3/$1
+echo "compute seasonalities"
 
-[ ! -d "$outPath" ] && mkdir -p "$outPath"
+Path=/project/pr94/rxiang/analysis/EAS$2_$3/$1
 
-pressure=(10000 20000 30000 40000 50000 60000 70000 85000 92500)
+[ ! -d "$Path" ] && mkdir -p "$Path"
 
 for s in "${st1[@]}"
 do 
   if [[ "${IFS}${list_6h3D[*]}${IFS}" =~ "${IFS}$1${IFS}" ]]; then
     for p in "${pressure[@]}"
     do
-      cdo -select,season="$s"  $inPath/$4_$1_mergetime_$p.nc $outPath/$4_$1_mergetime_$p_TS_${s}.nc
+      cdo -select,season="$s"  $Path/$4_$1_mergetime_$p.nc $Path/$4_$1_mergetime_$p_TS_$s.nc
       if [ "$1" != "U" ] && [ "$1" != "V" ]; then
-        cdo timmean $outPath/$4_$1_mergetime_$p_TS_${s}.nc $outPath/$4_$1_mergetime_$p_${s}.nc
-        rm $outPath/$4_$1_mergetime_$p_TS_${s}.nc
+        cdo timmean $Path/$4_$1_mergetime_$p_TS_$s.nc $Path/$4_$1_mergetime_$p_$s.nc
+        rm $Path/$4_$1_mergetime_$p_TS_$s.nc
       fi
     done
   else
-    cdo -select,season="$s"  $inPath/$4_$1_mergetime.nc $outPath/$4_$1_mergetime_TS_${s}.nc
-    cdo timmean $outPath/$4_$1_mergetime_TS_${s}.nc $outPath/$4_$1_mergetime_${s}.nc
-    rm $outPath/$4_$1_mergetime_TS_${s}.nc
+    cdo -select,season="$s"  $Path/$4_$1_mergetime.nc $Path/$4_$1_mergetime_TS_$s.nc
+    cdo timmean $Path/$4_$1_mergetime_TS_$s.nc $Path/$4_$1_mergetime_$s.nc
+    rm $Path/$4_$1_mergetime_TS_$s.nc
   fi
 done
 }
