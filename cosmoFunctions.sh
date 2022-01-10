@@ -69,8 +69,8 @@ outPath=/project/pr94/rxiang/analysis/EAS$2_$3/seasonal
 
 for i in "${st1[@]}"
 do
-  cdo -select,season="$i"  $1.nc $outPath/$1_TS_${i}.nc
-  cdo timmean $outPath/$1_TS_${i}.nc $outPath/$1_${i}.nc
-  rm $outPath/$1_TS_${i}.nc
+  cdo -select,season="$i"  $4_$1_mergetime.nc $outPath/$4_$1_mergetime_TS_${i}.nc
+  cdo timmean $outPath/$4_$1_mergetime_TS_${i}.nc $outPath/$4_$1_mergetime_${i}.nc
+  rm $outPath/$4_$1_mergetime_TS_${i}.nc
 done
 }
