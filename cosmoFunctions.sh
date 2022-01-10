@@ -115,8 +115,8 @@ do
     for p in "${pressure[@]}"
     do
       cdo -select,season="$s" $Path/$4_$1_mergetime_$p.nc $Path/$4_$1_mergetime_${p}_TS_$s.nc
+      cdo timmean $Path/$4_$1_mergetime_${p}_TS_$s.nc $Path/$4_$1_mergetime_${p}_$s.nc
       if [ "$1" != "U" ] && [ "$1" != "V" ]; then
-        cdo timmean $Path/$4_$1_mergetime_${p}_TS_$s.nc $Path/$4_$1_mergetime_${p}_$s.nc
         rm $Path/$4_$1_mergetime_${p}_TS_$s.nc
       fi
     done
