@@ -11,4 +11,5 @@ year=01
 for i in "${var[@]}"
 do
   mergeFiles $i $resolution $sim $year
+  seasonal $i $resolution $sim $year
 done
