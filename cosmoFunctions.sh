@@ -113,8 +113,7 @@ do
   echo "true"
     for p in "${pressure[@]}"
     do
-      echo "$p"
-      echo "$4_$1_mergetime_$p.nc"
+      echo "cdo -select,season="$s" $Path/$4_$1_mergetime_$p.nc $Path/$4_$1_mergetime_$p_TS_$s.nc"
       cdo -select,season="$s" $Path/$4_$1_mergetime_$p.nc $Path/$4_$1_mergetime_$p_TS_$s.nc
       if [ "$1" != "U" ] && [ "$1" != "V" ]; then
         cdo timmean $Path/$4_$1_mergetime_$p_TS_$s.nc $Path/$4_$1_mergetime_$p_$s.nc
