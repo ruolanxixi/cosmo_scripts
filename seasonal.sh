@@ -14,4 +14,5 @@ do
   do
     mergeFiles $i $resolution $j $year
     seasonal $i $resolution $j $year
+  done
 done
