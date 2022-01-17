@@ -14,11 +14,11 @@ import matplotlib.gridspec as gridspec
 # -------------------------------------------------------------------------------
 # import data
 #
-path1 = "/Users/rxiang/Desktop/plt/ctrl/"
-path2 = "/Users/rxiang/Desktop/plt/topo1/"
-file1 = '01_TOT_PREC_mergetime_JJA.nc'
-file2 = '01_U_mergetime_85000_JJA.nc'
-file3 = '01_V_mergetime_85000_JJA.nc'
+path1 = "/Users/kaktus/Documents/ETH/BECCY/myscripts/data/ctrl/"
+path2 = "/Users/kaktus/Documents/ETH/BECCY/myscripts/data/topo1/"
+file1 = '01-04_TOT_PREC_JJA.nc'
+file2 = '01-04_U_85000_JJA.nc'
+file3 = '01-04_V_85000_JJA.nc'
 
 ds = xr.open_dataset(path1 + file1)
 prec_ctrl = ds["TOT_PREC"].values[0, :, :]
@@ -132,4 +132,4 @@ y2x_ratio = (ymax - ymin) / (xmax - xmin)
 fig.set_figheight(wi * y2x_ratio)
 plt.show()
 
-fig.savefig('figure_prec_wind.png', dpi=300)
+#fig.savefig('figure_prec_wind.png', dpi=300)
