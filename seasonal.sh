@@ -10,7 +10,7 @@ source cosmoFunctions.sh
 # Omega --- lagrangian tendency of air pressure [Pa s-1 >> hPa day-1]
 # SLP --- winter monsoon winds at 850 hPa and see level pressure [Pa >> hPa]
 
-declare -a var=("TOT_PREC" "U" "V" "W" "TQV" "T_2M" "T" "SOHR_RAD" "THHR_RAD" "DT_CON" "DT_SSO" "Omega" "SLP") 
+declare -a var=("TOT_PREC" "U" "V" "W" "TQV" "QV" "T_2M" "T" "SOHR_RAD" "THHR_RAD" "DT_CON" "DT_SSO" "Omega" "SLP") 
 declare -a sim=("ctrl" "topo1")
 resolution=11
 year=01
