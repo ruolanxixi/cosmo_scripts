@@ -16,9 +16,9 @@ import matplotlib.gridspec as gridspec
 #
 path1 = "/Users/kaktus/Documents/ETH/BECCY/myscripts/data/ctrl/"
 path2 = "/Users/kaktus/Documents/ETH/BECCY/myscripts/data/topo1/"
-file1 = '01-04_TOT_PREC_JJA.nc'
-file2 = '01-04_U_85000_JJA.nc'
-file3 = '01-04_V_85000_JJA.nc'
+file1 = '01_TOT_PREC_JJA.nc'
+file2 = '01_U_85000_JJA.nc'
+file3 = '01_V_85000_JJA.nc'
 
 ds = xr.open_dataset(path1 + file1)
 prec_ctrl = ds["TOT_PREC"].values[0, :, :]
