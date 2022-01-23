@@ -57,49 +57,27 @@ if test -f "$outPath/$4_$1_mergetime.nc"; then
     rm $outPath/$4_$1_mergetime.nc
 fi
 
-cdo mergetime $inPath/$1.nc $outPath/$4_$1_mergetime.nc
+cdo mergetime $inPath/$1.nc $outPath/$4_$1.nc
 echo "files merged"
 
 pressure=(10000 20000 30000 40000 50000 60000 70000 85000 92500)
 if [[ "${IFS}${list_6h3D[*]}${IFS}" =~ "${IFS}$1${IFS}" ]]; then
   for p in "${pressure[@]}"
   do
-    cdo -select,level=$p $outPath/$4_$1_mergetime.nc $outPath/$4_$1_mergetime_$p.nc
+    cdo -select,level=$p $outPath/$4_$1.nc $outPath/$4_$1_$p.nc
   done
-  rm $outPath/$4_$1_mergetime.nc
+  # rm $outPath/$4_$1.nc
 fi
 
 if [ "$1" == "TOT_PREC" ] || [ "$1" == "TQV" ]; then
-  cdo -shifttime,-30minutes $outPath/$4_$1_mergetime.nc $outPath/$4_$1_mergetime_sft.nc
-  cdo daysum $outPath/$4_$1_mergetime_sft.nc $outPath/$4_$1_mergetime_daysum.nc
-  rm $outPath/$4_$1_mergetime.nc $outPath/$4_$1_mergetime_sft.nc
-  mv $outPath/$4_$1_mergetime_daysum.nc $outPath/$4_$1_mergetime.nc
+  cdo -shifttime,-30minutes $outPath/$4_$1.nc $outPath/$4_$1_sft.nc
+  cdo daysum $outPath/$4_$1_sft.nc $outPath/$4_$1_daysum.nc
+  rm $outPath/$4_$1.nc $outPath/$4_$1_sft.nc
+  mv $outPath/$4_$1_daysum.nc $outPath/$4_$1.nc
   echo "shift time"
 else
   echo "no shift time"
 fi
-}
-
-# -------------------------------------------------------------------------------
-# compute horizontal wind
-#
-horizontal() {
-echo "compute horizontal wind"
-echo "start $1"
-uPath=/project/pr94/rxiang/analysis/EAS$2_$3/U
-vPath=/project/pr94/rxiang/analysis/EAS$2_$3/V
-outPath=/project/pr94/rxiang/analysis/EAS$2_$3/wind
-
-[ ! -d "$outPath" ] && mkdir -p "$outPath"
-for s in "${st1[@]}"
-do 
-  for p in "${pressure[@]}"
-  do
-  cdo sqrt -add -sqr $uPath/$4_U_mergetime_${p}_TS_${s}.nc -sqr $vPath/$4_V_mergetime_${p}_TS_${s}.nc $outPath/$4_wind_mergetime_${p}_TS_${s}.nc
-  cdo timmean $outPath/$4_wind_mergetime_${p}_TS_${s}.nc $outPath/$4_wind_mergetime_${p}_${s}.nc
-  rm $outPath/$4_wind_mergetime_${p}_TS_${s}.nc
-  done
-done
 }
 
 # -------------------------------------------------------------------------------
@@ -118,16 +96,31 @@ do
   echo "true"
     for p in "${pressure[@]}"
     do
-      cdo -select,season="$s" $Path/$4_$1_mergetime_$p.nc $Path/$4_$1_mergetime_${p}_TS_$s.nc
-      cdo timmean $Path/$4_$1_mergetime_${p}_TS_$s.nc $Path/$4_$1_mergetime_${p}_$s.nc
-      if [ "$1" != "U" ] && [ "$1" != "V" ]; then
-        rm $Path/$4_$1_mergetime_${p}_TS_$s.nc
-      fi
+      cdo -select,season="$s" $Path/$4_$1_${p}.nc $Path/$4_$1_${p}_TS_${s}.nc
+      cdo timmean $Path/$4_$1_${p}_TS_${s}.nc $Path/$4_$1_${p}_${s}.nc
+      rm $Path/$4_$1_${p}_TS_${s}.nc
     done
   else
-    cdo -select,season="$s" $Path/$4_$1_mergetime.nc $Path/$4_$1_mergetime_TS_$s.nc
-    cdo timmean $Path/$4_$1_mergetime_TS_$s.nc $Path/$4_$1_mergetime_$s.nc
-    rm $Path/$4_$1_mergetime_TS_$s.nc
+  cdo -select,season="${s}" $Path/$4_$1.nc $Path/$4_$1_TS_${s}.nc
+  cdo timmean $Path/$4_$1_TS_${s}.nc $Path/$4_$1_${s}.nc
+  rm $Path/$4_$1_TS_${s}.nc
   fi
 done
+}
+
+# -------------------------------------------------------------------------------
+# compute vertically integrated water vapor transport
+#
+IVT() {
+echo "compute IVT"
+
+inpath=/project/pr94/rxiang/analysis/EAS$2_$3/
+outPath=/project/pr94/rxiang/analysis/EAS$2_$3/IVT
+
+[ ! -d "$outPath" ] && mkdir -p "$outPath"
+
+cdo -expr,'qvu=U*QV' -merge $inPath/U/$4_U.nc $inPath/QV/$4_QV.nc $outpath/$4_QVU.nc
+cdo -expr,'qvv=V*QV' -merge $inPath/V/$4_V.nc $inPath/QV/$4_QV.nc $outpath/$4_QVV.nc
+ncwa -N -v qvu -w pressure -a pressure $outpath/$4_QVU.nc outPath/$4_IVT_U.nc
+ncwa -N -v qvv -w pressure -a pressure $outpath/$4_QVV.nc outPath/$4_IVT_V.nc
 }
