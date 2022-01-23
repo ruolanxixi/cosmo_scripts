@@ -17,7 +17,8 @@ from matplotlib import ticker
 #
 path1 = "/Users/rxiang/Desktop/plt/ctrl/"
 path2 = "/Users/rxiang/Desktop/plt/topo1/"
-file1 = '01_T_mergetime_50000_JJA.nc'
+file1 = '01_T_50000_JJA.nc'
+file2 = '01_FI_50000_JJA.nc'
 
 ds = xr.open_dataset(path1 + file1)
 tmp_ctrl = ds["T"].values[0, 0, :, :] - 273.15
@@ -27,6 +28,14 @@ ds.close()
 
 ds = xr.open_dataset(path2 + file1)
 tmp_topo1 = ds["T"].values[0, 0, :, :] - 273.15
+ds.close()
+
+ds = xr.open_dataset(path1 + file2)
+FI_topo1 = ds["FI"].values[0, 0, :, :]
+ds.close()
+
+ds = xr.open_dataset(path2 + file2)
+FI_topo1 = ds["FI"].values[0, 0, :, :]
 ds.close()
 
 tmp_diff = tmp_ctrl - tmp_topo1
@@ -49,11 +58,11 @@ axs1 = plt.subplot(gs[1], projection=projection)
 axs2 = plt.subplot(gs[2], projection=projection)
 
 cs0 = axs0.contourf(lon, lat, tmp_ctrl, transform=ccrs.PlateCarree(), levels=np.linspace(-10, 3.0, 14), cmap='YlOrRd', vmin=-10, vmax=3, extend='both')
-axs0.contour(lon, lat, tmp_ctrl, cs0.levels, colors='k', linewidths=.3)
+axs0.contour(lon, lat, FI_ctrl, levels=[500, 520, 540, 560, 580, 600], colors='k', linewidths=.3)
 cs1 = axs1.contourf(lon, lat, tmp_topo1, transform=ccrs.PlateCarree(), levels=np.linspace(-10, 3.0, 14), cmap='YlOrRd', vmin=-10, vmax=3, extend='both')
-axs1.contour(lon, lat, tmp_topo1, cs1.levels, colors='k', linewidths=.3)
+axs1.contour(lon, lat, FI_topo1, levels=[500, 520, 540, 560, 580, 600], colors='k', linewidths=.3)
 cs2 = axs2.contourf(lon, lat, tmp_diff, transform=ccrs.PlateCarree(), levels=np.linspace(-1, 1, 11), cmap='RdYlBu_r', vmin=-1, vmax=1, extend='both')
-axs2.contour(lon, lat, tmp_diff, cs2.levels, colors='k', linewidths=.3)
+# axs2.contour(lon, lat, tmp_diff, cs2.levels, colors='k', linewidths=.3)
 
 axs0.set_title("Control", fontweight='bold')
 axs1.set_title("Reduced topography 1", fontweight='bold')
@@ -104,4 +113,4 @@ y2x_ratio = (ymax - ymin) / (xmax - xmin)
 fig.set_figheight(wi * y2x_ratio)
 plt.show()
 
-fig.savefig('figure_tmp500.png', dpi=300)
+fig.savefig('figure_tmp_FI.png', dpi=300)
