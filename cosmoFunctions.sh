@@ -58,7 +58,7 @@ if test -f "$outPath/$4_$1.nc"; then
 fi
 
 cdo mergetime $inPath/$1.nc $outPath/$4_$1.nc
-echo "files merged"
+echo "files $1 merged"
 
 pressure=(10000 20000 30000 40000 50000 60000 70000 85000 92500)
 if [[ "${IFS}${list_6h3D[*]}${IFS}" =~ "${IFS}$1${IFS}" ]]; then
