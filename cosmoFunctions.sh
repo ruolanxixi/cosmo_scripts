@@ -118,7 +118,8 @@ inPath=/project/pr94/rxiang/analysis/EAS$2_$3
 outPathU=/project/pr94/rxiang/analysis/EAS$2_$3/IVT_U
 outPathV=/project/pr94/rxiang/analysis/EAS$2_$3/IVT_V
 
-[ ! -d "$outPath" ] && mkdir -p "$outPath"
+[ ! -d "$outPathU" ] && mkdir -p "$outPathU"
+[ ! -d "$outPathV" ] && mkdir -p "$outPathV"
 
 cdo -L -expr,'qvu=U*QV' -merge $inPath/U/$4_U.nc $inPath/QV/$4_QV.nc $outPathU/$4_QVU.nc
 cdo -L -expr,'qvv=V*QV' -merge $inPath/V/$4_V.nc $inPath/QV/$4_QV.nc $outPathV/$4_QVV.nc
