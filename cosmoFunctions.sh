@@ -114,7 +114,7 @@ done
 IVT() {
 echo "compute $1"
 
-inpath=/project/pr94/rxiang/analysis/EAS$2_$3/
+inpath=/project/pr94/rxiang/analysis/EAS$2_$3
 outPath=/project/pr94/rxiang/analysis/EAS$2_$3/IVT
 
 [ ! -d "$outPath" ] && mkdir -p "$outPath"
