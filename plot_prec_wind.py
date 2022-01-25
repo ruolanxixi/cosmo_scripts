@@ -16,9 +16,9 @@ import matplotlib.gridspec as gridspec
 #
 path1 = "/Users/kaktus/Documents/ETH/BECCY/myscripts/data/ctrl/"
 path2 = "/Users/kaktus/Documents/ETH/BECCY/myscripts/data/topo1/"
-file1 = '01_TOT_PREC_JJA.nc'
-file2 = '01_U_85000_JJA.nc'
-file3 = '01_V_85000_JJA.nc'
+file1 = '01_TOT_PREC_JJA_cut.nc'
+file2 = '01_U_85000_JJA_cut.nc'
+file3 = '01_V_85000_JJA_cut.nc'
 
 ds = xr.open_dataset(path1 + file1)
 prec_ctrl = ds["TOT_PREC"].values[0, :, :]
@@ -79,8 +79,8 @@ q0 = axs0.quiver(lon[::15,::15], lat[::15,::15], u_ctrl[::15,::15], v_ctrl[::15,
 axs0.quiverkey(q0, 0.9, 1.05, 10, r'$10 m/s$', labelpos='E', transform=axs0.transAxes)
 q1 = axs1.quiver(lon[::15,::15], lat[::15,::15], u_topo1[::15,::15], v_topo1[::15,::15], transform=projection, color='red', scale=130)
 axs1.quiverkey(q1, 0.9, 1.05, 10, r'$10 m/s$', labelpos='E', transform=axs1.transAxes)
-q2 = axs2.quiver(lon[::15,::15], lat[::15,::15], u_diff[::15,::15], v_diff[::15,::15], transform=projection, color='k', scale=30)
-axs2.quiverkey(q2, 0.9, 1.05, 2, r'$2 m/s$', labelpos='E', transform=axs2.transAxes)
+q2 = axs2.quiver(lon[::15,::15], lat[::15,::15], u_diff[::15,::15], v_diff[::15,::15], transform=projection, color='k', scale=60)
+axs2.quiverkey(q2, 0.9, 1.05, 5, r'$5 m/s$', labelpos='E', transform=axs2.transAxes)
 
 axs0.set_title("Control", fontweight='bold', pad=10)
 axs1.set_title("Reduced topography 1", fontweight='bold', pad=10)
