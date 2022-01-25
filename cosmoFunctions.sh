@@ -119,8 +119,8 @@ outPath=/project/pr94/rxiang/analysis/EAS$2_$3/IVT
 
 [ ! -d "$outPath" ] && mkdir -p "$outPath"
 
-cdo -expr,'qvu=U*QV' -merge $inPath/U/$4_U.nc $inPath/QV/$4_QV.nc $outPath/$4_QVU.nc
-cdo -expr,'qvv=V*QV' -merge $inPath/V/$4_V.nc $inPath/QV/$4_QV.nc $outPath/$4_QVV.nc
+cdo -L -expr,'qvu=U*QV' -merge $inPath/U/$4_U.nc $inPath/QV/$4_QV.nc $outPath/$4_QVU.nc
+cdo -L -expr,'qvv=V*QV' -merge $inPath/V/$4_V.nc $inPath/QV/$4_QV.nc $outPath/$4_QVV.nc
 ncwa -N -v qvu -w pressure -a pressure $outPath/$4_QVU.nc $outPath/$4_IVT_U.nc
 ncwa -N -v qvv -w pressure -a pressure $outPath/$4_QVV.nc $outPath/$4_IVT_V.nc
 }
