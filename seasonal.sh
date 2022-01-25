@@ -8,9 +8,10 @@ source cosmoFunctions.sh
 # T FI --- summer temperature and geopotential at 500 hPa [K >> oC]
 # SOHR_RAD THHR_RAD DT_CON DT_SSO --- diabatic heating [K s-1 >> K day-1]
 # Omega --- lagrangian tendency of air pressure [Pa s-1 >> hPa day-1]
-# SLP --- winter monsoon winds at 850 hPa and see level pressure [Pa >> hPa]
+# PMSL --- winter monsoon winds at 850 hPa and see level pressure [Pa >> hPa]
 
-declare -a var=("TOT_PREC" "U" "V" "W" "TQV" "QV" "T_2M" "T" "FI" "SOHR_RAD" "THHR_RAD" "DT_CON" "DT_SSO" "OMEGA" "SLP") 
+# declare -a var=("TOT_PREC" "U" "V" "W" "TQV" "QV" "T_2M" "T" "FI" "SOHR_RAD" "THHR_RAD" "DT_CON" "DT_SSO" "OMEGA" "PMSL") 
+declare -a var=("PMSL")
 declare -a sim=("ctrl" "topo1")
 resolution=11
 year=01
