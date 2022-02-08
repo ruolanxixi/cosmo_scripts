@@ -18,27 +18,16 @@ from matplotlib import ticker
 path1 = "/Users/kaktus/Documents/ETH/BECCY/myscripts/data/ctrl/"
 path2 = "/Users/kaktus/Documents/ETH/BECCY/myscripts/data/topo1/"
 
-file1 = '01_T_50000_JJA_cut.nc'
-file2 = '01_FI_50000_JJA_cut.nc'
-
-g = 9.80665 # the standard gravity at mean sea level
+file1 = '01_T_2M_DJF_cut.nc'
 
 ds = xr.open_dataset(path1 + file1)
-tmp_ctrl = ds["T"].values[0, 0, :, :] - 273.15
+tmp_ctrl = ds["T_2M"].values[0, :, :] - 273.15
 lat = ds["lat"].values
 lon = ds["lon"].values
 ds.close()
 
 ds = xr.open_dataset(path2 + file1)
-tmp_topo1 = ds["T"].values[0, 0, :, :] - 273.15
-ds.close()
-
-ds = xr.open_dataset(path1 + file2)
-FI_ctrl = ds["FI"].values[0, 0, :, :]/g
-ds.close()
-
-ds = xr.open_dataset(path2 + file2)
-FI_topo1 = ds["FI"].values[0, 0, :, :]/g
+tmp_topo1 = ds["T_2M"].values[0, :, :] - 273.15
 ds.close()
 
 tmp_diff = tmp_ctrl - tmp_topo1
@@ -62,16 +51,13 @@ axs0 = plt.subplot(gs[0], projection=projection)
 axs1 = plt.subplot(gs[1], projection=projection)
 axs2 = plt.subplot(gs[2], projection=projection)
 
-cs0 = axs0.contourf(lon, lat, tmp_ctrl, transform=ccrs.PlateCarree(), levels=np.linspace(-10, 3.0, 14), cmap='YlOrRd', vmin=-10, vmax=3, extend='both')
-css0 = axs0.contour(lon, lat, FI_ctrl, levels=np.linspace(5600, 5900, 13), colors='k', linewidths=.7)
-manual_locations = [(146, 53), (130, 50), (125, 43), (105, 47), (115, 40), (147, 40), (110, 35), (110, 27), (135, 22)]
-axs0.clabel(css0, css0.levels[::1], inline=True, fontsize=8, manual=manual_locations)
-cs1 = axs1.contourf(lon, lat, tmp_topo1, transform=ccrs.PlateCarree(), levels=np.linspace(-10, 3.0, 14), cmap='YlOrRd', vmin=-10, vmax=3, extend='both')
-css1 = axs1.contour(lon, lat, FI_topo1, levels=np.linspace(5600, 5900, 13), colors='k', linewidths=.7)
-manual_locations = [(135, 50), (124, 48), (120, 45), (110, 49), (105, 47), (113, 35), (115, 30), (135, 27), (140, 20)]
-axs1.clabel(css1, css1.levels[::1], inline=True, fontsize=8, manual=manual_locations)
-cs2 = axs2.contourf(lon, lat, tmp_diff, transform=ccrs.PlateCarree(), levels=np.linspace(-1.5, 1.5, 16), cmap='RdYlBu_r', vmin=-1.5, vmax=1.5, extend='both')
-axs2.contour(lon, lat, tmp_diff, cs2.levels, colors='k', linewidths=.3)
+cs0 = axs0.contourf(lon, lat, tmp_ctrl, transform=ccrs.PlateCarree(), levels=np.linspace(-25, 35, 25), cmap='YlOrRd', vmin=-15, vmax=35, extend='both')
+# axs0.contour(lon, lat, tmp_ctrl, cs0.levels[::2], colors='k', linewidths=.3)
+cs1 = axs1.contourf(lon, lat, tmp_topo1, transform=ccrs.PlateCarree(), levels=np.linspace(-25, 35, 25), cmap='YlOrRd', vmin=-15, vmax=35, extend='both')
+# axs1.contour(lon, lat, tmp_topo1, cs1.levels[::2], colors='k', linewidths=.3)
+divnorm=colors.TwoSlopeNorm(vmin=-8., vcenter=0., vmax=4)
+cs2 = axs2.contourf(lon, lat, tmp_diff, transform=ccrs.PlateCarree(), levels=np.linspace(-8, 4, 13), cmap='RdYlBu_r', norm=divnorm, extend='both')
+# axs2.contour(lon, lat, tmp_diff, cs2.levels[::3], colors='k', linewidths=.3)
 
 axs0.set_title("Control", fontweight='bold')
 axs1.set_title("Reduced topography 1", fontweight='bold')
@@ -125,4 +111,4 @@ y2x_ratio = (ymax - ymin) / (xmax - xmin) * nrow / ncol * 1.4
 fig.set_figheight(wi * y2x_ratio)
 plt.show()
 
-fig.savefig('figure_tmp_z.png', dpi=300)
+fig.savefig('figure_tmp_2m_DJF.png', dpi=300)
