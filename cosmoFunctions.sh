@@ -112,15 +112,17 @@ done
 # compute vertically integrated water vapor transport
 #
 IVT() {
-echo "compute IVT"
+echo "compute $1"
 
-inpath=/project/pr94/rxiang/analysis/EAS$2_$3/
-outPath=/project/pr94/rxiang/analysis/EAS$2_$3/IVT
+inPath=/project/pr94/rxiang/analysis/EAS$2_$3
+outPathU=/project/pr94/rxiang/analysis/EAS$2_$3/IVT_U
+outPathV=/project/pr94/rxiang/analysis/EAS$2_$3/IVT_V
 
-[ ! -d "$outPath" ] && mkdir -p "$outPath"
+[ ! -d "$outPathU" ] && mkdir -p "$outPathU"
+[ ! -d "$outPathV" ] && mkdir -p "$outPathV"
 
-cdo -expr,'qvu=U*QV' -merge $inPath/U/$4_U.nc $inPath/QV/$4_QV.nc $outpath/$4_QVU.nc
-cdo -expr,'qvv=V*QV' -merge $inPath/V/$4_V.nc $inPath/QV/$4_QV.nc $outpath/$4_QVV.nc
-ncwa -N -v qvu -w pressure -a pressure $outpath/$4_QVU.nc outPath/$4_IVT_U.nc
-ncwa -N -v qvv -w pressure -a pressure $outpath/$4_QVV.nc outPath/$4_IVT_V.nc
+cdo -L -expr,'qvu=U*QV' -merge $inPath/U/$4_U.nc $inPath/QV/$4_QV.nc $outPathU/$4_QVU.nc
+cdo -L -expr,'qvv=V*QV' -merge $inPath/V/$4_V.nc $inPath/QV/$4_QV.nc $outPathV/$4_QVV.nc
+ncwa -N -v qvu -w pressure -a pressure $outPathU/$4_QVU.nc $outPathU/$4_IVT_U.nc
+ncwa -N -v qvv -w pressure -a pressure $outPathV/$4_QVV.nc $outPathV/$4_IVT_V.nc
 }
