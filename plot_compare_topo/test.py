@@ -1,7 +1,7 @@
 import xarray as xr
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
-from plotcosmomap import plotcosmo, add_gridline_labels
+from plotcosmomap import plotcosmo
 import matplotlib.gridspec as gridspec
 
 path1 = "/Users/kaktus/Documents/ETH/BECCY/myscripts/data/ctrl_ex/"

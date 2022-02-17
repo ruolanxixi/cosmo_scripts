@@ -12,6 +12,7 @@ import numpy as np
 import matplotlib.ticker as mticker
 from cartopy.mpl.ticker import (LongitudeFormatter, LatitudeFormatter,
                                 LongitudeLocator, LatitudeLocator)
+import xarray as xr
 
 
 def add_gridline_labels(ax, labels_set=None, side=None):  # 'top', 'bottom', 'left', 'right'
@@ -59,7 +60,7 @@ def add_gridline_labels(ax, labels_set=None, side=None):  # 'top', 'bottom', 'le
     return ax
 
 
-def plotcosmo(infile, ax):
+def plotcosmo(ax):
     """
     A function to draw the background map for plotting CCLM output.
             The output-map will be ploted on a rotated pole grid.
@@ -85,13 +86,6 @@ def plotcosmo(infile, ax):
 
                     m, xi, yi = plotcosmomap(mydata); m.pcolormesh(xi, yi, mydata, cmap='plasma')
     """
-    try:
-        lon = infile.lon
-        lat = infile.lat
-    except:
-        print("Cannot read lon or lat from specified file. Is it an xarray data array?")
-        exit
-
     proj = ccrs.PlateCarree()
     ax.set_extent([65, 174, 10, 61], crs=proj)  # for extended 12km domain
     ax.add_feature(cfeature.LAND)
@@ -106,6 +100,29 @@ def plotcosmo(infile, ax):
     add_gridline_labels(ax, labels_set=[80, 100, 120, 140, 160], side='bottom')
 
     return ax
+
+
+def pole():
+    file = "/Users/kaktus/Documents/ETH/BECCY/myscripts/data/globe_ex/01_TOT_PREC_DJF.nc"
+    ds = xr.open_dataset(f'{file}')
+    pole_lat = ds["rotated_pole"].grid_north_pole_latitude
+    pole_lon = ds["rotated_pole"].grid_north_pole_longitude
+    lat = ds["lat"].values
+    lon = ds["lon"].values
+    rlat = ds["rlat"].values
+    rlon = ds["rlon"].values
+    rot_pole_crs = ccrs.RotatedPole(pole_latitude=pole_lat, pole_longitude=pole_lon)
+
+    return pole_lat, pole_lon, lat, lon, rlat, rlon, rot_pole_crs
+
+
+def colorbar(fig, ax, n):
+    if n == 1:
+        cax = fig.add_axes([ax.get_position().x0, ax.get_position().y0 - 0.03, ax.get_position().width, 0.01])
+    elif n == 2:
+        cax = fig.add_axes([ax.get_position().x0 + 0.018, ax.get_position().y0 - 0.03, ax.get_position().width * 2, 0.01])
+
+    return cax
 
 
 
