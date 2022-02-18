@@ -121,6 +121,8 @@ def colorbar(fig, ax, n):
         cax = fig.add_axes([ax.get_position().x0, ax.get_position().y0 - 0.03, ax.get_position().width, 0.01])
     elif n == 2:
         cax = fig.add_axes([ax.get_position().x0 + 0.018, ax.get_position().y0 - 0.03, ax.get_position().width * 2, 0.01])
+    elif n == 4:
+        cax = fig.add_axes([ax.get_position().x0 + 0.018, ax.get_position().y0 - 0.07, ax.get_position().width * 4.4, 0.01])
 
     return cax
 

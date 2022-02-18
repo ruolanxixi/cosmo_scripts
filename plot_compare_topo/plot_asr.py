@@ -12,7 +12,7 @@ from numpy import inf
 # import data
 #
 seasons = ["DJF", "MAM", "JJA", "SON"]
-mdvname = 'TOT_PREC'  # edit here
+mdvname = 'ASOB_T'  # edit here
 year = '01'
 sim = ["MERIT_raw", "MERIT", "GLOBE_ex_nofilt", "GLOBE_ex"]
 datapath = "/Users/kaktus/Documents/ETH/BECCY/myscripts/data/"
@@ -38,21 +38,17 @@ eradata = []
 for seas in range(len(seasons)):
     season = seasons[seas]
     filename = f'era5_2001_{season}.nc'
-    data = xr.open_dataset(f'{erapath}{filename}')['tp'].values[0, :, :] * 1000
+    data = xr.open_dataset(f'{erapath}{filename}')['tsr'].values[0, :, :]
     eradata.append(data)
 
 # -------------------------------------------------------------------------------
 # compute difference
 #
-np.seterr(divide='ignore', invalid='ignore')
 diffdata = []
 for i in range(len(mddata)):
     j = i % 4
-    data = (mddata[i] - eradata[j]) / mddata[i] * 100
-    data[np.isnan(data)] = 0
-    data[data == -inf] = -100
+    data = mddata[i] - eradata[j]
     diffdata.append(data)
-np.seterr(divide='warn', invalid='warn')
 
 # -------------------------------------------------------------------------------
 # plot
@@ -71,7 +67,7 @@ fig, axs = plt.subplots(nrow, ncol, figsize=(wi, hi), subplot_kw={'projection': 
 cs = np.empty(shape=(nrow, ncol), dtype='object')
 # -------------------------
 # panel plot
-divnorm = colors.TwoSlopeNorm(vmin=-100., vcenter=0., vmax=80)
+divnorm = colors.TwoSlopeNorm(vmin=-10., vcenter=0., vmax=10)
 for i in range(ncol * nrow):
     cs[i % 4, i // 4] = axs[i % 4, i // 4].pcolormesh(rlon, rlat, diffdata[i], cmap='RdYlBu', norm=divnorm, shading="auto")
     ax = plotcosmo(axs[i % 4, i // 4])
@@ -95,7 +91,7 @@ axs[3, 0].text(-0.14, 0.55, 'SON', ha='center', va='center', rotation='vertical'
 # add colorbar
 cax = colorbar(fig, axs[3, 0], 4)  # edit here
 cb1 = fig.colorbar(cs[3, 0], cax=cax, orientation='horizontal')
-cb1.set_label('%')
+cb1.set_label('$W m^{-2}$')
 # cax = colorbar(fig, axs[3, 1], 1)
 # cb2 = fig.colorbar(cs[3, 1], cax=cax, orientation='horizontal', extend='both')
 # # # cb1.set_ticks([0, 500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000, 6500, 7000])
@@ -112,5 +108,5 @@ plt.show()
 # -------------------------
 # save figure
 plotpath = "/Users/kaktus/Documents/ETH/BECCY/myscripts/figure/"
-fig.savefig(plotpath + 'compare_topo_prec.png', dpi=300)
+fig.savefig(plotpath + 'compare_topo_tmp.png', dpi=300)
 plt.close(fig)
