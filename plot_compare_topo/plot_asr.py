@@ -12,42 +12,53 @@ from numpy import inf
 # import data
 #
 seasons = ["DJF", "MAM", "JJA", "SON"]
-mdvname = 'ASOB_T'  # edit here
+mdvname1 = 'ASOB_T'  # edit here
+mdvname2 = 'ASOD_T'  # edit here
 year = '01'
 sim = ["MERIT_raw", "MERIT", "GLOBE_ex_nofilt", "GLOBE_ex"]
 datapath = "/Users/kaktus/Documents/ETH/BECCY/myscripts/data/"
-erapath = "/Users/kaktus/Documents/ETH/BECCY/myscripts/data/ERA5/"
+erapath = "/Users/kaktus/Documents/ETH/BECCY/myscripts/data/CERES/"
 
 # -------------------------------------------------------------------------------
 # read model data
 #
-mddata = []
+mddata1 = []
 for sims in range(len(sim)):
     simulation = sim[sims]
     mdpath = f'{datapath}' + f'{simulation}' + "/"
     for seas in range(len(seasons)):
         season = seasons[seas]
-        filename = f'{year}_{mdvname}_{season}.nc'
-        data = xr.open_dataset(f'{mdpath}{filename}')[mdvname].values[0, :, :]
-        mddata.append(data)
+        filename = f'{year}_{mdvname1}_{season}.nc'
+        data = xr.open_dataset(f'{mdpath}{filename}')[mdvname1].values[0, :, :]
+        mddata1.append(data)
+
+mddata2 = []
+for sims in range(len(sim)):
+    simulation = sim[sims]
+    mdpath = f'{datapath}' + f'{simulation}' + "/"
+    for seas in range(len(seasons)):
+        season = seasons[seas]
+        filename = f'{year}_{mdvname2}_{season}.nc'
+        data = xr.open_dataset(f'{mdpath}{filename}')[mdvname2].values[0, :, :]
+        mddata2.append(data)
 
 # -------------------------------------------------------------------------------
-# read era5 data
+# read CERES data
 #
 eradata = []
 for seas in range(len(seasons)):
     season = seasons[seas]
-    filename = f'era5_2001_{season}.nc'
-    data = xr.open_dataset(f'{erapath}{filename}')['tsr'].values[0, :, :]
+    filename = f'CERES_2001_{season}.nc'
+    data = xr.open_dataset(f'{erapath}{filename}')['toa_sw_all_mon'].values[0, :, :]
     eradata.append(data)
 
 # -------------------------------------------------------------------------------
 # compute difference
 #
 diffdata = []
-for i in range(len(mddata)):
+for i in range(len(mddata1)):
     j = i % 4
-    data = mddata[i] - eradata[j]
+    data = mddata2[i] - mddata1[i] - eradata[j]
     diffdata.append(data)
 
 # -------------------------------------------------------------------------------
@@ -67,9 +78,9 @@ fig, axs = plt.subplots(nrow, ncol, figsize=(wi, hi), subplot_kw={'projection': 
 cs = np.empty(shape=(nrow, ncol), dtype='object')
 # -------------------------
 # panel plot
-divnorm = colors.TwoSlopeNorm(vmin=-10., vcenter=0., vmax=10)
+divnorm = colors.TwoSlopeNorm(vmin=-40., vcenter=0., vmax=100)
 for i in range(ncol * nrow):
-    cs[i % 4, i // 4] = axs[i % 4, i // 4].pcolormesh(rlon, rlat, diffdata[i], cmap='RdYlBu', norm=divnorm, shading="auto")
+    cs[i % 4, i // 4] = axs[i % 4, i // 4].pcolormesh(rlon, rlat, diffdata[i], cmap='RdYlBu_r', norm=divnorm, shading="auto")
     ax = plotcosmo(axs[i % 4, i // 4])
 # -------------------------
 # add title
@@ -108,5 +119,5 @@ plt.show()
 # -------------------------
 # save figure
 plotpath = "/Users/kaktus/Documents/ETH/BECCY/myscripts/figure/"
-fig.savefig(plotpath + 'compare_topo_tmp.png', dpi=300)
+fig.savefig(plotpath + 'compare_topo_asr.png', dpi=300)
 plt.close(fig)

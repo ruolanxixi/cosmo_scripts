@@ -16,7 +16,7 @@ mdvname = 'ATHB_T'  # edit here
 year = '01'
 sim = ["MERIT_raw", "MERIT", "GLOBE_ex_nofilt", "GLOBE_ex"]
 datapath = "/Users/kaktus/Documents/ETH/BECCY/myscripts/data/"
-erapath = "/Users/kaktus/Documents/ETH/BECCY/myscripts/data/ERA5/"
+erapath = "/Users/kaktus/Documents/ETH/BECCY/myscripts/data/CERES/"
 
 # -------------------------------------------------------------------------------
 # read model data
@@ -32,13 +32,14 @@ for sims in range(len(sim)):
         mddata.append(data)
 
 # -------------------------------------------------------------------------------
-# read era5 data
+# read CERES data
 #
 eradata = []
 for seas in range(len(seasons)):
     season = seasons[seas]
-    filename = f'era5_2001_{season}.nc'
-    data = xr.open_dataset(f'{erapath}{filename}')['ttr'].values[0, :, :]
+    filename = f'CERES_2001_{season}.nc'
+    data = xr.open_dataset(f'{erapath}{filename}')['toa_lw_all_mon'].values[0, :, :]
+    data = - data
     eradata.append(data)
 
 # -------------------------------------------------------------------------------
@@ -67,9 +68,9 @@ fig, axs = plt.subplots(nrow, ncol, figsize=(wi, hi), subplot_kw={'projection': 
 cs = np.empty(shape=(nrow, ncol), dtype='object')
 # -------------------------
 # panel plot
-divnorm = colors.TwoSlopeNorm(vmin=-10., vcenter=0., vmax=10)
+divnorm = colors.TwoSlopeNorm(vmin=-30, vcenter=0., vmax=60)
 for i in range(ncol * nrow):
-    cs[i % 4, i // 4] = axs[i % 4, i // 4].pcolormesh(rlon, rlat, diffdata[i], cmap='RdYlBu', norm=divnorm, shading="auto")
+    cs[i % 4, i // 4] = axs[i % 4, i // 4].pcolormesh(rlon, rlat, diffdata[i], cmap='RdYlBu_r', norm=divnorm, shading="auto")
     ax = plotcosmo(axs[i % 4, i // 4])
 # -------------------------
 # add title
@@ -108,5 +109,5 @@ plt.show()
 # -------------------------
 # save figure
 plotpath = "/Users/kaktus/Documents/ETH/BECCY/myscripts/figure/"
-fig.savefig(plotpath + 'compare_topo_tmp.png', dpi=300)
+fig.savefig(plotpath + 'compare_topo_olr.png', dpi=300)
 plt.close(fig)

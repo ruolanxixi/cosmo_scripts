@@ -12,7 +12,7 @@ from numpy import inf
 # import data
 #
 seasons = ["DJF", "MAM", "JJA", "SON"]
-mdvname = 'ALHFL'  # edit here
+mdvname = 'ALHFL_S'  # edit here
 year = '01'
 sim = ["MERIT_raw", "MERIT", "GLOBE_ex_nofilt", "GLOBE_ex"]
 datapath = "/Users/kaktus/Documents/ETH/BECCY/myscripts/data/"
@@ -38,7 +38,7 @@ eradata = []
 for seas in range(len(seasons)):
     season = seasons[seas]
     filename = f'era5_2001_{season}.nc'
-    data = xr.open_dataset(f'{erapath}{filename}')['slhf'].values[0, :, :]
+    data = xr.open_dataset(f'{erapath}{filename}')['mslhf'].values[0, :, :]
     eradata.append(data)
 
 # -------------------------------------------------------------------------------
@@ -67,7 +67,7 @@ fig, axs = plt.subplots(nrow, ncol, figsize=(wi, hi), subplot_kw={'projection': 
 cs = np.empty(shape=(nrow, ncol), dtype='object')
 # -------------------------
 # panel plot
-divnorm = colors.TwoSlopeNorm(vmin=-10., vcenter=0., vmax=10)
+divnorm = colors.TwoSlopeNorm(vmin=-30., vcenter=0., vmax=50)
 for i in range(ncol * nrow):
     cs[i % 4, i // 4] = axs[i % 4, i // 4].pcolormesh(rlon, rlat, diffdata[i], cmap='RdYlBu', norm=divnorm, shading="auto")
     ax = plotcosmo(axs[i % 4, i // 4])
@@ -108,5 +108,5 @@ plt.show()
 # -------------------------
 # save figure
 plotpath = "/Users/kaktus/Documents/ETH/BECCY/myscripts/figure/"
-fig.savefig(plotpath + 'compare_topo_tmp.png', dpi=300)
+fig.savefig(plotpath + 'compare_topo_lhf.png', dpi=300)
 plt.close(fig)
