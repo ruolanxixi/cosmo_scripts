@@ -6,31 +6,26 @@
 # define directories
 #
 IFS="|"
-list_1h="SNOW_CON${IFS}SNOW_GSP${IFS}RAIN_CON${IFS}RAIN_GSP${IFS}TOT_PREC${IFS}TD_2M\
-${IFS}T_2M${IFS}U_10M${IFS}V_10M${IFS}CLCT${IFS}CLCL${IFS}CLCM${IFS}CLCH"
-list_3h="ALHFL_S${IFS}ATHD_S${IFS}ATHU_S${IFS}ASHFL_S${IFS}ASOD_T${IFS}ASOB_T${IFS}\
-ASOB_S${IFS}ATHB_T${IFS}ATHB_S${IFS}ASWDIFD_S${IFS}ASWDIFU_S${IFS}ASWDIR_S${IFS}ASOBC_S\
-${IFS}ASOBC_T${IFS}ATHBC_S${IFS}ATHBC_T${IFS}DURSUN${IFS}PMSL${IFS}PS${IFS}QV_2M${IFS}RELHUM_2M${IFS}ALB_RAD${IFS}AEVAP_S"
-list_6h="H_SNOW${IFS}RUNOFF_G${IFS}RUNOFF_S${IFS}TQC${IFS}TQI${IFS}TQV${IFS}TQR${IFS}\
-TQS${IFS}TQG${IFS}HPBL${IFS}SNOW_MELT${IFS}WTDEPTH"
-list_6h3D="FI${IFS}QV${IFS}T${IFS}U${IFS}V${IFS}W${IFS}SOHR_RAD${IFS}THHR_RAD${IFS}DT_CON${IFS}DT_SSO${IFS}OMEGA${IFS}"
-list_24h="TMAX_2M${IFS}TMIN_2M${IFS}TWATER${IFS}TWATFLXU${IFS}TWATFLXV${IFS}T_SO${IFS}W_SO${IFS}VMAX_10M${IFS}"
+list_1h="SNOW_CON${IFS}SNOW_GSP${IFS}TOT_PREC${IFS}T_2M${IFS}QV_2M${IFS}PS"
+list_1h2="ASHFL_S${IFS}ALHFL_S${IFS}ASOB_S${IFS}ASWDIR_S${IFS}ASWDIFD_S${IFS}ATHB_S${IFS}ATHD_S${IFS}CAPE_ML${IFS}CIN_ML${IFS}AEVAP_S"
+list_3h="PMSL${IFS}CLCT${IFS}CLCL${IFS}CLCM${IFS}CLCH${IFS}T_G${IFS}U_10M${IFS}V_10M${IFS}ALB_RAD${IFS}ASOB_T${IFS}ASOD_T${IFS}ATHB_T${IFS}TQV${IFS}TQC${IFS}TQI${IFS}TWATER${IFS}TWATFLXU${IFS}TWATFLXV${IFS}HPBL${IFS}T_SO${IFS}TDIV_HUM"
+list_3h3D="FI${IFS}QV${IFS}T${IFS}U${IFS}V${IFS}W"
+list_24h3D="TADV_SUM${IFS}TCONV_SUM${IFS}TCONVLH_SUM${IFS}TTTUR_SUM${IFS}SOHR_SUM${IFS}THHR_SUM${IFS}TGSCP_SUM${IFS}TMPHYS_SUM"
+list_24h="VMAX_10M${IFS}H_SNOW${IFS}W_SNOW${IFS}TMAX_2M${IFS}TMIN_2M${IFS}DURSUN${IFS}RUNOFF_S${IFS}RUNOFF_G${IFS}SNOW_MELT${IFS}W_SO"
 
-pressure=(10000 20000 30000 40000 50000 60000 70000 85000 92500)
+pressure=(10000 20000 30000 40000 50000 60000 70000 85000 92500 100000)
 st1=("DJF" "MAM" "JJA" "SON")
-# -------------------------------------------------------------------------------
-# merge ncfiles
-#
-mergeFiles() {
 
 if [[ "${IFS}${list_1h[*]}${IFS}" =~ "${IFS}$1${IFS}" ]]; then
   subDir=1h
+elif [[ "${IFS}${list_1h2[*]}${IFS}" =~ "${IFS}$1${IFS}" ]]; then
+   subDir=1h2
 elif [[ "${IFS}${list_3h[*]}${IFS}" =~ "${IFS}$1${IFS}" ]]; then
    subDir=3h
-elif [[ "${IFS}${list_6h[*]}${IFS}" =~ "${IFS}$1${IFS}" ]]; then
-   subDir=6h
-elif [[ "${IFS}${list_6h3D[*]}${IFS}" =~ "${IFS}$1${IFS}" ]]; then
-   subDir=6h3D
+elif [[ "${IFS}${list_3h3D[*]}${IFS}" =~ "${IFS}$1${IFS}" ]]; then
+   subDir=3h3D
+elif [[ "${IFS}${list_24h3D[*]}${IFS}" =~ "${IFS}$1${IFS}" ]]; then
+   subDir=24h3D
 elif [[ "${IFS}${list_24h[*]}${IFS}" =~ "${IFS}$1${IFS}" ]]; then
    subDir=24h
 else
@@ -42,13 +37,18 @@ if [ "$2" == "11" ]; then
 elif [ "$2" == "44" ]; then
   reso=fine
 fi
+# -------------------------------------------------------------------------------
+# merge ncfiles
+#
+mergeFiles() {
 
-
-Dir=/project/pr94/rxiang/data_lmp
+Dir=/store/c2sm/pr04/rxiang/data_lmp
+# Dir=/project/pr94/rxiang/data_lmp
 simname=$3
 year=$4
 inPath=$Dir/$4**_$3/lm_$reso/$subDir
-outPath=/project/pr94/rxiang/analysis/EAS$2_$3/$1
+outPath=/project/pr133/rxiang/data/cosmo/EAS$2_$3/$subDir/$1
+dayPath=/project/pr133/rxiang/data/cosmo/EAS$2_$3/day/$1
 
 [ ! -d "$outPath" ] && mkdir -p "$outPath"
 
@@ -60,8 +60,7 @@ fi
 cdo mergetime $inPath/$1.nc $outPath/$4_$1.nc
 echo "files $1 merged"
 
-pressure=(10000 20000 30000 40000 50000 60000 70000 85000 92500)
-if [[ "${IFS}${list_6h3D[*]}${IFS}" =~ "${IFS}$1${IFS}" ]]; then
+if [[ "${IFS}${list_3h3D[*]}${IFS}" =~ "${IFS}$1${IFS}" ]]; then
   for p in "${pressure[@]}"
   do
     cdo -select,level=$p $outPath/$4_$1.nc $outPath/$4_$1_$p.nc
@@ -71,9 +70,8 @@ fi
 
 if [ "$1" == "TOT_PREC" ] || [ "$1" == "TQV" ]; then
   cdo -shifttime,-30minutes $outPath/$4_$1.nc $outPath/$4_$1_sft.nc
-  cdo daysum $outPath/$4_$1_sft.nc $outPath/$4_$1_daysum.nc
-  rm $outPath/$4_$1.nc $outPath/$4_$1_sft.nc
-  mv $outPath/$4_$1_daysum.nc $outPath/$4_$1.nc
+  cdo daysum $outPath/$4_$1_sft.nc $dayPath/$4_$1.nc
+  rm $outPath/$4_$1_sft.nc
   echo "shift time"
 else
   echo "no shift time"
@@ -86,24 +84,47 @@ fi
 seasonal() {
 echo "compute seasonalities"
 
-Path=/project/pr94/rxiang/analysis/EAS$2_$3/$1
+if [[ "${IFS}${list_1h[*]}${IFS}" =~ "${IFS}$1${IFS}" ]]; then
+  subDir=1h
+elif [[ "${IFS}${list_1h2[*]}${IFS}" =~ "${IFS}$1${IFS}" ]]; then
+   subDir=1h2
+elif [[ "${IFS}${list_3h[*]}${IFS}" =~ "${IFS}$1${IFS}" ]]; then
+   subDir=3h
+elif [[ "${IFS}${list_3h3D[*]}${IFS}" =~ "${IFS}$1${IFS}" ]]; then
+   subDir=3h3D
+elif [[ "${IFS}${list_24h3D[*]}${IFS}" =~ "${IFS}$1${IFS}" ]]; then
+   subDir=24h3D
+elif [[ "${IFS}${list_24h[*]}${IFS}" =~ "${IFS}$1${IFS}" ]]; then
+   subDir=24h
+else
+   echo "variable $1 doesn't exit in cosmo output"
+fi
 
-[ ! -d "$Path" ] && mkdir -p "$Path"
+if [ "$2" == "11" ]; then
+  reso=coarse
+elif [ "$2" == "44" ]; then
+  reso=fine
+fi
+
+inPath=/project/pr133/rxiang/data/cosmo/EAS$2_$3/$subDir/$1
+outPath=/project/pr133/rxiang/data/cosmo/EAS$2_$3/szn/$1
+
+[ ! -d "$outPath" ] && mkdir -p "$outPath"
 
 for s in "${st1[@]}"
 do 
-  if [[ "${IFS}${list_6h3D[*]}${IFS}" =~ "${IFS}$1${IFS}" ]]; then
+  if [[ "${IFS}${list_3h3D[*]}${IFS}" =~ "${IFS}$1${IFS}" ]]; then
   echo "true"
     for p in "${pressure[@]}"
     do
-      cdo -select,season="$s" $Path/$4_$1_${p}.nc $Path/$4_$1_${p}_TS_${s}.nc
-      cdo timmean $Path/$4_$1_${p}_TS_${s}.nc $Path/$4_$1_${p}_${s}.nc
-      rm $Path/$4_$1_${p}_TS_${s}.nc
+      cdo -select,season="$s" $inPath/$4_$1_${p}.nc $inPath/$4_$1_${p}_TS_${s}.nc
+      cdo timmean $inPath/$4_$1_${p}_TS_${s}.nc $outPath/$4_$1_${p}_${s}.nc
+      rm $inPath/$4_$1_${p}_TS_${s}.nc
     done
   else
-  cdo -select,season="${s}" $Path/$4_$1.nc $Path/$4_$1_TS_${s}.nc
-  cdo timmean $Path/$4_$1_TS_${s}.nc $Path/$4_$1_${s}.nc
-  rm $Path/$4_$1_TS_${s}.nc
+  cdo -select,season="${s}" $inPath/$4_$1.nc $inPath/$4_$1_TS_${s}.nc
+  cdo timmean $inPath/$4_$1_TS_${s}.nc $outPath/$4_$1_${s}.nc
+  rm $inPath/$4_$1_TS_${s}.nc
   fi
 done
 }
