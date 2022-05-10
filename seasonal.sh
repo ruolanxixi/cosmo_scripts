@@ -12,15 +12,18 @@ source cosmoFunctions.sh
 
 # declare -a var=("TOT_PREC" "U" "V" "W" "TQV" "QV" "T_2M" "T" "FI" "SOHR_RAD" "THHR_RAD" "DT_CON" "DT_SSO" "OMEGA" "PMSL") 
 declare -a var=("TOT_PREC" "T_2M" "CLCT" "ASOB_T" "ASOD_T" "ATHB_T")
-declare -a sim=("topo1")
+declare -a sim=("ctrl")
 resolution=11
-year=01
+year=(02 03 04)
 
-for v in "${var[@]}"
+for y in 02 03 04
 do
-  for c in "${sim[@]}"
-  do
-    mergeFiles $v $resolution $c $year
-    seasonal $v $resolution $c $year
-  done
+    for v in "${var[@]}"
+    do
+        for c in "${sim[@]}"
+        do
+            mergeFiles $v $resolution $c $y
+            seasonal $v $resolution $c $y
+        done
+    done
 done
