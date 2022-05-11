@@ -88,7 +88,7 @@ def plotcosmo(ax):
     """
     proj = ccrs.PlateCarree()
     ax.set_extent([65, 174, 10, 61], crs=proj)  # for extended 12km domain
-    ax.add_feature(cfeature.LAND)
+    # ax.add_feature(cfeature.LAND)
     ax.add_feature(cfeature.COASTLINE)
     ax.add_feature(cfeature.BORDERS, linestyle=':')
     ax.add_feature(cfeature.LAKES, alpha=0.5)
@@ -103,7 +103,7 @@ def plotcosmo(ax):
 
 
 def pole():
-    file = "/Users/kaktus/Documents/ETH/BECCY/myscripts/data/globe_ex/01_TOT_PREC_DJF.nc"
+    file = "/project/pr133/rxiang/data/cosmo/EAS11_ctrl/szn/T_2M/01_T_2M_DJF.nc"
     ds = xr.open_dataset(f'{file}')
     pole_lat = ds["rotated_pole"].grid_north_pole_latitude
     pole_lon = ds["rotated_pole"].grid_north_pole_longitude
@@ -118,9 +118,11 @@ def pole():
 
 def colorbar(fig, ax, n):
     if n == 1:
-        cax = fig.add_axes([ax.get_position().x0, ax.get_position().y0 - 0.03, ax.get_position().width, 0.01])
+        cax = fig.add_axes([ax.get_position().x0, ax.get_position().y0 - 0.07, ax.get_position().width*0.99, 0.01])
     elif n == 2:
-        cax = fig.add_axes([ax.get_position().x0 + 0.018, ax.get_position().y0 - 0.03, ax.get_position().width * 2, 0.01])
+        cax = fig.add_axes([ax.get_position().x0 + 0.018, ax.get_position().y0 - 0.07, ax.get_position().width * 2, 0.01])
+    elif n == 3:
+        cax = fig.add_axes([ax.get_position().x0 + 0.018, ax.get_position().y0 - 0.07, ax.get_position().width * 3.2, 0.01])
     elif n == 4:
         cax = fig.add_axes([ax.get_position().x0 + 0.018, ax.get_position().y0 - 0.07, ax.get_position().width * 4.4, 0.01])
 

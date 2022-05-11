@@ -13,44 +13,57 @@ from numpy import inf
 #
 seasons = ["DJF", "MAM", "JJA", "SON"]
 mdvname = 'T_2M'  # edit here
-year = '01'
-sim = ["MERIT_raw", "GLOBE_ex", "GLOBE_ex_nofilt", "MERIT"]
-datapath = "/Users/kaktus/Documents/ETH/BECCY/myscripts/data/"
-erapath = "/Users/kaktus/Documents/ETH/BECCY/myscripts/data/ERA5/"
+year = '2001-2005'
+mdpath = "/project/pr133/rxiang/data/cosmo/EAS11_ctrl/szn/T_2M/"
+erapath = "/project/pr133/rxiang/data/era5/ot/remap/"
+crupath = "/project/pr133/rxiang/data/obs/tmp/cru/remap/"
+aphropath = "/project/pr133/rxiang/data/obs/tmp/APHRO/remap/"
 
 # -------------------------------------------------------------------------------
 # read model data
 #
 mddata = []
-for sims in range(len(sim)):
-    simulation = sim[sims]
-    mdpath = f'{datapath}' + f'{simulation}' + "/"
-    for seas in range(len(seasons)):
-        season = seasons[seas]
-        filename = f'{year}_{mdvname}_{season}.nc'
-        data = xr.open_dataset(f'{mdpath}{filename}')[mdvname].values[0, :, :] - 273.15
-        mddata.append(data)
+for seas in range(len(seasons)):
+    season = seasons[seas]
+    filename = f'{year}.{mdvname}.{season}.nc'
+    data = xr.open_dataset(f'{mdpath}{filename}')[mdvname].values[0, :, :] - 273.15
+    mddata.append(data)
 
 # -------------------------------------------------------------------------------
 # read era5 data
 #
-eradata = []
+otdata = []
 for seas in range(len(seasons)):
     season = seasons[seas]
-    filename = f'era5_2001_{season}.nc'
+    filename = f'era5.mo.2001-2005.{season}.remap.nc'
     data = xr.open_dataset(f'{erapath}{filename}')['t2m'].values[0, :, :] - 273.15
-    eradata.append(data)
+    otdata.append(data)
 
 # -------------------------------------------------------------------------------
-# compute model data difference
+# read observation data
 #
-for i in range(len(seasons)*len(sim)):
-    if i // 4 == 0:
-        mddata[i] = mddata[i]
-    elif i // 4 == 1:
-        mddata[i] = mddata[i % 4] - eradata[i % 4]
-    else:
-        mddata[i] = mddata[i % 4] - mddata[i]
+for seas in range(len(seasons)):
+    season = seasons[seas]
+    filename = f'cru.2001-2005.05.{season}.remap.nc'
+    data = xr.open_dataset(f'{crupath}{filename}')['tmp'].values[0, :, :]
+    otdata.append(data)
+
+for seas in range(len(seasons)):
+    season = seasons[seas]
+    filename = f'APHRO.2001-2005.025.{season}.remap.nc'
+    data = xr.open_dataset(f'{aphropath}{filename}')['tave'].values[0, :, :]
+    otdata.append(data)
+
+# -------------------------------------------------------------------------------
+# compute difference
+#
+diffdata = []
+for i in range(len(otdata)):
+    j = i % 4
+    data = mddata[j] - otdata[i]
+    diffdata.append(data)
+np.seterr(divide='warn', invalid='warn')
+
 
 # -------------------------------------------------------------------------------
 # plot
@@ -62,28 +75,27 @@ hi = 14  # height in inches
 wi = hi / ar  # width in inches
 # fig = plt.figure(figsize=(wi, hi))
 #
-ncol = len(sim)
+ncol = 4  # edit here
 nrow = 4
 # gs = gridspec.GridSpec(nrow, ncol, figure=fig)
 fig, axs = plt.subplots(nrow, ncol, figsize=(wi, hi), subplot_kw={'projection': rot_pole_crs})
 cs = np.empty(shape=(nrow, ncol), dtype='object')
 # -------------------------
 # panel plot
-divnorm1 = colors.TwoSlopeNorm(vmin=-20., vcenter=0., vmax=30)
-divnorm2 = colors.TwoSlopeNorm(vmin=-3., vcenter=0., vmax=3)
-for i in range(ncol * nrow):
-    if i // 4 == 0:
-        cs[i % 4, i // 4] = axs[i % 4, i // 4].pcolormesh(rlon, rlat, mddata[i], cmap='RdYlBu_r', norm=divnorm1, shading="auto")
-        ax = plotcosmo(axs[i % 4, i // 4])
-    else:
-        cs[i % 4, i // 4] = axs[i % 4, i // 4].pcolormesh(rlon, rlat, mddata[i], cmap='RdYlBu', norm=divnorm2, shading="auto")
-        ax = plotcosmo(axs[i % 4, i // 4])
+divnorm = colors.TwoSlopeNorm(vmin=np.amin(mddata), vcenter=0., vmax=np.amax(mddata))
+for i in range(nrow):
+    cs[i % 4, i // 4] = axs[i % 4, i // 4].pcolormesh(rlon, rlat, mddata[i], cmap='RdYlBu_r', norm=divnorm, shading="auto")
+    ax = plotcosmo(axs[i % 4, i // 4])
+divnorm = colors.TwoSlopeNorm(vmin=-6., vcenter=0., vmax=6)
+for i in np.arange(nrow, ncol * nrow, 1):
+    cs[i % 4, i // 4] = axs[i % 4, i // 4].pcolormesh(rlon, rlat, diffdata[i-4], cmap='RdBu_r', norm=divnorm, shading="auto")
+    ax = plotcosmo(axs[i % 4, i // 4])
 # -------------------------
 # add title
-axs[0, 0].set_title("MERIT_raw", fontweight='bold', pad=10)
-axs[0, 1].set_title("MERIT_raw - ERA5", fontweight='bold', pad=10)
-axs[0, 2].set_title("MERIT_raw - GLOBE", fontweight='bold', pad=10)
-axs[0, 3].set_title("MERIT_raw - MERIT_agg", fontweight='bold', pad=10)
+axs[0, 0].set_title("COSMO", fontweight='bold', pad=10)
+axs[0, 1].set_title("COSMO-ERA5", fontweight='bold', pad=10)
+axs[0, 2].set_title("COSMO-CRU", fontweight='bold', pad=10)
+axs[0, 3].set_title("COSMO-APHRO", fontweight='bold', pad=10)
 # -------------------------
 # add label
 axs[0, 0].text(-0.14, 0.55, 'DJF', ha='center', va='center', rotation='vertical',
@@ -99,9 +111,9 @@ axs[3, 0].text(-0.14, 0.55, 'SON', ha='center', va='center', rotation='vertical'
 cax = colorbar(fig, axs[3, 0], 1)  # edit here
 cb1 = fig.colorbar(cs[3, 0], cax=cax, orientation='horizontal')
 cb1.set_label('$^{o}C$')
-cax = colorbar(fig, axs[3, 1], 3)
-cb2 = fig.colorbar(cs[3, 1], cax=cax, orientation='horizontal')
-cb2.set_label('$^{o}C$')
+cax = colorbar(fig, axs[3, 1], 3)  # edit here
+cb1 = fig.colorbar(cs[3, 1], cax=cax, orientation='horizontal')
+cb1.set_label('$^{o}C$')
 # cax = colorbar(fig, axs[3, 1], 1)
 # cb2 = fig.colorbar(cs[3, 1], cax=cax, orientation='horizontal', extend='both')
 # # # cb1.set_ticks([0, 500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000, 6500, 7000])
@@ -117,6 +129,6 @@ fig.set_figwidth(hi / y2x_ratio)
 plt.show()
 # -------------------------
 # save figure
-plotpath = "/Users/kaktus/Documents/ETH/BECCY/myscripts/figure/"
-fig.savefig(plotpath + 'compare_topo_tmp.png', dpi=300)
+plotpath = "/project/pr133/rxiang/figure/validation/"
+fig.savefig(plotpath + 'tmp.png', dpi=300)
 plt.close(fig)

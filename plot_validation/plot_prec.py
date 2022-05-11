@@ -45,13 +45,13 @@ for seas in range(len(seasons)):
 for seas in range(len(seasons)):
     season = seasons[seas]
     filename = f'cru.2001-2005.05.{season}.remap.nc'
-    data = xr.open_dataset(f'{erapath}{filename}')['pre'].values[0, :, :]
+    data = xr.open_dataset(f'{crupath}{filename}')['pre'].values[0, :, :]
     otdata.append(data)
 
 for seas in range(len(seasons)):
     season = seasons[seas]
     filename = f'IMERG.ydaymean.2001-2005.{season}.remap.nc4'
-    data = xr.open_dataset(f'{erapath}{filename}')['pr'].values[0, :, :]
+    data = xr.open_dataset(f'{imergpath}{filename}')['pr'].values[0, :, :]
     otdata.append(data)
 
 # -------------------------------------------------------------------------------
@@ -66,7 +66,6 @@ for i in range(len(otdata)):
     data[data == -inf] = -100
     diffdata.append(data)
 np.seterr(divide='warn', invalid='warn')
-
 
 
 # -------------------------------------------------------------------------------
@@ -86,9 +85,12 @@ fig, axs = plt.subplots(nrow, ncol, figsize=(wi, hi), subplot_kw={'projection': 
 cs = np.empty(shape=(nrow, ncol), dtype='object')
 # -------------------------
 # panel plot
-divnorm = colors.TwoSlopeNorm(vmin=-100., vcenter=0., vmax=80)
-for i in range(ncol * nrow):
-    cs[i % 4, i // 4] = axs[i % 4, i // 4].pcolormesh(rlon, rlat, diffdata[i], cmap='RdYlBu', norm=divnorm, shading="auto")
+divnorm = colors.TwoSlopeNorm(vmin=-120., vcenter=0., vmax=80)
+for i in range(nrow):
+    cs[i % 4, i // 4] = axs[i % 4, i // 4].pcolormesh(rlon, rlat, mddata[i], cmap='YlGnBu', vmin=0, vmax=20, shading="auto")
+    ax = plotcosmo(axs[i % 4, i // 4])
+for i in np.arange(nrow, ncol * nrow, 1):
+    cs[i % 4, i // 4] = axs[i % 4, i // 4].pcolormesh(rlon, rlat, diffdata[i-4], cmap='RdBu', norm=divnorm, shading="auto")
     ax = plotcosmo(axs[i % 4, i // 4])
 # -------------------------
 # add title
@@ -108,8 +110,11 @@ axs[3, 0].text(-0.14, 0.55, 'SON', ha='center', va='center', rotation='vertical'
                transform=axs[3, 0].transAxes, fontsize=13, fontweight='bold')
 # -------------------------
 # add colorbar
-cax = colorbar(fig, axs[3, 0], 4)  # edit here
+cax = colorbar(fig, axs[3, 0], 1)  # edit here
 cb1 = fig.colorbar(cs[3, 0], cax=cax, orientation='horizontal')
+cb1.set_label('mm/day')
+cax = colorbar(fig, axs[3, 1], 3)  # edit here
+cb1 = fig.colorbar(cs[3, 1], cax=cax, orientation='horizontal')
 cb1.set_label('%')
 # cax = colorbar(fig, axs[3, 1], 1)
 # cb2 = fig.colorbar(cs[3, 1], cax=cax, orientation='horizontal', extend='both')

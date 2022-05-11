@@ -14,7 +14,7 @@ from numpy import inf
 seasons = ["DJF", "MAM", "JJA", "SON"]
 mdvname = 'ALHFL_S'  # edit here
 year = '01'
-sim = ["MERIT_raw", "MERIT", "GLOBE_ex_nofilt", "GLOBE_ex"]
+sim = ["MERIT_raw", "GLOBE_ex", "GLOBE_ex_nofilt", "MERIT"]
 datapath = "/Users/kaktus/Documents/ETH/BECCY/myscripts/data/"
 erapath = "/Users/kaktus/Documents/ETH/BECCY/myscripts/data/ERA5/"
 
@@ -29,6 +29,7 @@ for sims in range(len(sim)):
         season = seasons[seas]
         filename = f'{year}_{mdvname}_{season}.nc'
         data = xr.open_dataset(f'{mdpath}{filename}')[mdvname].values[0, :, :]
+        data = - data
         mddata.append(data)
 
 # -------------------------------------------------------------------------------
@@ -39,16 +40,19 @@ for seas in range(len(seasons)):
     season = seasons[seas]
     filename = f'era5_2001_{season}.nc'
     data = xr.open_dataset(f'{erapath}{filename}')['mslhf'].values[0, :, :]
+    data = - data
     eradata.append(data)
 
 # -------------------------------------------------------------------------------
 # compute difference
 #
-diffdata = []
-for i in range(len(mddata)):
-    j = i % 4
-    data = mddata[i] - eradata[j]
-    diffdata.append(data)
+for i in range(len(seasons)*len(sim)):
+    if i // 4 == 0:
+        mddata[i] = mddata[i]
+    elif i // 4 == 1:
+        mddata[i] = mddata[i % 4] - eradata[i % 4]
+    else:
+        mddata[i] = mddata[i % 4] - mddata[i]
 
 # -------------------------------------------------------------------------------
 # plot
@@ -67,16 +71,20 @@ fig, axs = plt.subplots(nrow, ncol, figsize=(wi, hi), subplot_kw={'projection': 
 cs = np.empty(shape=(nrow, ncol), dtype='object')
 # -------------------------
 # panel plot
-divnorm = colors.TwoSlopeNorm(vmin=-30., vcenter=0., vmax=50)
+divnorm = colors.TwoSlopeNorm(vmin=-50., vcenter=0., vmax=30)
 for i in range(ncol * nrow):
-    cs[i % 4, i // 4] = axs[i % 4, i // 4].pcolormesh(rlon, rlat, diffdata[i], cmap='RdYlBu', norm=divnorm, shading="auto")
-    ax = plotcosmo(axs[i % 4, i // 4])
+    if i // 4 == 0:
+        cs[i % 4, i // 4] = axs[i % 4, i // 4].pcolormesh(rlon, rlat, mddata[i], cmap='RdYlBu_r', vmin=0, vmax=300, shading="auto")
+        ax = plotcosmo(axs[i % 4, i // 4])
+    else:
+        cs[i % 4, i // 4] = axs[i % 4, i // 4].pcolormesh(rlon, rlat, mddata[i], cmap='RdYlBu_r', norm=divnorm, shading="auto")
+        ax = plotcosmo(axs[i % 4, i // 4])
 # -------------------------
 # add title
 axs[0, 0].set_title("MERIT_raw", fontweight='bold', pad=10)
-axs[0, 1].set_title("MERIT", fontweight='bold', pad=10)
-axs[0, 2].set_title("GLOBE", fontweight='bold', pad=10)
-axs[0, 3].set_title("GLOBE_filt", fontweight='bold', pad=10)
+axs[0, 1].set_title("MERIT_raw - ERA5", fontweight='bold', pad=10)
+axs[0, 2].set_title("MERIT_raw - GLOBE", fontweight='bold', pad=10)
+axs[0, 3].set_title("MERIT_raw - MERIT_agg", fontweight='bold', pad=10)
 # -------------------------
 # add label
 axs[0, 0].text(-0.14, 0.55, 'DJF', ha='center', va='center', rotation='vertical',
@@ -89,9 +97,13 @@ axs[3, 0].text(-0.14, 0.55, 'SON', ha='center', va='center', rotation='vertical'
                transform=axs[3, 0].transAxes, fontsize=13, fontweight='bold')
 # -------------------------
 # add colorbar
-cax = colorbar(fig, axs[3, 0], 4)  # edit here
+cax = colorbar(fig, axs[3, 0], 1)  # edit here
 cb1 = fig.colorbar(cs[3, 0], cax=cax, orientation='horizontal')
 cb1.set_label('$W m^{-2}$')
+cax = colorbar(fig, axs[3, 1], 3)
+cb2 = fig.colorbar(cs[3, 1], cax=cax, orientation='horizontal')
+cb2.set_label('$W m^{-2}$')
+
 # cax = colorbar(fig, axs[3, 1], 1)
 # cb2 = fig.colorbar(cs[3, 1], cax=cax, orientation='horizontal', extend='both')
 # # # cb1.set_ticks([0, 500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000, 6500, 7000])

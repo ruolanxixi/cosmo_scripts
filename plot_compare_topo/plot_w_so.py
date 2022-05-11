@@ -12,11 +12,10 @@ from numpy import inf
 # import data
 #
 seasons = ["DJF", "MAM", "JJA", "SON"]
-mdvname = 'TOT_PREC'  # edit here
+mdvname = 'W_SO'  # edit here
 year = '01'
-sim = ["MERIT_raw", "GLOBE_ex", "GLOBE_ex_nofilt", "MERIT"]
+sim = ["MERIT_raw", "MERIT", "GLOBE_ex_nofilt", "GLOBE_ex"]
 datapath = "/Users/kaktus/Documents/ETH/BECCY/myscripts/data/"
-erapath = "/Users/kaktus/Documents/ETH/BECCY/myscripts/data/ERA5/"
 
 # -------------------------------------------------------------------------------
 # read model data
@@ -28,33 +27,17 @@ for sims in range(len(sim)):
     for seas in range(len(seasons)):
         season = seasons[seas]
         filename = f'{year}_{mdvname}_{season}.nc'
-        data = xr.open_dataset(f'{mdpath}{filename}')[mdvname].values[0, :, :]
+        data = xr.open_dataset(f'{mdpath}{filename}')[mdvname].values[0, 2, :, :] * 1000
         mddata.append(data)
 
 # -------------------------------------------------------------------------------
-# read era5 data
+# compute model data difference
 #
-eradata = []
-for seas in range(len(seasons)):
-    season = seasons[seas]
-    filename = f'era5_2001_{season}.nc'
-    data = xr.open_dataset(f'{erapath}{filename}')['tp'].values[0, :, :] * 1000
-    eradata.append(data)
-
-# -------------------------------------------------------------------------------
-# compute difference
-#
-np.seterr(divide='ignore', invalid='ignore')
-for i in range(len(mddata)):
+for i in range(len(seasons)*len(sim)):
     if i // 4 == 0:
         mddata[i] = mddata[i]
-    elif i // 4 == 1:
-        mddata[i] = (mddata[i % 4] - eradata[i % 4])/mddata[i % 4] * 100
     else:
-        mddata[i] = (mddata[i % 4] - mddata[i])/mddata[i % 4] * 100
-    mddata[i][np.isnan(mddata[i])] = 0
-    mddata[i][mddata[i] == -inf] = -100
-np.seterr(divide='warn', invalid='warn')
+        mddata[i] = mddata[i % 4] - mddata[i]
 
 # -------------------------------------------------------------------------------
 # plot
@@ -73,20 +56,21 @@ fig, axs = plt.subplots(nrow, ncol, figsize=(wi, hi), subplot_kw={'projection': 
 cs = np.empty(shape=(nrow, ncol), dtype='object')
 # -------------------------
 # panel plot
-divnorm = colors.TwoSlopeNorm(vmin=-150., vcenter=0., vmax=80)
+divnorm = colors.TwoSlopeNorm(vmin=-5., vcenter=0., vmax=5)
 for i in range(ncol * nrow):
     if i // 4 == 0:
-        cs[i % 4, i // 4] = axs[i % 4, i // 4].pcolormesh(rlon, rlat, mddata[i], cmap='YlGnBu', vmin=0, vmax=20, shading="auto")
+        cs[i % 4, i // 4] = axs[i % 4, i // 4].pcolormesh(rlon, rlat, mddata[i], cmap='YlGnBu', shading="auto")
         ax = plotcosmo(axs[i % 4, i // 4])
     else:
         cs[i % 4, i // 4] = axs[i % 4, i // 4].pcolormesh(rlon, rlat, mddata[i], cmap='RdYlBu', norm=divnorm, shading="auto")
         ax = plotcosmo(axs[i % 4, i // 4])
+
 # -------------------------
 # add title
 axs[0, 0].set_title("MERIT_raw", fontweight='bold', pad=10)
-axs[0, 1].set_title("MERIT_raw - ERA5", fontweight='bold', pad=10)
+axs[0, 1].set_title("MERIT_raw - MERIT", fontweight='bold', pad=10)
 axs[0, 2].set_title("MERIT_raw - GLOBE", fontweight='bold', pad=10)
-axs[0, 3].set_title("MERIT_raw - MERIT_agg", fontweight='bold', pad=10)
+axs[0, 3].set_title("MERIT_raw - GLOBE_filt", fontweight='bold', pad=10)
 # -------------------------
 # add label
 axs[0, 0].text(-0.14, 0.55, 'DJF', ha='center', va='center', rotation='vertical',
@@ -101,10 +85,12 @@ axs[3, 0].text(-0.14, 0.55, 'SON', ha='center', va='center', rotation='vertical'
 # add colorbar
 cax = colorbar(fig, axs[3, 0], 1)  # edit here
 cb1 = fig.colorbar(cs[3, 0], cax=cax, orientation='horizontal')
-cb1.set_label('mm/day')
+cb1.set_label('$mm$')
 cax = colorbar(fig, axs[3, 1], 3)
 cb2 = fig.colorbar(cs[3, 1], cax=cax, orientation='horizontal')
-cb2.set_label('%')
+cb2.set_label('mm')
+# # # cb1.set_ticks([0, 500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000, 6500, 7000])
+# cb2.set_label('%')
 # -------------------------
 # adjust figure
 # plt.subplots_adjust(left=None, bottom=None, right=None, top=None)
@@ -117,5 +103,5 @@ plt.show()
 # -------------------------
 # save figure
 plotpath = "/Users/kaktus/Documents/ETH/BECCY/myscripts/figure/"
-fig.savefig(plotpath + 'compare_topo_prec.png', dpi=300)
+fig.savefig(plotpath + 'compare_topo_w_so_0.07.png', dpi=300)
 plt.close(fig)
