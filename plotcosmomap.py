@@ -17,12 +17,13 @@ import xarray as xr
 
 def add_gridline_labels(ax, labels_set=None, side=None):  # 'top', 'bottom', 'left', 'right'
 
-    gl = ax.gridlines(draw_labels=True, dms=True, x_inline=False, y_inline=False, linewidth=1, color='grey', alpha=0.5, linestyle='--')
+    gl = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=False, dms=True, x_inline=False, y_inline=False, linewidth=1,
+                      color='grey', alpha=0.5, linestyle='--')
     gl.xlabel_style = {'rotation': 0, 'rotation_mode': 'anchor'}
     gl.ylabel_style = {'rotation': 0, 'rotation_mode': 'anchor'}
 
     if side == 'top':
-        gl.xlocator = mticker.FixedLocator(labels_set)
+        # gl.xlocator = mticker.FixedLocator(labels_set)
         gl.ylines = False
         gl.top_labels = True
         gl.bottom_labels = False
@@ -30,7 +31,7 @@ def add_gridline_labels(ax, labels_set=None, side=None):  # 'top', 'bottom', 'le
         gl.right_labels = False
         gl.geo_labels = False
     elif side == 'bottom':
-        gl.xlocator = mticker.FixedLocator(labels_set)
+        # gl.xlocator = mticker.FixedLocator(labels_set)
         gl.ylines = False
         gl.top_labels = False
         gl.bottom_labels = True
@@ -38,7 +39,7 @@ def add_gridline_labels(ax, labels_set=None, side=None):  # 'top', 'bottom', 'le
         gl.right_labels = False
         gl.geo_labels = False
     elif side == 'left':
-        gl.ylocator = mticker.FixedLocator(labels_set)
+        # gl.ylocator = mticker.FixedLocator(labels_set)
         gl.xlines = False
         gl.top_labels = False
         gl.bottom_labels = False
@@ -46,7 +47,7 @@ def add_gridline_labels(ax, labels_set=None, side=None):  # 'top', 'bottom', 'le
         gl.right_labels = False
         gl.geo_labels = False
     elif side == 'right':
-        gl.ylocator = mticker.FixedLocator(labels_set)
+        # gl.ylocator = mticker.FixedLocator(labels_set)
         gl.xlines = False
         gl.top_labels = False
         gl.bottom_labels = False
@@ -54,8 +55,8 @@ def add_gridline_labels(ax, labels_set=None, side=None):  # 'top', 'bottom', 'le
         gl.right_labels = True
         gl.geo_labels = False
 
-    gl.xformatter = LongitudeFormatter()
-    gl.yformatter = LatitudeFormatter()
+    # gl.xformatter = LongitudeFormatter()
+    # gl.yformatter = LatitudeFormatter()
 
     return ax
 
@@ -86,18 +87,43 @@ def plotcosmo(ax):
 
                     m, xi, yi = plotcosmomap(mydata); m.pcolormesh(xi, yi, mydata, cmap='plasma')
     """
-    proj = ccrs.PlateCarree()
-    ax.set_extent([65, 174, 10, 61], crs=proj)  # for extended 12km domain
+
+    ax.set_extent([65, 173, 7, 61], crs=ccrs.PlateCarree())  # for extended 12km domain
     # ax.add_feature(cfeature.LAND)
     ax.add_feature(cfeature.COASTLINE)
     ax.add_feature(cfeature.BORDERS, linestyle=':')
     ax.add_feature(cfeature.LAKES, alpha=0.5)
     ax.add_feature(cfeature.RIVERS)
-    # ax.set_yticks([10, 20, 30, 40, 50], crs=proj)
-    add_gridline_labels(ax, labels_set=[10, 20, 30, 40, 50, 60], side='left')
-    add_gridline_labels(ax, labels_set=[0, 10, 20, 30, 40, 50, 60], side='right')
-    add_gridline_labels(ax, labels_set=[60, 100, 140, 180], side='top')
-    add_gridline_labels(ax, labels_set=[80, 100, 120, 140, 160], side='bottom')
+
+    # add_gridline_labels(ax, labels_set=[10, 20, 30, 40, 50, 60, 70], side='left')
+    # add_gridline_labels(ax, labels_set=[0, 10, 20, 30, 40, 50, 60], side='right')
+    # add_gridline_labels(ax, labels_set=[60, 100, 140, 180], side='top')
+    # add_gridline_labels(ax, labels_set=[80, 100, 120, 140, 160], side='bottom')
+    gl = ax.gridlines(draw_labels=False, dms=True, x_inline=False, y_inline=False, linewidth=1,
+                      color='grey', alpha=0.5, linestyle='--')
+    gl.xlocator = mticker.FixedLocator([80, 100, 120, 140, 160])
+    gl.ylocator = mticker.FixedLocator([0, 10, 20, 30, 40, 50, 60])
+
+    # add ticks manually
+    ax.text(-0.05, 0.95, '50°N', ha='center', va='center', transform=ax.transAxes, fontsize=11)
+    ax.text(-0.05, 0.77, '40°N', ha='center', va='center', transform=ax.transAxes, fontsize=11)
+    ax.text(-0.05, 0.59, '30°N', ha='center', va='center', transform=ax.transAxes, fontsize=11)
+    ax.text(-0.05, 0.41, '20°N', ha='center', va='center', transform=ax.transAxes, fontsize=11)
+    ax.text(-0.05, 0.23, '10°N', ha='center', va='center', transform=ax.transAxes, fontsize=11)
+    ax.text(-0.041, 0.05, '0°N', ha='center', va='center', transform=ax.transAxes, fontsize=11)
+
+    ax.text(0.12, -0.05, '80°E', ha='center', va='center', transform=ax.transAxes, fontsize=11)
+    ax.text(0.32, -0.05, '100°E', ha='center', va='center', transform=ax.transAxes, fontsize=11)
+    ax.text(0.52, -0.05, '120°E', ha='center', va='center', transform=ax.transAxes, fontsize=11)
+    ax.text(0.72, -0.05, '140°E', ha='center', va='center', transform=ax.transAxes, fontsize=11)
+    ax.text(0.92, -0.05, '160°E', ha='center', va='center', transform=ax.transAxes, fontsize=11)
+
+    # ax.set_xticks([80, 100, 120, 140, 160], crs=ccrs.PlateCarree())
+    # ax.set_yticks([0, 10, 20, 30, 40, 50, 60], crs=ccrs.PlateCarree())
+    # lon_formatter = LongitudeFormatter(number_format='.0f', degree_symbol='°')
+    # lat_formatter = LatitudeFormatter(number_format='.0f', degree_symbol='°')
+    # ax.xaxis.set_major_formatter(lon_formatter)
+    # ax.yaxis.set_major_formatter(lat_formatter)
 
     return ax
 
@@ -118,17 +144,15 @@ def pole():
 
 def colorbar(fig, ax, n):
     if n == 1:
-        cax = fig.add_axes([ax.get_position().x0, ax.get_position().y0 - 0.07, ax.get_position().width*0.99, 0.01])
+        cax = fig.add_axes([ax.get_position().x0, ax.get_position().y0 - 0.04, ax.get_position().width, 0.012])
     elif n == 2:
-        cax = fig.add_axes([ax.get_position().x0 + 0.018, ax.get_position().y0 - 0.07, ax.get_position().width * 2, 0.01])
+        cax = fig.add_axes(
+            [ax.get_position().x0, ax.get_position().y0 - 0.04, ax.get_position().width * 2.145, 0.012])
     elif n == 3:
-        cax = fig.add_axes([ax.get_position().x0 + 0.018, ax.get_position().y0 - 0.07, ax.get_position().width * 3.2, 0.01])
+        cax = fig.add_axes(
+            [ax.get_position().x0, ax.get_position().y0 - 0.04, ax.get_position().width * 3.275, 0.012])
     elif n == 4:
-        cax = fig.add_axes([ax.get_position().x0 + 0.018, ax.get_position().y0 - 0.07, ax.get_position().width * 4.4, 0.01])
+        cax = fig.add_axes(
+            [ax.get_position().x0, ax.get_position().y0 - 0.04, ax.get_position().width * 4.4, 0.012])
 
     return cax
-
-
-
-
-

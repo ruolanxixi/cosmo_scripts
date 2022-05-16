@@ -1,35 +1,26 @@
+# -------------------------------------------------------------------------------
+# Custom discrete colormap
 from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 import matplotlib.pyplot as plt
 import numpy as np
+import cmcrameri.cm as cmc
+import matplotlib.colors as colors
+from matplotlib.ticker import MaxNLocator
 
-colors = np.array([[158/256, 1/256, 66/256, 1],
-                  [213/256, 62/256, 79/256, 1],
-                  [244/256, 109/256, 67/256, 1],
-                  [253/256, 174/256, 97/256, 1],
-                  [254/256, 224/256, 139/256, 1],
-                  [256/256, 256/256, 256/256, 1],
-                  [230/256, 245/256, 152/256, 1],
-                  [171/256, 221/256, 164/256, 1],
-                  [102/256, 194/256, 165/256, 1],
-                  [50/256, 136/256, 189/256, 1],
-                  [94/256, 79/256, 162/256, 1]])
+def custom_div_cmap(numcolors, colormap):
+    """ Create a custom diverging colormap with three colors
 
-cmap1 = LinearSegmentedColormap.from_list("mycmap", colors, N=256)
-
-
-def plot_examples(colormaps):
+    Default is blue to white to red with 11 colors.  Colors can be specified
+    in any way understandable by matplotlib.colors.ColorConverter.to_rgb()
     """
-    Helper function to plot data with associated colormap.
-    """
-    np.random.seed(19680801)
-    data = np.random.randn(30, 30)
-    n = len(colormaps)
-    fig, axs = plt.subplots(1, n, figsize=(n * 2 + 2, 3),
-                            constrained_layout=True, squeeze=False)
-    for [ax, cmap] in zip(axs.flat, colormaps):
-        psm = ax.pcolormesh(data, cmap=cmap, rasterized=True, vmin=-4, vmax=4)
-        fig.colorbar(psm, ax=ax)
-    plt.show()
 
+    from matplotlib.colors import LinearSegmentedColormap
 
-plot_examples([cmap1])
+    colors_red = cmc.vik_r(np.linspace(0, 0.5, 20))
+    colors_blue = cmc.vik_r(np.linspace(0.5, 1, 20))
+    colors_white = np.array([1, 1, 1, 1])
+    colors = np.vstack((colors_red, colors_white, colors_blue))
+
+    cmap = LinearSegmentedColormap.from_list(name=colormap, colors=colors, N=numcolors)
+
+    return cmap

@@ -90,41 +90,46 @@ divnorm = colors.TwoSlopeNorm(vmin=-6., vcenter=0., vmax=6)
 for i in np.arange(nrow, ncol * nrow, 1):
     cs[i % 4, i // 4] = axs[i % 4, i // 4].pcolormesh(rlon, rlat, diffdata[i-4], cmap='RdBu_r', norm=divnorm, shading="auto")
     ax = plotcosmo(axs[i % 4, i // 4])
+
 # -------------------------
 # add title
 axs[0, 0].set_title("COSMO", fontweight='bold', pad=10)
 axs[0, 1].set_title("COSMO-ERA5", fontweight='bold', pad=10)
 axs[0, 2].set_title("COSMO-CRU", fontweight='bold', pad=10)
 axs[0, 3].set_title("COSMO-APHRO", fontweight='bold', pad=10)
+
 # -------------------------
 # add label
-axs[0, 0].text(-0.14, 0.55, 'DJF', ha='center', va='center', rotation='vertical',
+axs[0, 0].text(-0.16, 0.55, 'DJF', ha='center', va='center', rotation='vertical',
                transform=axs[0, 0].transAxes, fontsize=13, fontweight='bold')
-axs[1, 0].text(-0.14, 0.55, 'MAM', ha='center', va='center', rotation='vertical',
+axs[1, 0].text(-0.16, 0.55, 'MAM', ha='center', va='center', rotation='vertical',
                transform=axs[1, 0].transAxes, fontsize=13, fontweight='bold')
-axs[2, 0].text(-0.14, 0.55, 'JJA', ha='center', va='center', rotation='vertical',
+axs[2, 0].text(-0.16, 0.55, 'JJA', ha='center', va='center', rotation='vertical',
                transform=axs[2, 0].transAxes, fontsize=13, fontweight='bold')
-axs[3, 0].text(-0.14, 0.55, 'SON', ha='center', va='center', rotation='vertical',
+axs[3, 0].text(-0.16, 0.55, 'SON', ha='center', va='center', rotation='vertical',
                transform=axs[3, 0].transAxes, fontsize=13, fontweight='bold')
-# -------------------------
-# add colorbar
-cax = colorbar(fig, axs[3, 0], 1)  # edit here
-cb1 = fig.colorbar(cs[3, 0], cax=cax, orientation='horizontal')
-cb1.set_label('$^{o}C$')
-cax = colorbar(fig, axs[3, 1], 3)  # edit here
-cb1 = fig.colorbar(cs[3, 1], cax=cax, orientation='horizontal')
-cb1.set_label('$^{o}C$')
-# cax = colorbar(fig, axs[3, 1], 1)
-# cb2 = fig.colorbar(cs[3, 1], cax=cax, orientation='horizontal', extend='both')
-# # # cb1.set_ticks([0, 500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000, 6500, 7000])
-# cb2.set_label('%')
+
 # -------------------------
 # adjust figure
 # plt.subplots_adjust(left=None, bottom=None, right=None, top=None)
 xmin, xmax = axs[0, 0].get_xbound()
 ymin, ymax = axs[0, 0].get_ybound()
-y2x_ratio = (ymax - ymin) / (xmax - xmin) * nrow / ncol
+y2x_ratio = (ymax - ymin) / (xmax - xmin) * nrow / ncol * 1.05
 fig.set_figwidth(hi / y2x_ratio)
+plt.subplots_adjust(left=0.05, bottom=0.08, right=0.98, top=0.95, wspace=0.08, hspace=0.13)
+
+# -------------------------
+# add colorbar
+cax = colorbar(fig, axs[3, 0], 1)  # edit here
+cb1 = fig.colorbar(cs[3, 0], cax=cax, orientation='horizontal')
+cb1.set_label('$^{o}C$', fontsize=11)
+cax = colorbar(fig, axs[3, 1], 3)  # edit here
+cb1 = fig.colorbar(cs[3, 1], cax=cax, orientation='horizontal')
+cb1.set_label('$^{o}C$', fontsize=11)
+# cax = colorbar(fig, axs[3, 1], 1)
+# cb2 = fig.colorbar(cs[3, 1], cax=cax, orientation='horizontal', extend='both')
+# # # cb1.set_ticks([0, 500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000, 6500, 7000])
+# cb2.set_label('%')
 
 plt.show()
 # -------------------------
