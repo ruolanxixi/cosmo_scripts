@@ -16,11 +16,13 @@ def custom_div_cmap(numcolors, colormap):
 
     from matplotlib.colors import LinearSegmentedColormap
 
-    colors_red = cmc.vik_r(np.linspace(0, 0.5, 20))
-    colors_blue = cmc.vik_r(np.linspace(0.5, 1, 20))
+    colors_red = colormap(np.linspace(0, 0.5, 20))
+    colors_blue = colormap(np.linspace(0.5, 1, 20))
     colors_white = np.array([1, 1, 1, 1])
     colors = np.vstack((colors_red, colors_white, colors_blue))
 
     cmap = LinearSegmentedColormap.from_list(name=colormap, colors=colors, N=numcolors)
 
     return cmap
+
+

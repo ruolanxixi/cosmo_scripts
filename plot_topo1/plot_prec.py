@@ -42,18 +42,19 @@ def read_data(mdvname):
     if mdvname in ('U', 'V', 'T', 'W', 'FI'):
         data_ctrl = xr.open_dataset(f'{ctrlpath}{mdvname}/{filename}')[mdvname].values[0, 0, :, :]
         data_topo1 = xr.open_dataset(f'{topo1path}{mdvname}/{filename}')[mdvname].values[0, 0, :, :]
-        data_diff = data_ctrl - data_topo1
+        data_diff = data_topo1 - data_ctrl
     else:
         data_ctrl = xr.open_dataset(f'{ctrlpath}{mdvname}/{filename}')[mdvname].values[0, :, :]
         data_topo1 = xr.open_dataset(f'{topo1path}{mdvname}/{filename}')[mdvname].values[0, :, :]
         if mdvname == 'TOT_PREC':
             np.seterr(divide='ignore', invalid='ignore')
-            data_diff = (data_ctrl - data_topo1) / data_ctrl * 100
+            data_diff = (data_topo1 - data_ctrl) / data_topo1 * 100
             data_diff[np.isnan(data_diff)] = 0
             data_diff[data_diff == -inf] = -100
             np.seterr(divide='warn', invalid='warn')
         else:
-            data_diff = data_ctrl - data_topo1
+            data_diff = data_topo1 - data_ctrl
+    data_diff = - data_diff
     data = np.dstack((data_ctrl, data_topo1, data_diff))
     da = xr.DataArray(data=data,
                       coords={"rlat": rlat,
@@ -149,13 +150,13 @@ da_v = read_data("TWATFLXV")
 
 q[0, 1] = axs[0, 2].quiver(rlon[::30], rlat[::30], da_u.sel(sim='ctrl').values[::30, ::30],
                            da_v.sel(sim='ctrl').values[::30, ::30], color='black', scale=8000)
-axs[0, 2].quiverkey(q[0, 1], 0.92, 1.1, 200, r'$200\ kg\ m^{-1}\ s^{-1}$', labelpos='S', transform=axs[0, 2].transAxes,
+axs[0, 2].quiverkey(q[0, 1], 0.9, 1.1, 200, r'$200\ kg\ m^{-1}\ s^{-1}$', labelpos='S', transform=axs[0, 2].transAxes,
                      fontproperties={'size': 12})
 q[1, 1] = axs[1, 2].quiver(rlon[::30], rlat[::30], da_u.sel(sim='topo1').values[::30, ::30],
                            da_v.sel(sim='topo1').values[::30, ::30], color='black', scale=8000)
 q[2, 1] = axs[2, 2].quiver(rlon[::30], rlat[::30], da_u.sel(sim='diff').values[::30, ::30],
                            da_v.sel(sim='diff').values[::30, ::30], color='black', scale=3000)
-axs[2, 2].quiverkey(q[2, 1], .925, 1.1, 100, r'$100\ kg\ m^{-1}\ s^{-1}$', labelpos='S', transform=axs[2, 2].transAxes,
+axs[2, 2].quiverkey(q[2, 1], .9, 1.1, 100, r'$100\ kg\ m^{-1}\ s^{-1}$', labelpos='S', transform=axs[2, 2].transAxes,
                      fontproperties={'size': 12})
 del da_u, da_v
 
@@ -253,5 +254,5 @@ plt.show()
 # -------------------------
 # save figure
 plotpath = "/project/pr133/rxiang/figure/topo1/"
-fig.savefig(plotpath + 'monsoon.png', dpi=300)
+fig.savefig(plotpath + 'monsoon2.png', dpi=300)
 plt.close(fig)

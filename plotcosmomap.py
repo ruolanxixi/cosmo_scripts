@@ -90,6 +90,9 @@ def plotcosmo(ax):
 
     ax.set_extent([65, 173, 7, 61], crs=ccrs.PlateCarree())  # for extended 12km domain
     # ax.add_feature(cfeature.LAND)
+    ax.stock_img()
+    # ax.add_feature(cfeature.OCEAN, zorder=100)
+    ax.add_feature(cfeature.LAND, edgecolor='k')
     ax.add_feature(cfeature.COASTLINE)
     ax.add_feature(cfeature.BORDERS, linestyle=':')
     ax.add_feature(cfeature.LAKES, alpha=0.5)

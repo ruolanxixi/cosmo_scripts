@@ -1,7 +1,7 @@
 # Load modules
 import numpy as np
 import matplotlib as mpl
-
+import xarray as xr
 
 ###############################################################################
 
@@ -135,3 +135,22 @@ def spat_agg_2d(data, agg_num_0, agg_num_1, operation="sum"):
         data_agg /= float(agg_num_0 * agg_num_1)
 
     return data_agg
+
+
+
+def read_topo():
+    path = "/project/pr94/rxiang/data/extpar/"
+    file1 = 'extpar_12km_1118x670_MERIT_raw.nc'
+    file2 = 'extpar_EAS_ext_12km_merit_adj.nc'
+
+    ds = xr.open_dataset(path + file1)
+    elev_ctrl = ds["HSURF"].values[:, :]
+    lat = ds["lat"].values
+    lon = ds["lon"].values
+    ds.close()
+
+    ds = xr.open_dataset(path + file2)
+    elev_topo1 = ds["HSURF"].values[:, :]
+    ds.close()
+
+    return elev_ctrl, elev_topo1, lat, lon
