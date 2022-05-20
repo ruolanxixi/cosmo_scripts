@@ -22,7 +22,7 @@ topo1path = "/project/pr133/rxiang/data/cosmo/EAS11_topo1/10days/"
 sims = ['ctrl', 'topo1']
 titles = ['Control', 'Reduced topography']
 [pole_lat, pole_lon, lat, lon, rlat, rlon, rot_pole_crs] = pole()
-dates = ['01 Apr. - 10 Apr.', '11 Apr. - 20 Apr.', '21 May - 30 Apr.',
+dates = ['01 Apr. - 10 Apr.', '11 Apr. - 20 Apr.', '21 Apr - 30 Apr.',
          '01 May - 10 May', '11 May - 20 May', '21 May - 31 May',
          '01 June - 10 June', '11 June - 20 June', '21 Jun - 30 June',
          '01 July - 10 July', '11 July - 20 July', '21 July - 31 July',
@@ -59,15 +59,19 @@ for i in range(len(sims)):
         norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)
         cs = ax.pcolormesh(rlon, rlat, IVT, cmap=cmap, norm=norm, shading="auto")
         q = ax.quiver(rlon[::30], rlat[::30], data_wu[::30, ::30], data_wv[::30, ::30], color='black', scale=5000)
-        ax.quiverkey(q, 0.9, 1.12, 200, r'$200\ kg\ m^{-1}\ s^{-1}$', labelpos='S', transform=ax.transAxes,
+        ax.quiverkey(q, 0.89, 1.12, 200, r'$IVT\ (200\ kg/m/s)$', labelpos='S', transform=ax.transAxes,
                      fontproperties={'size': 10})
-        ax.text(0.13, 1.05, f'{date}', ha='center', va='center', transform=ax.transAxes, fontsize=11)
+        # if title == 'Control':
+            # ax.text(0.055, 1.05, f'{title}', ha='center', va='center', transform=ax.transAxes, fontsize=11)
+        # else:
+            # ax.text(0.162, 1.05, f'{title}', ha='center', va='center', transform=ax.transAxes, fontsize=11)
+        ax.text(0.125, 1.05, f'{date}', ha='center', va='center', transform=ax.transAxes, fontsize=11)
         ax.set_title(f'{title}', fontweight='bold', pad=15, fontsize=13)
         cax = fig.add_axes([ax.get_position().x0, ax.get_position().y0 - 0.1, ax.get_position().width, 0.027])
         cb = fig.colorbar(cs, cax=cax, orientation='horizontal', extend='max')
-        cb.set_label('$kg\ m^{-1}\ s^{-1}$', fontsize=11)
+        cb.set_label('IVT intensity ($kg/m/s$)', fontsize=11)
         # adjust figure
-        fig.show()
+        # fig.show()
         # save figure
         plotpath = "/project/pr133/rxiang/figure/atmosriver/"
         fig.savefig(plotpath + f'{sim}_{jj}.png', dpi=300)
