@@ -69,7 +69,7 @@ for i in range(len(sims)):
         ax.set_title(f'{title}', fontweight='bold', pad=15, fontsize=13)
         cax = fig.add_axes([ax.get_position().x0, ax.get_position().y0 - 0.1, ax.get_position().width, 0.027])
         cb = fig.colorbar(cs, cax=cax, orientation='horizontal', extend='max')
-        cb.set_label('IVT intensity ($kg/m/s$)', fontsize=11)
+        cb.set_label('IVT ($kg/m/s$)', fontsize=11)
         # adjust figure
         # fig.show()
         # save figure
