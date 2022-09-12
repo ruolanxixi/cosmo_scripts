@@ -71,12 +71,14 @@ for i in range(2):
                            linewidths=1)
     axs[i].text(0.02, 1.02, f'{sim}', ha='left', va='bottom', transform=axs[i].transAxes, fontsize=14)
 
-    trans = Transformer.from_proj(ccrs.PlateCarree(), rot_pole_crs, always_xy=True)
-    x = np.array([100, 122, 90, 111, 80, 140, 150, 165, 140, 118])
-    y = np.array([57, 57, 38, 25, 28, 24, 13, 27, 61, 20])
-    loc_lon, loc_lat = trans.transform(x, y)
-    manual_locations = [i for i in zip(loc_lon, loc_lat)]
-    clabel = axs[i].clabel(ct[i], [55., 70., 85.], inline=True, fontsize=13, manual=manual_locations)
+    # trans = Transformer.from_proj(ccrs.PlateCarree(), rot_pole_crs, always_xy=True)
+    # x = np.array([100, 122, 90, 111, 80, 140, 150, 165, 140, 118])
+    # y = np.array([57, 57, 38, 25, 28, 24, 13, 27, 61, 20])
+    # loc_lon, loc_lat = trans.transform(x, y)
+    # manual_locations = [i for i in zip(loc_lon, loc_lat)]
+    clabel = axs[i].clabel(ct[i], [55., 70., 85.], inline=True, fontsize=13, use_clabeltext=True)
+    for l in clabel:
+        l.set_rotation(0)
     [txt.set_bbox(dict(facecolor='white', edgecolor='none', pad=0, alpha=0.5)) for txt in clabel]
 
 cax = fig.add_axes([axs[1].get_position().x0, axs[1].get_position().y0 - bottom, axs[1].get_position().width, 0.02])
@@ -95,12 +97,14 @@ ct[2] = axs[2].contour(rlon, rlat, all_rt_sms[0] - all_rt_sms[1], levels=np.lins
                       linewidths=1)
 axs[2].text(0.02, 1.02, 'Control - Reduced topography', ha='left', va='bottom', transform=axs[2].transAxes, fontsize=14)
 
-trans = Transformer.from_proj(ccrs.PlateCarree(), rot_pole_crs, always_xy=True)
-x = np.array([80, 118, 118, 135, 110, 90, 71, 105, 121, 68, 77])
-y = np.array([57, 44, 13, 47, 34, 23, 33, 41, 28, 21, 23])
-loc_lon, loc_lat = trans.transform(x, y)
-manual_locations = [i for i in zip(loc_lon, loc_lat)]
-clabel = axs[2].clabel(ct[2], [-20., -10, 0, 10, 20], inline=True, fontsize=13, manual=manual_locations)
+# trans = Transformer.from_proj(ccrs.PlateCarree(), rot_pole_crs, always_xy=True)
+# x = np.array([80, 118, 118, 135, 110, 90, 71, 105, 121, 68, 77])
+# y = np.array([57, 44, 13, 47, 34, 23, 33, 41, 28, 21, 23])
+# loc_lon, loc_lat = trans.transform(x, y)
+# manual_locations = [i for i in zip(loc_lon, loc_lat)]
+clabel = axs[2].clabel(ct[2], [-20., -10, 0, 10, 20], inline=True, fontsize=13, use_clabeltext=True)
+for l in clabel:
+    l.set_rotation(0)
 [txt.set_bbox(dict(facecolor='white', edgecolor='none', pad=0, alpha=0.7)) for txt in clabel]
 
 cax = fig.add_axes([axs[2].get_position().x0, axs[2].get_position().y0 - bottom, axs[2].get_position().width, 0.02])
@@ -115,7 +119,7 @@ ymin, ymax = axs[1].get_ybound()
 y2x_ratio = (ymax - ymin) / (xmax - xmin) * nrow / ncol + 0.15
 fig.set_figheight(wi * y2x_ratio)
 
-fig.show()
+# fig.show()
 plotpath = "/project/pr133/rxiang/figure/monsoon/topo1/"
 fig.savefig(plotpath + 'rr.png', dpi=500)
 plt.close(fig)

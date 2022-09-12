@@ -65,12 +65,14 @@ for i in range(2):
     ct[i] = axs[i].contour(rlon, rlat, all_smr_sms[i], levels=np.linspace(2, 11, 4, endpoint=True), colors='maroon', linewidths=1)
     axs[i].text(0.02, 1.02, f'{sim}', ha='left', va='bottom', transform=axs[i].transAxes, fontsize=14)
 
-    trans = Transformer.from_proj(ccrs.PlateCarree(), rot_pole_crs, always_xy=True)
-    x = np.array([90, 102, 152, 140, 105, 147, 70])
-    y = np.array([35, 33, 29, 21, 23, 10, 9])
-    loc_lon, loc_lat = trans.transform(x, y)
-    manual_locations = [i for i in zip(loc_lon, loc_lat)]
-    clabel = axs[i].clabel(ct[i], [2., 5., 8., 11.], inline=True, fontsize=13, manual=manual_locations)
+    # trans = Transformer.from_proj(ccrs.PlateCarree(), rot_pole_crs, always_xy=True)
+    # x = np.array([90, 102, 152, 140, 105, 147, 70])
+    # y = np.array([35, 33, 29, 21, 23, 10, 9])
+    # loc_lon, loc_lat = trans.transform(x, y)
+    # manual_locations = [i for i in zip(loc_lon, loc_lat)]
+    clabel = axs[i].clabel(ct[i], [2., 5., 8., 11.], inline=True, fontsize=13, use_clabeltext=True)
+    for l in clabel:
+        l.set_rotation(0)
     [txt.set_bbox(dict(facecolor='white', edgecolor='none', pad=0, alpha=0.5)) for txt in clabel]
 
 cax = fig.add_axes([axs[1].get_position().x0, axs[1].get_position().y0 - bottom, axs[1].get_position().width, 0.02])
@@ -89,12 +91,15 @@ ct[2] = axs[2].contour(rlon, rlat, all_smr_sms[0] - all_smr_sms[1], levels=np.li
                        linewidths=1)
 axs[2].text(0.02, 1.02, 'Control - Reduced topography', ha='left', va='bottom', transform=axs[2].transAxes, fontsize=14)
 
-trans = Transformer.from_proj(ccrs.PlateCarree(), rot_pole_crs, always_xy=True)
-x = np.array([90, 90, 119, 113, 140, 138, 160, 170, 90])
-y = np.array([35, 27, 28, 22, 29, 13, 15, 42, 57])
-loc_lon, loc_lat = trans.transform(x, y)
-manual_locations = [i for i in zip(loc_lon, loc_lat)]
-clabel = axs[2].clabel(ct[2], [-2., 0, 2], inline=True, fontsize=13, manual=manual_locations)
+# trans = Transformer.from_proj(ccrs.PlateCarree(), rot_pole_crs, always_xy=True)
+# x = np.array([90, 90, 119, 113, 140, 138, 160, 170, 90])
+# y = np.array([35, 27, 28, 22, 29, 13, 15, 42, 57])
+# loc_lon, loc_lat = trans.transform(x, y)
+# manual_locations = [i for i in zip(loc_lon, loc_lat)]
+# clabel = axs[2].clabel(ct[2], [-2., 0, 2], inline=True, fontsize=13, manual=manual_locations)
+clabel = axs[2].clabel(ct[2], [-2., 0, 2], inline=True, use_clabeltext=True, fontsize=13)
+for l in clabel:
+    l.set_rotation(0)
 [txt.set_bbox(dict(facecolor='white', edgecolor='none', pad=0, alpha=0.7)) for txt in clabel]
 
 cax = fig.add_axes([axs[2].get_position().x0, axs[2].get_position().y0 - bottom, axs[2].get_position().width, 0.02])
@@ -109,7 +114,7 @@ ymin, ymax = axs[1].get_ybound()
 y2x_ratio = (ymax - ymin) / (xmax - xmin) * nrow / ncol + 0.15
 fig.set_figheight(wi * y2x_ratio)
 
-fig.show()
+# fig.show()
 plotpath = "/project/pr133/rxiang/figure/monsoon/topo1/"
 fig.savefig(plotpath + 'smr.png', dpi=500)
 plt.close(fig)
