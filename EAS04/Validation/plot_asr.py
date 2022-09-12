@@ -4,7 +4,7 @@
 import xarray as xr
 import matplotlib.pyplot as plt
 import numpy as np
-from plotcosmomap import plotcosmo, pole, colorbar
+from plotcosmomap import plotcosmo04, pole04, pole, colorbar, custom_div_cmap
 import matplotlib.colors as colors
 from numpy import inf
 
@@ -14,9 +14,9 @@ from numpy import inf
 seasons = ["DJF", "MAM", "JJA", "SON"]
 mdvname1 = 'ASOB_T'  # edit here
 mdvname2 = 'ASOD_T'  # edit here
-year = '2001-2005'
-mdpath1 = "/project/pr133/rxiang/data/cosmo/EAS11_ctrl/szn/ASOB_T/"
-mdpath2 = "/project/pr133/rxiang/data/cosmo/EAS11_ctrl/szn/ASOD_T/"
+year = '01'
+mdpath1 = "/project/pr133/rxiang/data/cosmo/EAS04_ctrl/szn/ASOB_T/"
+mdpath2 = "/project/pr133/rxiang/data/cosmo/EAS04_ctrl/szn/ASOD_T/"
 erapath = "/project/pr133/rxiang/data/era5/ot/remap/"
 cerespath = "/project/pr133/rxiang/data/obs/rd/CERES/remap/"
 
@@ -26,10 +26,10 @@ cerespath = "/project/pr133/rxiang/data/obs/rd/CERES/remap/"
 mddata1, mddata2 = [], []
 for seas in range(len(seasons)):
     season = seasons[seas]
-    filename = f'{year}.{mdvname1}.{season}.nc'
+    filename = f'{year}_{mdvname1}_{season}.nc'
     data = xr.open_dataset(f'{mdpath1}{filename}')[mdvname1].values[0, :, :]
     mddata1.append(data)
-    filename = f'{year}.{mdvname2}.{season}.nc'
+    filename = f'{year}_{mdvname2}_{season}.nc'
     data = xr.open_dataset(f'{mdpath2}{filename}')[mdvname2].values[0, :, :]
     mddata2.append(data)
 
@@ -39,7 +39,7 @@ for seas in range(len(seasons)):
 otdata = []
 for seas in range(len(seasons)):
     season = seasons[seas]
-    filename = f'era5.mo.2001-2005.{season}.remap.nc'
+    filename = f'era5.mo.2001.{season}.remap.04.nc'
     data1 = xr.open_dataset(f'{erapath}{filename}')['mtnswrf'].values[0, :, :]
     data2 = xr.open_dataset(f'{erapath}{filename}')['mtdwswrf'].values[0, :, :]
     data = data2 - data1
@@ -50,7 +50,7 @@ for seas in range(len(seasons)):
 #
 for seas in range(len(seasons)):
     season = seasons[seas]
-    filename = f'CERES.2001-2005.1.{season}.remap.nc'
+    filename = f'CERES.2001.1.{season}.remap.04.nc'
     data = xr.open_dataset(f'{cerespath}{filename}')['toa_sw_all_mon'].values[0, :, :]
     otdata.append(data)
 
@@ -66,7 +66,7 @@ for i in range(len(otdata)):
 # -------------------------------------------------------------------------------
 # plot
 #
-[pole_lat, pole_lon, lat, lon, rlat, rlon, rot_pole_crs] = pole()
+[pole_lat, pole_lon, lat, lon, rlat, rlon, rot_pole_crs] = pole04()
 #
 ar = 1.0  # initial aspect ratio for first trial
 hi = 14  # height in inches
@@ -82,11 +82,11 @@ cs = np.empty(shape=(nrow, ncol), dtype='object')
 # panel plot
 for i in range(nrow):
     cs[i % 4, i // 4] = axs[i % 4, i // 4].pcolormesh(rlon, rlat, mddata2[i] - mddata1[i], cmap='RdYlBu_r', shading="auto")
-    ax = plotcosmo(axs[i % 4, i // 4])
-divnorm = colors.TwoSlopeNorm(vmin=-40., vcenter=0., vmax=100.)
+    ax = plotcosmo04(axs[i % 4, i // 4])
+divnorm = colors.TwoSlopeNorm(vmin=-100., vcenter=0., vmax=100.)
 for i in np.arange(nrow, ncol * nrow, 1):
     cs[i % 4, i // 4] = axs[i % 4, i // 4].pcolormesh(rlon, rlat, diffdata[i-4], cmap='RdBu_r', norm=divnorm, shading="auto")
-    ax = plotcosmo(axs[i % 4, i // 4])
+    ax = plotcosmo04(axs[i % 4, i // 4])
 
 # -------------------------
 # add title
@@ -116,10 +116,11 @@ plt.subplots_adjust(left=0.05, bottom=0.08, right=0.98, top=0.95, wspace=0.08, h
 
 # -------------------------
 # add colorbar
-cax = colorbar(fig, axs[3, 0], 1)  # edit here
+wspace=0.023
+cax = colorbar(fig, axs[3, 0], 1, wspace)  # edit here
 cb1 = fig.colorbar(cs[3, 0], cax=cax, orientation='horizontal')
 cb1.set_label('$W/m^2$')
-cax = colorbar(fig, axs[3, 1], 2)  # edit here
+cax = colorbar(fig, axs[3, 1], 2, wspace)  # edit here
 cb1 = fig.colorbar(cs[3, 1], cax=cax, orientation='horizontal')
 cb1.set_label('$W/m^2$')
 # cax = colorbar(fig, axs[3, 1], 1)
@@ -130,6 +131,6 @@ cb1.set_label('$W/m^2$')
 plt.show()
 # -------------------------
 # save figure
-plotpath = "/project/pr133/rxiang/figure/validation/"
+plotpath = "/project/pr133/rxiang/figure/val04/"
 fig.savefig(plotpath + 'asr.png', dpi=300)
 plt.close(fig)

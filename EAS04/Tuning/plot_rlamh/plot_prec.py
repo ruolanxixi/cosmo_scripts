@@ -14,51 +14,51 @@ from matplotlib.ticker import MaxNLocator
 # -------------------------------------------------------------------------------
 # import data
 #
-mdnames = ['ctrl', 'SHAL']
-mdvname1 = 'ASOB_T'  # edit here
-mdvname2 = 'ASOD_T'  # edit here
-year = '200106'
+mdnames = ['rlamh', 'shuchang']
+mdvname = 'TOT_PREC'  # edit here
+year = '200107'
 mdpath = "/project/pr133/rxiang/data/cosmo/"
-erapath = "/project/pr133/rxiang/data/era5/ot/remap/"
-cerespath = "/project/pr133/rxiang/data/obs/rd/CERES/remap/"
+erapath = "/project/pr133/rxiang/data/era5/pr/remap/"
+crupath = "/project/pr133/rxiang/data/obs/pr/cru/remap/"
+imergpath = "/project/pr133/rxiang/data/obs/pr/IMERG/remap/"
 
 # -------------------------------------------------------------------------------
 # read model data
 #
-mddata1, mddata2 = [], []
+mddata = []
 for mds in range(len(mdnames)):
     md = mdnames[mds]
-    filename = f'{mdvname1}.nc'
-    data = xr.open_dataset(f'{mdpath}EAS04_{md}/{year}/{filename}')[mdvname1].values[0, :, :]
-    mddata1.append(data)
-    filename = f'{mdvname2}.nc'
-    data = xr.open_dataset(f'{mdpath}EAS04_{md}/{year}/{filename}')[mdvname2].values[0, :, :]
-    mddata2.append(data)
+    filename = f'{mdvname}.nc'
+    data = xr.open_dataset(f'{mdpath}EAS04_{md}/{year}/{filename}')[mdvname].values[0, :, :]
+    mddata.append(data)
 
 # -------------------------------------------------------------------------------
 # read era5 data
 #
 filename = f'era5.mo.{year}.remap.04.nc'
-data1 = xr.open_dataset(f'{erapath}{filename}')['mtnswrf'].values[0, :, :]
-data2 = xr.open_dataset(f'{erapath}{filename}')['mtdwswrf'].values[0, :, :]
-eradata = data2 - data1
+eradata = xr.open_dataset(f'{erapath}{filename}')['tp'].values[0, :, :] * 1000
 
 # -------------------------------------------------------------------------------
 # read observation data
 #
+filename = f'cru.{year}.05.remap.04.nc'
+crudata = xr.open_dataset(f'{crupath}{filename}')['pre'].values[0, :, :]
 
-filename = f'CERES.{year}.1.remap.04.nc'
-otdata = xr.open_dataset(f'{cerespath}{filename}')['toa_sw_all_mon'].values[0, :, :]
+filename = f'{year}.remap.04.nc4'
+imergdata = xr.open_dataset(f'{imergpath}{filename}')['pr'].values[0, :, :]
 
 # -------------------------------------------------------------------------------
 # compute difference
 #
 diffdata = []
 for i in range(len(mdnames)):
-    data = mddata2[i] - mddata1[i] - eradata
+    data = mddata[i] - eradata
     diffdata.append(data)
 for i in range(len(mdnames)):
-    data = mddata2[i] - mddata1[i] - otdata
+    data = mddata[i] - crudata
+    diffdata.append(data)
+for i in range(len(mdnames)):
+    data = mddata[i] - imergdata
     diffdata.append(data)
 
 # -------------------------------------------------------------------------------
@@ -71,7 +71,7 @@ hi = 14  # height in inches
 wi = hi / ar  # width in inches
 # fig = plt.figure(figsize=(wi, hi))
 #
-ncol = 3  # edit here
+ncol = 4  # edit here
 nrow = 2
 # gs = gridspec.GridSpec(nrow, ncol, figure=fig)
 fig, axs = plt.subplots(nrow, ncol, figsize=(wi, hi), subplot_kw={'projection': rot_pole_crs})
@@ -79,13 +79,12 @@ cs = np.empty(shape=(nrow, ncol), dtype='object')
 # -------------------------
 # panel plot
 for i in range(nrow):
-    cs[i % 2, i // 2] = axs[i % 2, i // 2].pcolormesh(rlon, rlat, mddata2[i] - mddata1[i], cmap=cmc.roma_r, shading="auto")
+    cs[i % 2, i // 2] = axs[i % 2, i // 2].pcolormesh(rlon, rlat, mddata[i], cmap=cmc.davos_r, clim=(0, 30), shading="auto")
     ax = plotcosmo04(axs[i % 2, i // 2])
 
-cmap = custom_div_cmap(27, cmc.vik)
-levels = MaxNLocator(nbins=26).tick_values(-40, 100)
-norm = colors.TwoSlopeNorm(vmin=-40., vcenter=0., vmax=100.)
-cs[1, 0] = axs[1, 0].pcolormesh(rlon, rlat, mddata2[0] - mddata1[0] - mddata2[1] + mddata1[1], cmap=cmap, norm=norm, shading="auto")
+cmap = custom_div_cmap(27, cmc.broc_r)
+norm = colors.TwoSlopeNorm(vmin=-15., vcenter=0., vmax=15.)
+cs[1, 0] = axs[1, 0].pcolormesh(rlon, rlat, mddata[0] - mddata[1], cmap=cmap, norm=norm, shading="auto")
 for i in np.arange(nrow, ncol * nrow, 1):
     cs[i % 2, i // 2] = axs[i % 2, i // 2].pcolormesh(rlon, rlat, diffdata[i-2], cmap=cmap, norm=norm, shading="auto")
     ax = plotcosmo04(axs[i % 2, i // 2])
@@ -94,13 +93,14 @@ for i in np.arange(nrow, ncol * nrow, 1):
 # add title
 axs[0, 0].set_title("COSMO", fontweight='bold', pad=10, fontsize=14)
 axs[0, 1].set_title("COSMO-ERA5", fontweight='bold', pad=10, fontsize=14)
-axs[0, 2].set_title("COSMO-CERES", fontweight='bold', pad=10, fontsize=14)
+axs[0, 2].set_title("COSMO-CRU", fontweight='bold', pad=10, fontsize=14)
+axs[0, 3].set_title("COSMO-IMERG", fontweight='bold', pad=10, fontsize=14)
 
 # -------------------------
 # add label
-axs[0, 0].text(-0.14, 0.55, 'Explicit', ha='center', va='center', rotation='vertical',
+axs[0, 0].text(-0.18, 0.55, 'old', ha='center', va='center', rotation='vertical',
                transform=axs[0, 0].transAxes, fontsize=14, fontweight='bold')
-axs[1, 0].text(-0.14, 0.55, 'Explicit - Shallow', ha='center', va='center', rotation='vertical',
+axs[1, 0].text(-0.18, 0.55, 'shuchang', ha='center', va='center', rotation='vertical',
                transform=axs[1, 0].transAxes, fontsize=14, fontweight='bold')
 # -------------------------
 # adjust figure
@@ -113,14 +113,14 @@ plt.subplots_adjust(left=0.05, bottom=0.08, right=0.98, top=0.95, wspace=0.1, hs
 
 # -------------------------
 # add colorbar
-wspace=0.03
+wspace=0.021
 cax = colorbar(fig, axs[1, 0], 1, wspace)  # edit here
-cb1 = fig.colorbar(cs[0, 0], cax=cax, orientation='horizontal', extend='both')
-cb1.set_label('$W/m^2$', fontsize=12)
+cb1 = fig.colorbar(cs[0, 0], cax=cax, orientation='horizontal', extend='max')
+cb1.set_label('mm/day', fontsize=12)
 cb1.ax.tick_params(labelsize=12)
-cax = colorbar(fig, axs[1, 1], 2, wspace)  # edit here
-cb2 = fig.colorbar(cs[1, 1], cax=cax, orientation='horizontal', ticks=np.append(np.linspace(-40, 0, 5), np.linspace(20, 100, 5)), extend='both')
-cb2.set_label('$W/m^2$', fontsize=12)
+cax = colorbar(fig, axs[1, 1], 3, wspace)  # edit here
+cb2 = fig.colorbar(cs[1, 1], cax=cax, orientation='horizontal', ticks=np.linspace(-15, 15, 11), extend='both')
+cb2.set_label('mm/day', fontsize=12)
 cb2.ax.tick_params(labelsize=12)
 # cax = colorbar(fig, axs[3, 1], 1)
 # cb2 = fig.colorbar(cs[3, 1], cax=cax, orientation='horizontal', extend='both')
@@ -130,6 +130,9 @@ cb2.ax.tick_params(labelsize=12)
 plt.show()
 # -------------------------
 # save figure
-plotpath = "/project/pr133/rxiang/figure/shal/"
-fig.savefig(plotpath + 'asr.png', dpi=300)
+plotpath = "/project/pr133/rxiang/figure/shuchang/"
+fig.savefig(plotpath + 'pr.png', dpi=300)
 plt.close(fig)
+
+for i in range(6):
+    print(np.nanmean(diffdata[i]))

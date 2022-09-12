@@ -25,4 +25,22 @@ def custom_div_cmap(numcolors, colormap):
 
     return cmap
 
+def lapaz_cmap(numcolors, colormap):
+    """ Create a custom diverging colormap with three colors
+
+    Default is blue to white to red with 11 colors.  Colors can be specified
+    in any way understandable by matplotlib.colors.ColorConverter.to_rgb()
+    """
+
+    from matplotlib.colors import LinearSegmentedColormap
+
+    colors_lapaz = colormap(np.linspace(0, 1, 200))
+    colors_white = np.array([1, 1, 1, 1])
+    colors = np.vstack((colors_white, colors_lapaz))
+
+    cmap = LinearSegmentedColormap.from_list(name=colormap, colors=colors, N=numcolors)
+
+    return cmap
+
+
 

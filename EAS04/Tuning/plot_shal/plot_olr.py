@@ -126,3 +126,6 @@ plt.show()
 plotpath = "/project/pr133/rxiang/figure/shal/"
 fig.savefig(plotpath + 'olr.png', dpi=300)
 plt.close(fig)
+
+for i in range(4):
+    print(np.mean(diffdata[i]))

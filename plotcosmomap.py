@@ -103,23 +103,23 @@ def plotcosmo(ax):
     # add_gridline_labels(ax, labels_set=[60, 100, 140, 180], side='top')
     # add_gridline_labels(ax, labels_set=[80, 100, 120, 140, 160], side='bottom')
     gl = ax.gridlines(draw_labels=False, dms=True, x_inline=False, y_inline=False, linewidth=1,
-                      color='grey', alpha=0.5, linestyle='--')
+                      color='grey', alpha=0.7, linestyle='--')
     gl.xlocator = mticker.FixedLocator([80, 100, 120, 140, 160])
     gl.ylocator = mticker.FixedLocator([0, 10, 20, 30, 40, 50, 60])
 
     # add ticks manually
-    ax.text(-0.05, 0.95, '50°N', ha='center', va='center', transform=ax.transAxes, fontsize=11)
-    ax.text(-0.05, 0.77, '40°N', ha='center', va='center', transform=ax.transAxes, fontsize=11)
-    ax.text(-0.05, 0.59, '30°N', ha='center', va='center', transform=ax.transAxes, fontsize=11)
-    ax.text(-0.05, 0.41, '20°N', ha='center', va='center', transform=ax.transAxes, fontsize=11)
-    ax.text(-0.05, 0.23, '10°N', ha='center', va='center', transform=ax.transAxes, fontsize=11)
-    ax.text(-0.041, 0.05, '0°N', ha='center', va='center', transform=ax.transAxes, fontsize=11)
+    ax.text(-0.05, 0.95, '50°N', ha='center', va='center', transform=ax.transAxes, fontsize=13)
+    ax.text(-0.05, 0.77, '40°N', ha='center', va='center', transform=ax.transAxes, fontsize=13)
+    ax.text(-0.05, 0.59, '30°N', ha='center', va='center', transform=ax.transAxes, fontsize=13)
+    ax.text(-0.05, 0.41, '20°N', ha='center', va='center', transform=ax.transAxes, fontsize=13)
+    ax.text(-0.05, 0.23, '10°N', ha='center', va='center', transform=ax.transAxes, fontsize=13)
+    ax.text(-0.038, 0.05, '0°N', ha='center', va='center', transform=ax.transAxes, fontsize=13)
 
-    ax.text(0.12, -0.05, '80°E', ha='center', va='center', transform=ax.transAxes, fontsize=11)
-    ax.text(0.32, -0.05, '100°E', ha='center', va='center', transform=ax.transAxes, fontsize=11)
-    ax.text(0.52, -0.05, '120°E', ha='center', va='center', transform=ax.transAxes, fontsize=11)
-    ax.text(0.72, -0.05, '140°E', ha='center', va='center', transform=ax.transAxes, fontsize=11)
-    ax.text(0.92, -0.05, '160°E', ha='center', va='center', transform=ax.transAxes, fontsize=11)
+    ax.text(0.12, -0.05, '80°E', ha='center', va='center', transform=ax.transAxes, fontsize=13)
+    ax.text(0.32, -0.05, '100°E', ha='center', va='center', transform=ax.transAxes, fontsize=13)
+    ax.text(0.52, -0.05, '120°E', ha='center', va='center', transform=ax.transAxes, fontsize=13)
+    ax.text(0.72, -0.05, '140°E', ha='center', va='center', transform=ax.transAxes, fontsize=13)
+    ax.text(0.92, -0.05, '160°E', ha='center', va='center', transform=ax.transAxes, fontsize=13)
 
     # ax.set_xticks([80, 100, 120, 140, 160], crs=ccrs.PlateCarree())
     # ax.set_yticks([0, 10, 20, 30, 40, 50, 60], crs=ccrs.PlateCarree())
@@ -179,15 +179,15 @@ def plotcosmo04(ax):
     gl.ylocator = mticker.FixedLocator([15, 20, 25, 30, 35, 40])
 
     # add ticks manually
-    ax.text(-0.05, 0.88, '35°N', ha='center', va='center', transform=ax.transAxes, fontsize=13)
-    ax.text(-0.05, 0.67, '30°N', ha='center', va='center', transform=ax.transAxes, fontsize=13)
-    ax.text(-0.05, 0.46, '25°N', ha='center', va='center', transform=ax.transAxes, fontsize=13)
-    ax.text(-0.05, 0.25, '20°N', ha='center', va='center', transform=ax.transAxes, fontsize=13)
-    ax.text(-0.05, 0.04, '15°N', ha='center', va='center', transform=ax.transAxes, fontsize=13)
+    ax.text(-0.1, 0.88, '35°N', ha='center', va='center', transform=ax.transAxes, fontsize=12)
+    ax.text(-0.1, 0.67, '30°N', ha='center', va='center', transform=ax.transAxes, fontsize=12)
+    ax.text(-0.1, 0.46, '25°N', ha='center', va='center', transform=ax.transAxes, fontsize=12)
+    ax.text(-0.1, 0.25, '20°N', ha='center', va='center', transform=ax.transAxes, fontsize=12)
+    ax.text(-0.1, 0.04, '15°N', ha='center', va='center', transform=ax.transAxes, fontsize=12)
 
-    ax.text(0.04, -0.04, '90°E', ha='center', va='center', transform=ax.transAxes, fontsize=13)
-    ax.text(0.46, -0.04, '100°E', ha='center', va='center', transform=ax.transAxes, fontsize=13)
-    ax.text(0.86, -0.04, '110°E', ha='center', va='center', transform=ax.transAxes, fontsize=13)
+    ax.text(0.04, -0.05, '90°E', ha='center', va='center', transform=ax.transAxes, fontsize=12)
+    ax.text(0.46, -0.05, '100°E', ha='center', va='center', transform=ax.transAxes, fontsize=12)
+    ax.text(0.86, -0.05, '110°E', ha='center', va='center', transform=ax.transAxes, fontsize=12)
 
     # ax.set_xticks([80, 100, 120, 140, 160], crs=ccrs.PlateCarree())
     # ax.set_yticks([0, 10, 20, 30, 40, 50, 60], crs=ccrs.PlateCarree())
@@ -256,11 +256,50 @@ def custom_div_cmap(numcolors, colormap):
     from matplotlib.colors import LinearSegmentedColormap
 
     colors_red = colormap(np.linspace(0, 0.5, 20))
-    colors_blue = colormap(np.linspace(0.55, 1, 20))
+    colors_blue = colormap(np.linspace(0.5, 1, 20))
     colors_white = np.array([1, 1, 1, 1])
     colors = np.vstack((colors_red, colors_white, colors_blue))
 
     cmap = LinearSegmentedColormap.from_list(name=colormap, colors=colors, N=numcolors)
 
     return cmap
+
+
+
+def custom_seq_cmap(numcolors, colormap):
+    """ Create a custom diverging colormap with three colors
+
+    Default is blue to white to red with 11 colors.  Colors can be specified
+    in any way understandable by matplotlib.colors.ColorConverter.to_rgb()
+    """
+
+    from matplotlib.colors import LinearSegmentedColormap
+
+    colors_blue = colormap(np.linspace(0.5, 1, 20))
+    colors_white = np.array([1, 1, 1, 1])
+    colors = np.vstack((colors_white, colors_blue))
+
+    cmap = LinearSegmentedColormap.from_list(name=colormap, colors=colors, N=numcolors)
+
+    return cmap
+
+
+
+def custom_white_cmap(numcolors, colormap):
+    """ Create a custom diverging colormap with three colors
+
+    Default is blue to white to red with 11 colors.  Colors can be specified
+    in any way understandable by matplotlib.colors.ColorConverter.to_rgb()
+    """
+
+    from matplotlib.colors import LinearSegmentedColormap
+
+    colors_blue = colormap(np.linspace(0, 1, 20))
+    colors_white = np.array([1, 1, 1, 1])
+    colors = np.vstack((colors_white, colors_blue))
+
+    cmap = LinearSegmentedColormap.from_list(name=colormap, colors=colors, N=numcolors)
+
+    return cmap
+
 

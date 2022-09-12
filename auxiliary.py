@@ -2,6 +2,14 @@
 import numpy as np
 import matplotlib as mpl
 import xarray as xr
+from collections import UserDict
+import matplotlib.pyplot as plt
+import matplotlib
+from math import radians, cos, sin, asin, sqrt, ceil, floor
+from pyproj import Geod
+import pvlib.atmosphere as pva
+from netCDF4 import Dataset
+import wrf
 
 ###############################################################################
 
@@ -40,6 +48,7 @@ def truncate_colormap(cmap_in, minval=0.0, maxval=1.0, n=100):
         cmap_in(np.linspace(minval, maxval, n)))
 
     return cmap_trun
+
 
 ###############################################################################
 
@@ -137,9 +146,10 @@ def spat_agg_2d(data, agg_num_0, agg_num_1, operation="sum"):
     return data_agg
 
 
+###############################################################################
 
 def read_topo():
-    path = "/project/pr94/rxiang/data/extpar/"
+    path = "/project/pr133/rxiang/data/extpar/"
     file1 = 'extpar_12km_1118x670_MERIT_raw.nc'
     file2 = 'extpar_EAS_ext_12km_merit_adj.nc'
 
@@ -154,3 +164,7 @@ def read_topo():
     ds.close()
 
     return elev_ctrl, elev_topo1, lat, lon
+
+
+###############################################################################
+
