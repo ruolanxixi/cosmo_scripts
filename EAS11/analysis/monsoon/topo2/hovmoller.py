@@ -86,9 +86,9 @@ for i, j in zip(lonmin, lonmax):
     norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)
     cf4 = ax4.pcolormesh(time_, lat_, np.transpose(cpm_ctrl[:, :, 0]) - np.transpose(cpm_topo2[:, :, 0]), cmap=cmap, clim=(-10, 10))
     ct2 = ax2.contour(time_, lat_, mpcalc.smooth_n_point(np.transpose(cpm_ctrl[:, :, 0]), 5, 1),
-                      colors='k', linewidths=1)
+                      levels=[5, 10, 15, 20], colors='k', linewidths=1)
     ct3 = ax3.contour(time_, lat_, mpcalc.smooth_n_point(np.transpose(cpm_topo2[:, :, 0]), 5, 1),
-                      colors='k', linewidths=1)
+                      levels=[5, 10, 15, 20], colors='k', linewidths=1)
     ct4 = ax4.contour(time_, lat_, mpcalc.smooth_n_point(np.transpose(cpm_topo2[:, :, 0]) - np.transpose(cpm_ctrl[:, :, 0]), 9, 1),
                       colors='k', linewidths=1)
 

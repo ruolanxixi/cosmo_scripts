@@ -179,15 +179,15 @@ def plotcosmo04(ax):
     gl.ylocator = mticker.FixedLocator([15, 20, 25, 30, 35, 40])
 
     # add ticks manually
-    ax.text(-0.1, 0.88, '35°N', ha='center', va='center', transform=ax.transAxes, fontsize=12)
-    ax.text(-0.1, 0.67, '30°N', ha='center', va='center', transform=ax.transAxes, fontsize=12)
-    ax.text(-0.1, 0.46, '25°N', ha='center', va='center', transform=ax.transAxes, fontsize=12)
-    ax.text(-0.1, 0.25, '20°N', ha='center', va='center', transform=ax.transAxes, fontsize=12)
-    ax.text(-0.1, 0.04, '15°N', ha='center', va='center', transform=ax.transAxes, fontsize=12)
+    ax.text(-0.1, 0.88, '35°N', ha='center', va='center', transform=ax.transAxes, fontsize=14)
+    ax.text(-0.1, 0.67, '30°N', ha='center', va='center', transform=ax.transAxes, fontsize=14)
+    ax.text(-0.1, 0.46, '25°N', ha='center', va='center', transform=ax.transAxes, fontsize=14)
+    ax.text(-0.1, 0.25, '20°N', ha='center', va='center', transform=ax.transAxes, fontsize=14)
+    ax.text(-0.1, 0.04, '15°N', ha='center', va='center', transform=ax.transAxes, fontsize=14)
 
-    ax.text(0.04, -0.05, '90°E', ha='center', va='center', transform=ax.transAxes, fontsize=12)
-    ax.text(0.46, -0.05, '100°E', ha='center', va='center', transform=ax.transAxes, fontsize=12)
-    ax.text(0.86, -0.05, '110°E', ha='center', va='center', transform=ax.transAxes, fontsize=12)
+    ax.text(0.04, -0.05, '90°E', ha='center', va='center', transform=ax.transAxes, fontsize=14)
+    ax.text(0.46, -0.05, '100°E', ha='center', va='center', transform=ax.transAxes, fontsize=14)
+    ax.text(0.86, -0.05, '110°E', ha='center', va='center', transform=ax.transAxes, fontsize=14)
 
     # ax.set_xticks([80, 100, 120, 140, 160], crs=ccrs.PlateCarree())
     # ax.set_yticks([0, 10, 20, 30, 40, 50, 60], crs=ccrs.PlateCarree())
@@ -215,7 +215,7 @@ def pole():
 
 
 def pole04():
-    file = "/project/pr133/rxiang/data/cosmo/EAS04_ctrl/200106/T_2M.nc"
+    file = "/project/pr133/rxiang/data/cosmo/EAS04_ctrl/1h/TOT_PREC/01_TOT_PREC.nc"
     ds = xr.open_dataset(f'{file}')
     pole_lat = ds["rotated_pole"].grid_north_pole_latitude
     pole_lon = ds["rotated_pole"].grid_north_pole_longitude

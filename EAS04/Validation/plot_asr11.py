@@ -18,8 +18,8 @@ seasons = ["DJF", "MAM", "JJA", "SON"]
 mdvname1 = 'ASOB_T'  # edit here
 mdvname2 = 'ASOD_T'  # edit here
 year = '2001-2005'
-mdpath1 = "/scratch/snx3000/rxiang/data/cosmo/EAS04_ctrl/szn/ASOB_T/"
-mdpath2 = "/scratch/snx3000/rxiang/data/cosmo/EAS04_ctrl/szn/ASOD_T/"
+mdpath1 = "/project/pr133/rxiang/data/cosmo/EAS11_ctrl/szn/ASOB_T/"
+mdpath2 = "/project/pr133/rxiang/data/cosmo/EAS11_ctrl/szn/ASOD_T/"
 erapath = "/project/pr133/rxiang/data/era5/ot/remap/"
 cerespath = "/project/pr133/rxiang/data/obs/rd/CERES/remap/"
 
@@ -42,7 +42,7 @@ for seas in range(len(seasons)):
 otdata = []
 for seas in range(len(seasons)):
     season = seasons[seas]
-    filename = f'era5.mo.2001-2005.{season}.remap.04.nc'
+    filename = f'era5.mo.2001-2005.{season}.remap.nc'
     data1 = xr.open_dataset(f'{erapath}{filename}')['mtnswrf'].values[0, :, :]
     data2 = xr.open_dataset(f'{erapath}{filename}')['mtdwswrf'].values[0, :, :]
     data = data2 - data1
@@ -53,7 +53,7 @@ for seas in range(len(seasons)):
 #
 for seas in range(len(seasons)):
     season = seasons[seas]
-    filename = f'CERES.2001-2005.1.{season}.remap.04.nc'
+    filename = f'CERES.2001-2005.1.{season}.remap.nc'
     data = xr.open_dataset(f'{cerespath}{filename}')['toa_sw_all_mon'].values[0, :, :]
     otdata.append(data)
 
@@ -68,12 +68,12 @@ for i in range(len(otdata)):
 
 bias = np.arange(0, len(diffdata), 1.0)
 for i in range(len(otdata)):
-    bias[i] = np.nanmean(diffdata[i])
+    bias[i] = np.nanmean(diffdata[i][108:346, 239:476])
 
 # -------------------------------------------------------------------------------
 # plot
 #
-[pole_lat, pole_lon, lat, lon, rlat, rlon, rot_pole_crs] = pole04()
+[pole_lat, pole_lon, lat, lon, rlat, rlon, rot_pole_crs] = pole()
 #
 ar = 1.0  # initial aspect ratio for first trial
 hi = 14  # height in inches
@@ -147,5 +147,5 @@ plt.show()
 # -------------------------
 # save figure
 plotpath = "/project/pr133/rxiang/figure/val04/"
-fig.savefig(plotpath + 'asr.png', dpi=300)
+fig.savefig(plotpath + 'asr11.png', dpi=300)
 plt.close(fig)
