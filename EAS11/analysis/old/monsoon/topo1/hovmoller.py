@@ -12,7 +12,7 @@ import xarray as xr
 import cmcrameri.cm as cmc
 from matplotlib.colors import BoundaryNorm
 from matplotlib.ticker import MaxNLocator
-from mycolor import custom_div_cmap
+from mycolor import custom_div_cmap, drywet
 
 # -------------------------------------------------------------------------------
 # read data
@@ -29,8 +29,8 @@ lonmax = [80, 95, 105, 120, 140]
 for i, j in zip(lonmin, lonmax):
     data = xr.open_dataset('/project/pr133/rxiang/data/cosmo/EAS11_ctrl/monsoon/TOT_PREC/hovmoller/' + f'01-05.TOT_PREC.cpm.{i}-{j}.nc')
     cpm_ctrl = data['TOT_PREC'].values[...]
-    data = xr.open_dataset(f'/project/pr133/rxiang/data/cosmo/EAS11_topo2/monsoon/TOT_PREC/hovmoller/' + f'01-05.TOT_PREC.cpm.{i}-{j}.nc')
-    cpm_topo2 = data['TOT_PREC'].values[...]
+    data = xr.open_dataset(f'/project/pr133/rxiang/data/cosmo/EAS11_topo1/monsoon/TOT_PREC/hovmoller/' + f'01-05.TOT_PREC.cpm.{i}-{j}.nc')
+    cpm_topo1 = data['TOT_PREC'].values[...]
 
     lat = data['lat'].values[...]
     time = data['time'].values[...]
@@ -79,22 +79,22 @@ for i, j in zip(lonmin, lonmax):
     norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)
 
     cf2 = ax2.pcolormesh(time_, lat_, np.transpose(cpm_ctrl[:, :, 0]), cmap=cmap, norm=norm)
-    cf3 = ax3.pcolormesh(time_, lat_, np.transpose(cpm_topo2[:, :, 0]), cmap=cmap, norm=norm)
+    cf3 = ax3.pcolormesh(time_, lat_, np.transpose(cpm_topo1[:, :, 0]), cmap=cmap, norm=norm)
 
     levels = MaxNLocator(nbins=23).tick_values(-10, 10)
-    cmap = custom_div_cmap(25, cmc.vik_r)
+    cmap = drywet(25, cmc.vik_r)
     norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)
-    cf4 = ax4.pcolormesh(time_, lat_, np.transpose(cpm_ctrl[:, :, 0]) - np.transpose(cpm_topo2[:, :, 0]), cmap=cmap, clim=(-10, 10))
+    cf4 = ax4.pcolormesh(time_, lat_, np.transpose(cpm_topo1[:, :, 0]) - np.transpose(cpm_ctrl[:, :, 0]), cmap=cmap, clim=(-10, 10))
     ct2 = ax2.contour(time_, lat_, mpcalc.smooth_n_point(np.transpose(cpm_ctrl[:, :, 0]), 5, 1),
                       levels=[5, 10, 15, 20], colors='k', linewidths=1)
-    ct3 = ax3.contour(time_, lat_, mpcalc.smooth_n_point(np.transpose(cpm_topo2[:, :, 0]), 5, 1),
+    ct3 = ax3.contour(time_, lat_, mpcalc.smooth_n_point(np.transpose(cpm_topo1[:, :, 0]), 5, 1),
                       levels=[5, 10, 15, 20], colors='k', linewidths=1)
-    ct4 = ax4.contour(time_, lat_, mpcalc.smooth_n_point(np.transpose(cpm_topo2[:, :, 0]) - np.transpose(cpm_ctrl[:, :, 0]), 9, 1),
+    ct4 = ax4.contour(time_, lat_, mpcalc.smooth_n_point(np.transpose(cpm_topo1[:, :, 0]) - np.transpose(cpm_ctrl[:, :, 0]), 9, 1),
                       colors='k', linewidths=1)
 
     ax2.text(0, 1.01, 'Control', ha='left', va='bottom', transform=ax2.transAxes, fontsize=14)
-    ax3.text(0, 1.01, 'Envelope topography', ha='left', va='bottom', transform=ax3.transAxes, fontsize=14)
-    ax4.text(0, 1.01, 'Envelope topography - Control', ha='left', va='bottom', transform=ax4.transAxes, fontsize=14)
+    ax3.text(0, 1.01, 'Reduced topography', ha='left', va='bottom', transform=ax3.transAxes, fontsize=14)
+    ax4.text(0, 1.01, 'Reduced topography - Control', ha='left', va='bottom', transform=ax4.transAxes, fontsize=14)
 
     for ax, ct in zip([ax2, ax3, ax4], [ct2, ct3, ct4]):
         clabel = ax.clabel(ct, inline=True, use_clabeltext=True, fontsize=13)
@@ -130,7 +130,7 @@ for i, j in zip(lonmin, lonmax):
               # loc='right', fontsize=10)
 
     # plt.show()
-    plotpath = "/project/pr133/rxiang/figure/monsoon/topo2/hovmoller/"
+    plotpath = "/project/pr133/rxiang/figure/EAS11/analysis/monsoon/topo1/hovmoller/"
     fig.savefig(plotpath + f'{i}°-{j}°E.png', dpi=500)
     plt.close(fig)
 

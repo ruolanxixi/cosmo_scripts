@@ -15,7 +15,7 @@ import cmcrameri.cm as cmc
 from auxiliary import read_topo
 import matplotlib.gridspec as gridspec
 from pyproj import Transformer
-from mycolor import custom_div_cmap
+from mycolor import custom_div_cmap, drywet
 from numpy import inf
 
 # -------------------------------------------------------------------------------
@@ -120,25 +120,29 @@ da_v = read_data("V")
 # fig.savefig(plotpath + 'pr_1x3.png', dpi=300)
 # plt.close(fig)
 
-fig, ax = plt.subplots(subplot_kw={'projection': rot_pole_crs})
-ax = plotcosmo(ax)
+fig = plt.figure(figsize=(6, 4.5))
+left, bottom, right, top = 0.09, 0.13, 0.99, 0.95
+gs = gridspec.GridSpec(1, 1, left=left, bottom=bottom, right=right, top=top, wspace=0.12, hspace=0.1)
+ax = fig.add_subplot(gs[0], projection=rot_pole_crs)
+ax=plotcosmo(ax)
 
-cmap = custom_div_cmap(27, cmc.broc_r)
+cmap = drywet(27, cmc.vik_r)
 
-cs = ax.pcolormesh(rlon, rlat, da.sel(sim='diff').values[:, :], cmap=cmap, clim=(-10, 10), shading="auto")
-q = ax.quiver(rlon[::30], rlat[::30], da_u.sel(sim='diff').values[::30, ::30],
-                           da_v.sel(sim='diff').values[::30, ::30], color='black', scale=50)
+cs = ax.pcolormesh(rlon, rlat, -da.sel(sim='diff').values[:, :], cmap=cmap, clim=(-10, 10), shading="auto")
+q = ax.quiver(rlon[::30], rlat[::30], -da_u.sel(sim='diff').values[::30, ::30],
+                           -da_v.sel(sim='diff').values[::30, ::30], color='black', scale=50)
 qk = ax.quiverkey(q, 0.92, 0.03, 2, r'$2\ \frac{m}{s}$', labelpos='E', transform=ax.transAxes,
                      fontproperties={'size': 9})
-ax.text(0.21, 1.05, 'Control - Reduced topography', ha='center', va='center', transform=ax.transAxes, fontsize=10)
-ax.text(0.90, 1.05, '2001-2005 JJA', ha='center', va='center', transform=ax.transAxes, fontsize=10)
-ax.set_title('Anomalies in Precipitation and Wind Speed at 850 hPa', fontweight='bold', pad=22, fontsize=11)
-cax = fig.add_axes([ax.get_position().x0, ax.get_position().y0 - 0.1, ax.get_position().width, 0.027])
+ax.text(0, 1.02, 'Reduced topography - Control', ha='left', va='bottom', transform=ax.transAxes, fontsize=11)
+ax.text(1, 1.02, '2001-2005 JJA', ha='right', va='bottom', transform=ax.transAxes, fontsize=11)
+ax.set_title('Anomalies in Precipitation and Wind Speed at 850 hPa', fontweight='bold', pad=24, fontsize=12)
+cax = fig.add_axes([ax.get_position().x0, ax.get_position().y0 - 0.1, ax.get_position().width, 0.03])
 cb = fig.colorbar(cs, cax=cax, orientation='horizontal', extend='both')
+cb.ax.tick_params(labelsize=11)
 cb.set_label('mm/day', fontsize=11)
 # adjust figure
 fig.show()
 # save figure
-plotpath = "/project/pr133/rxiang/figure/topo1/"
+plotpath = "/project/pr133/rxiang/figure/EAS11/analysis/JJA/topo1/"
 fig.savefig(plotpath + 'pr_diff.png', dpi=300)
 plt.close(fig)

@@ -8,13 +8,14 @@ import cartopy.feature as cfeature
 import numpy as np
 import matplotlib.colors as colors
 from copy import copy
-from plotcosmomap import plotcosmo, pole, colorbar, custom_seq_cmap, custom_white_cmap
+from plotcosmomap import plotcosmo, pole, colorbar
 from matplotlib.colors import BoundaryNorm
 from matplotlib.ticker import MaxNLocator
 from cmcrameri import cm
 from auxiliary import truncate_colormap, spat_agg_1d, spat_agg_2d
 import matplotlib.gridspec as gridspec
 import matplotlib.ticker as mticker
+from mycolor import custom_seq_cmap, custom_white_cmap
 
 # -------------------------------------------------------------------------------
 # import data
