@@ -177,12 +177,27 @@ def plotcosmo_notick(ax):
     gl.xlocator = mticker.FixedLocator([80, 100, 120, 140, 160])
     gl.ylocator = mticker.FixedLocator([0, 10, 20, 30, 40, 50, 60])
 
+    # add ticks manually
+    # ax.text(-0.008, 0.95, '50°N', ha='right', va='center', transform=ax.transAxes, fontsize=13)
+    # ax.text(-0.008, 0.77, '40°N', ha='right', va='center', transform=ax.transAxes, fontsize=13)
+    # ax.text(-0.008, 0.59, '30°N', ha='right', va='center', transform=ax.transAxes, fontsize=13)
+    # ax.text(-0.008, 0.41, '20°N', ha='right', va='center', transform=ax.transAxes, fontsize=13)
+    # ax.text(-0.008, 0.23, '10°N', ha='right', va='center', transform=ax.transAxes, fontsize=13)
+    # ax.text(-0.008, 0.05, '0°N', ha='right', va='center', transform=ax.transAxes, fontsize=13)
+    #
+    # ax.text(0.12, -0.02, '80°E', ha='center', va='top', transform=ax.transAxes, fontsize=13)
+    # ax.text(0.32, -0.02, '100°E', ha='center', va='top', transform=ax.transAxes, fontsize=13)
+    # ax.text(0.52, -0.02, '120°E', ha='center', va='top', transform=ax.transAxes, fontsize=13)
+    # ax.text(0.72, -0.02, '140°E', ha='center', va='top', transform=ax.transAxes, fontsize=13)
+    # ax.text(0.92, -0.02, '160°E', ha='center', va='top', transform=ax.transAxes, fontsize=13)
+
     # ax.set_xticks([80, 100, 120, 140, 160], crs=ccrs.PlateCarree())
     # ax.set_yticks([0, 10, 20, 30, 40, 50, 60], crs=ccrs.PlateCarree())
     # lon_formatter = LongitudeFormatter(number_format='.0f', degree_symbol='°')
     # lat_formatter = LatitudeFormatter(number_format='.0f', degree_symbol='°')
     # ax.xaxis.set_major_formatter(lon_formatter)
     # ax.yaxis.set_major_formatter(lat_formatter)
+
 
     return ax
 
