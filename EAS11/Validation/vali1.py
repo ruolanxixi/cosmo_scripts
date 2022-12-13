@@ -5,7 +5,7 @@ from netCDF4 import Dataset
 import xarray as xr
 import matplotlib.pyplot as plt
 import numpy as np
-from plotcosmomap import plotcosmo, pole, colorbar
+from plotcosmomap import plotcosmo_notick, pole, colorbar
 import cartopy.crs as ccrs
 from numpy import inf
 import matplotlib.gridspec as gridspec
@@ -69,7 +69,7 @@ for s in range(len(seasons)):
     pr = data['TOT_PREC'].values[0, :, :]
     dt['LSM'][season]['pr'] = pr
     data = xr.open_dataset(f'{mdpath}/T_2M/2001-2005.T_2M.{season}.nc')
-    tmp = data['T_2M'].values[0, :, :]
+    tmp = data['T_2M'].values[0, :, :] - 273.15
     dt['LSM'][season]['tmp'] = tmp
     dt['LSM']['lon'] = rlon
     dt['LSM']['lat'] = rlat
@@ -97,9 +97,11 @@ for s in range(len(seasons)):
     dt['LSM_ERA5'][season]['q850'] = q * 1000
     data = xr.open_dataset(f'{rmpath}/TOT_PREC/2001-2005.TOT_PREC.{season}.remap.imerg.nc')
     pr = data['TOT_PREC'].values[0, :, :]
+    dt['LSM_IMERG'][season] = {}
     dt['LSM_IMERG'][season]['pr'] = pr
     data = xr.open_dataset(f'{rmpath}/T_2M/2001-2005.T_2M.{season}.remap.cru.nc')
-    tmp = data['T_2M'].values[0, :, :]
+    tmp = data['T_2M'].values[0, :, :] - 273.15
+    dt['LSM_CRU'][season] = {}
     dt['LSM_CRU'][season]['tmp'] = tmp
     # ERA5
     dt['ERA5'][season] = {}
@@ -147,6 +149,10 @@ for s in range(len(seasons)):
     for v in range(len(vars)):
         var = vars[v]
         dt['DIFF'][season][var] = dt['LSM_ERA5'][season][var] - dt['ERA5'][season][var]
+    dt['DIFF'][season]['R'] = \
+        ma.corrcoef(ma.masked_invalid(dt['LSM_ERA5'][season]['q850'].flatten()),
+                    ma.masked_invalid(dt['ERA5'][season]['q850'].flatten()))[0, 1]
+    dt['DIFF'][season]['BIAS'] = np.nanmean(dt['LSM_ERA5'][season]['q850'] - dt['ERA5'][season]['q850'])
     dt['DIFF_IMERG'][season]['pr'] = dt['LSM_IMERG'][season]['pr'] - dt['IMERG'][season]['pr']
     dt['DIFF_CRU'][season]['tmp'] = dt['LSM_CRU'][season]['tmp'] - dt['CRU'][season]['tmp']
     dt['DIFF_IMERG'][season]['R'] = \
@@ -172,7 +178,7 @@ rlon_, rlat_ = np.meshgrid(rlon, rlat)
 sims = ['LSM', 'ERA5', 'DIFF']
 fig = plt.figure(figsize=(12.5, 9))
 gs1 = gridspec.GridSpec(4, 2, left=0.05, bottom=0.03, right=0.575,
-                        top=0.95, hspace=0.25, wspace=0.18,
+                        top=0.95, hspace=0.15, wspace=0.1,
                         width_ratios=[1, 1], height_ratios=[1, 1, 1, 1])
 gs2 = gridspec.GridSpec(4, 1, left=0.682, bottom=0.03, right=0.925,
                         top=0.95, hspace=0.25, wspace=0.18)
@@ -186,9 +192,9 @@ axs, cs, ct, qk, q = np.empty(shape=(nrow, ncol), dtype='object'), np.empty(shap
 for i in range(nrow):
     for j in range(ncol - 1):
         axs[i, j] = fig.add_subplot(gs1[i, j], projection=rot_pole_crs)
-        axs[i, j] = plotcosmo(axs[i, j])
+        axs[i, j] = plotcosmo_notick(axs[i, j])
     axs[i, 2] = fig.add_subplot(gs2[i, 0], projection=rot_pole_crs)
-    axs[i, 2] = plotcosmo(axs[i, 2])
+    axs[i, 2] = plotcosmo_notick(axs[i, 2])
 
 # plot wind 500
 levels1 = MaxNLocator(nbins=20).tick_values(0, 20)
@@ -270,6 +276,15 @@ qk[1, 1] = axs[1, 1].quiverkey(q[1, 1], 0.88, 1.06, 10, r'$10$', labelpos='E', t
 qk[1, 2] = axs[1, 2].quiverkey(q[1, 2], 0.88, 1.06, 10, r'$10$', labelpos='E', transform=axs[1, 2].transAxes,
                                fontproperties={'size': 13})
 
+txt = dt['DIFF']['JJA']['R']
+t = axs[1, 2].text(0.99, 0.92, 'R=%0.2f' % txt, fontsize=13, horizontalalignment='right',
+               verticalalignment='center', transform=axs[1, 2].transAxes)
+t.set_bbox(dict(facecolor='white', alpha=0.7, pad=1, edgecolor='none'))
+txt = dt['DIFF']['JJA']['BIAS']
+t = axs[1, 2].text(0.99, 0.81, 'BIAS=%0.2f' % txt, fontsize=13, horizontalalignment='right',
+               verticalalignment='center', transform=axs[1, 2].transAxes)
+t.set_bbox(dict(facecolor='white', alpha=0.7, pad=1, edgecolor='none'))
+
 cax = fig.add_axes(
     [axs[1, 1].get_position().x1 + 0.01, axs[1, 1].get_position().y0, 0.015, axs[1, 1].get_position().height])
 cbar = fig.colorbar(cs[1, 1], cax=cax, orientation='vertical', extend='max')
@@ -299,23 +314,25 @@ for j in range(3):
     cs[2, j] = axs[2, j].pcolormesh(dt[sim]['lon'], dt[sim]['lat'], dt[sim]['JJA']['pr'], cmap=cmap, norm=norm,
                                     shading="auto", transform=dt[sim]['proj'])
 txt = dt['DIFF_IMERG']['JJA']['R']
-axs[2, 2].text(0.98, 0.92, 'R=%0.2f' % txt, fontsize=13, horizontalalignment='right',
+t = axs[2, 2].text(0.99, 0.92, 'R=%0.2f' % txt, fontsize=13, horizontalalignment='right',
                verticalalignment='center', transform=axs[2, 2].transAxes)
+t.set_bbox(dict(facecolor='white', alpha=0.7, pad=1, edgecolor='none'))
 txt = dt['DIFF_IMERG']['JJA']['BIAS']
-axs[2, 2].text(0.98, 0.81, 'BIAS=%0.2f' % txt, fontsize=13, horizontalalignment='right',
+t = axs[2, 2].text(0.99, 0.81, 'BIAS=%0.2f' % txt, fontsize=13, horizontalalignment='right',
                verticalalignment='center', transform=axs[2, 2].transAxes)
+t.set_bbox(dict(facecolor='white', alpha=0.7, pad=1, edgecolor='none'))
 
 cax = fig.add_axes(
     [axs[2, 1].get_position().x1 + 0.01, axs[2, 1].get_position().y0, 0.015, axs[2, 1].get_position().height])
-cbar = fig.colorbar(cs[1, 1], cax=cax, orientation='vertical', extend='max', ticks=np.linspace(0, 20, 5, endpoint=True))
+cbar = fig.colorbar(cs[2, 1], cax=cax, orientation='vertical', extend='both', ticks=np.linspace(0, 20, 5, endpoint=True))
 cbar.ax.tick_params(labelsize=13)
 cax = fig.add_axes(
     [axs[2, 2].get_position().x1 + 0.01, axs[2, 2].get_position().y0, 0.015, axs[2, 2].get_position().height])
-cbar = fig.colorbar(cs[1, 2], cax=cax, orientation='vertical', extend='both', ticks=np.linspace(-15, 15, 7, endpoint=True))
+cbar = fig.colorbar(cs[2, 2], cax=cax, orientation='vertical', extend='both', ticks=np.linspace(-15, 15, 7, endpoint=True))
 cbar.ax.tick_params(labelsize=13)
 
 # plot tmp
-levels1 = MaxNLocator(nbins=35).tick_values(-35, 35)
+levels1 = MaxNLocator(nbins=18).tick_values(0, 36)
 cmap1 = cmc.roma_r
 norm1 = BoundaryNorm(levels1, ncolors=cmap1.N, clip=True)
 
@@ -331,22 +348,24 @@ for j in range(3):
     sim = sims[j]
     cmap = cmaps[j]
     norm = norms[j]
-    cs[2, j] = axs[3, j].pcolormesh(dt[sim]['lon'], dt[sim]['lat'], dt[sim]['JJA']['tmp'], cmap=cmap, norm=norm,
+    cs[3, j] = axs[3, j].pcolormesh(dt[sim]['lon'], dt[sim]['lat'], dt[sim]['JJA']['tmp'], cmap=cmap, norm=norm,
                                     shading="auto", transform=dt[sim]['proj'])
 txt = dt['DIFF_CRU']['JJA']['R']
-axs[3, 2].text(0.98, 0.92, 'R=%0.2f' % txt, fontsize=13, horizontalalignment='right',
+t = axs[3, 2].text(0.99, 0.92, 'R=%0.2f' % txt, fontsize=13, horizontalalignment='right',
                verticalalignment='center', transform=axs[3, 2].transAxes)
+t.set_bbox(dict(facecolor='white', alpha=0.7, pad=1, edgecolor='none'))
 txt = dt['DIFF_CRU']['JJA']['BIAS']
-axs[3, 2].text(0.98, 0.81, 'BIAS=%0.2f' % txt, fontsize=13, horizontalalignment='right',
+t = axs[3, 2].text(0.99, 0.81, 'BIAS=%0.2f' % txt, fontsize=13, horizontalalignment='right',
                verticalalignment='center', transform=axs[3, 2].transAxes)
+t.set_bbox(dict(facecolor='white', alpha=0.7, pad=1, edgecolor='none'))
 
 cax = fig.add_axes(
     [axs[3, 1].get_position().x1 + 0.01, axs[3, 1].get_position().y0, 0.015, axs[3, 1].get_position().height])
-cbar = fig.colorbar(cs[1, 1], cax=cax, orientation='vertical', extend='max', ticks=np.linspace(-30, 30, 5, endpoint=True))
+cbar = fig.colorbar(cs[3, 1], cax=cax, orientation='vertical', extend='max', ticks=np.linspace(0, 36, 7, endpoint=True))
 cbar.ax.tick_params(labelsize=13)
 cax = fig.add_axes(
     [axs[3, 2].get_position().x1 + 0.01, axs[3, 2].get_position().y0, 0.015, axs[3, 2].get_position().height])
-cbar = fig.colorbar(cs[1, 2], cax=cax, orientation='vertical', extend='both', ticks=np.linspace(-9, 9, 7, endpoint=True))
+cbar = fig.colorbar(cs[3, 2], cax=cax, orientation='vertical', extend='both', ticks=np.linspace(-9, 9, 7, endpoint=True))
 cbar.ax.tick_params(labelsize=13)
 # ---
 for i in range(nrow):
@@ -355,6 +374,21 @@ for i in range(nrow):
         t = axs[i, j].text(0.01, 0.985, f'({label})', ha='left', va='top',
                            transform=axs[i, j].transAxes, fontsize=14)
         t.set_bbox(dict(facecolor='white', alpha=0.7, pad=1, edgecolor='none'))
+
+for i in range(nrow):
+    axs[i, 0].text(-0.008, 0.95, '50°N', ha='right', va='center', transform=axs[i, 0].transAxes, fontsize=13)
+    axs[i, 0].text(-0.008, 0.77, '40°N', ha='right', va='center', transform=axs[i, 0].transAxes, fontsize=13)
+    axs[i, 0].text(-0.008, 0.59, '30°N', ha='right', va='center', transform=axs[i, 0].transAxes, fontsize=13)
+    axs[i, 0].text(-0.008, 0.41, '20°N', ha='right', va='center', transform=axs[i, 0].transAxes, fontsize=13)
+    axs[i, 0].text(-0.008, 0.23, '10°N', ha='right', va='center', transform=axs[i, 0].transAxes, fontsize=13)
+    axs[i, 0].text(-0.008, 0.05, '0°N', ha='right', va='center', transform=axs[i, 0].transAxes, fontsize=13)
+
+for j in range(ncol):
+    axs[3, j].text(0.12, -0.02, '80°E', ha='center', va='top', transform=axs[3, j].transAxes, fontsize=13)
+    axs[3, j].text(0.32, -0.02, '100°E', ha='center', va='top', transform=axs[3, j].transAxes, fontsize=13)
+    axs[3, j].text(0.52, -0.02, '120°E', ha='center', va='top', transform=axs[3, j].transAxes, fontsize=13)
+    axs[3, j].text(0.72, -0.02, '140°E', ha='center', va='top', transform=axs[3, j].transAxes, fontsize=13)
+    axs[3, j].text(0.92, -0.02, '160°E', ha='center', va='top', transform=axs[3, j].transAxes, fontsize=13)
 
 plt.show()
 # plotpath = "/project/pr133/rxiang/figure/paper1/validation/LSM/"
