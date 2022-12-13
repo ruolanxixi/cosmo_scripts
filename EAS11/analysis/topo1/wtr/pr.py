@@ -40,6 +40,7 @@ ds.close()
 ds = xr.open_dataset('/project/pr133/rxiang/data/extpar/old/extpar_EAS_ext_12km_merit_adj.nc')
 hsurf_topo1 = ds['HSURF'].values[:, :]
 hsurf_diff = ndimage.gaussian_filter(hsurf_ctrl - hsurf_topo1, sigma=3, order=0)
+hsurf_ctrl = ndimage.gaussian_filter(hsurf_ctrl, sigma=3, order=0)
 lat_ = ds["lat"].values
 lon_ = ds["lon"].values
 ds.close()
@@ -54,16 +55,16 @@ wi = 5.1  # height in inches #15
 hi = 10  # width in inches #10
 ncol = 1  # edit here
 nrow = 3
-axs, cs, ct, topo, q, qk = np.empty(shape=(nrow, ncol), dtype='object'), np.empty(shape=(nrow, ncol), dtype='object'), \
+axs, cs, ct, topo, q, qk, topo1 = np.empty(shape=(nrow, ncol), dtype='object'), np.empty(shape=(nrow, ncol), dtype='object'), \
                            np.empty(shape=(nrow, ncol), dtype='object'), np.empty(shape=(nrow, ncol), dtype='object'),\
-                           np.empty(shape=(nrow, ncol), dtype='object'), np.empty(shape=(nrow, ncol), dtype='object')
+                           np.empty(shape=(nrow, ncol), dtype='object'), np.empty(shape=(nrow, ncol), dtype='object'), np.empty(shape=(nrow, ncol), dtype='object')
 
 fig = plt.figure(figsize=(wi, hi))
 
-left, bottom, right, top = 0.06, 0.44, 1.08, 0.94
+left, bottom, right, top = 0.06, 0.454, 1.08, 0.965
 gs1 = gridspec.GridSpec(nrows=2, ncols=1, left=left, bottom=bottom, right=right, top=top,
                        wspace=0.08, hspace=0.15)
-left, bottom, right, top = 0.06, 0.102, 1.08, 0.332
+left, bottom, right, top = 0.06, 0.105, 1.08, 0.343
 gs2 = gridspec.GridSpec(nrows=1, ncols=1, left=left, bottom=bottom, right=right, top=top,
                        wspace=0.08, hspace=0.15)
 
@@ -77,11 +78,17 @@ for i in range(2):
         axs[i, j] = fig.add_subplot(gs1[i, j], projection=rot_pole_crs)
         axs[i, j] = plotcosmo(axs[i, j])
         topo[i, j] = axs[i, j].contour(lon_, lat_, hsurf_diff, levels=[500], colors='darkgreen', linewidths=1, transform=ccrs.PlateCarree())
+        topo[i, j] = axs[i, j].contour(lon_, lat_, hsurf_ctrl, levels=[3000], colors='darkgreen', linestyles='dashed',
+                                       linewidths=1,
+                                       transform=ccrs.PlateCarree())
 
 for j in range(1):
     axs[2, j] = fig.add_subplot(gs2[j], projection=rot_pole_crs)
     axs[2, j] = plotcosmo(axs[2, j])
     topo[2, j] = axs[2, j].contour(lon_, lat_, hsurf_diff, levels=[500], colors='darkgreen', linewidths=1,
+                                   transform=ccrs.PlateCarree())
+    topo[2, j] = axs[2, j].contour(lon_, lat_, hsurf_ctrl, levels=[3000], colors='darkgreen', linestyles='dashed',
+                                   linewidths=1,
                                    transform=ccrs.PlateCarree())
 
 levels1 = MaxNLocator(nbins=20).tick_values(0, 20)
@@ -118,14 +125,14 @@ for l in clabel:
 cax = fig.add_axes([axs[1, 0].get_position().x0, axs[1, 0].get_position().y0 - .05, axs[1, 0].get_position().width, 0.02])
 cbar = fig.colorbar(cs[1, 0], cax=cax, orientation='horizontal', extend='max')
 cbar.ax.tick_params(labelsize=13)
-cbar.ax.set_xlabel('mm/day', fontsize=13)
+cbar.ax.set_xlabel('mm day$^{-1}$', fontsize=13)
 
 cax = fig.add_axes([axs[2, 0].get_position().x0, axs[2, 0].get_position().y0 - .05, axs[2, 0].get_position().width, 0.02])
 cbar = fig.colorbar(cs[2, 0], cax=cax, orientation='horizontal', extend='both')
 cbar.ax.tick_params(labelsize=13)
-cbar.ax.set_xlabel('mm/day', fontsize=13)
+cbar.ax.set_xlabel('mm day$^{-1}$', fontsize=13)
 
-axs[0, 0].set_title("Total rainfall Nov to Mar", fontweight='bold', pad=18, fontsize=14)
+axs[0, 0].set_title("Precipitation", fontweight='bold', pad=7, fontsize=13, loc='left')
 
 # axs[0, 0].text(0, 1.01, '@ 500 hPa', ha='left', va='bottom',
 #                transform=axs[0, 0].transAxes, fontsize=11)

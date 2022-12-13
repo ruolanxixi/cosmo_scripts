@@ -60,10 +60,10 @@ axs, cs, ct, topo, q, qk = np.empty(shape=(nrow, ncol), dtype='object'), np.empt
 
 fig = plt.figure(figsize=(wi, hi))
 
-left, bottom, right, top = 0.06, 0.44, 1.08, 0.94
+left, bottom, right, top = 0.06, 0.454, 1.08, 0.965
 gs1 = gridspec.GridSpec(nrows=2, ncols=1, left=left, bottom=bottom, right=right, top=top,
                        wspace=0.08, hspace=0.15)
-left, bottom, right, top = 0.06, 0.102, 1.08, 0.332
+left, bottom, right, top = 0.06, 0.105, 1.08, 0.343
 gs2 = gridspec.GridSpec(nrows=1, ncols=1, left=left, bottom=bottom, right=right, top=top,
                        wspace=0.08, hspace=0.15)
 
@@ -125,10 +125,10 @@ cbar = fig.colorbar(cs[2, 0], cax=cax, orientation='horizontal', extend='both', 
 cbar.ax.tick_params(labelsize=13)
 cbar.ax.set_xlabel('gpm', fontsize=13)
 
-axs[0, 0].set_title("Geopotential height Nov to Mar", fontweight='bold', pad=18, fontsize=14)
+axs[0, 0].set_title("500 hPa Geopotential height", fontweight='bold', pad=7, fontsize=13, loc='left')
 
-axs[0, 0].text(0, 1.01, '@ 500 hPa', ha='left', va='bottom',
-               transform=axs[0, 0].transAxes, fontsize=11)
+# axs[0, 0].text(0, 1.01, '@ 500 hPa', ha='left', va='bottom',
+               # transform=axs[0, 0].transAxes, fontsize=11)
 axs[0, 0].text(-0.15, 0.5, 'CTRL', ha='center', va='center', rotation='vertical',
                transform=axs[0, 0].transAxes, fontsize=13, fontweight='bold')
 axs[1, 0].text(-0.15, 0.5, 'TRED', ha='center', va='center', rotation='vertical',

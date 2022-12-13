@@ -45,7 +45,7 @@ class Plot_Cross(UserDict):
 
         self.ax.yaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator())
 
-        pres = np.array([100000, 92500, 85000, 70000, 60000, 50000, 40000, 30000, 20000, 15000, 10000])
+        pres = np.array([100000, 92500, 85000, 70000, 60000, 50000, 40000, 30000, 20000, 15000])
         alts = [alt for alt in pva.pres2alt(pres) / 1000 if alt <= zmax]
 
         self.axp.set_yticks(alts[:])
@@ -131,7 +131,7 @@ class Plot_Cross(UserDict):
 
         vert_cross = var[:, lat_start_id:lat_end_id + 1, 0]
 
-        vert_cross_W = W[:, lat_start_id:lat_end_id + 1, 0]
+        vert_cross_W = omega[:, lat_start_id:lat_end_id + 1, 0]
         vert_cross_W = np.ma.array(vert_cross_W, mask=np.isnan(vert_cross_W))
 
         vert_cross_U = U[:, lat_start_id:lat_end_id + 1, 0]
@@ -153,11 +153,11 @@ class Plot_Cross(UserDict):
         X, Y = np.meshgrid(np.arange(self.lat_start, self.lat_end + 0.04, 0.04 * 20), vcoord2[::-1] / 1000)
 
         q = self.ax.quiver(X, Y, vert_cross_V[..., ::20],
-                           vert_cross_W[..., ::20] * 100, scale=20)
+                           vert_cross_W[..., ::20] / 100 * 86400, scale=400)
 
-        self.ax.quiverkey(q, 0.85, 1.02, 1, r'$1\ m\ s^{-1}$', labelpos='E', transform=self.ax.transAxes,
-                          labelsep=0.03,
-                          fontproperties={'size': 10})
+        # self.ax.quiverkey(q, 0.85, 1.02, 100, r'$100\ hPa\ day^{-1}$', labelpos='E', transform=self.ax.transAxes,
+        #                  labelsep=0.03,
+        #                  fontproperties={'size': 12})
 
         self.add_terrain(self.xyline)
 
@@ -168,14 +168,14 @@ class Plot_Cross(UserDict):
         self.ax.xaxis.set_label_coords(1.06, -0.018)
 
         cbar = plt.colorbar(ctf, orientation='horizontal', pad=0.01)
-        cbar.ax.set_xlabel('K day$^{-1}$', fontsize=11)
+        # cbar.ax.set_xlabel('K day$^{-1}$', fontsize=11)
         cbar.set_ticks([-7, -5, -3, -2, -1, -0.5, 0.5, 1, 2, 3, 5, 7])
         cbar.set_ticklabels([-7, -5, -3, -2, -1, -0.5, 0.5, 1, 2, 3, 5, 7])
         cbar.ax.tick_params(labelsize=10)
 
-        self.ax.set_title('Anomalies in summer total diabatic heating', fontweight='bold', pad=18, fontsize=12)
+        # self.ax.set_title('Anomalies in summer total diabatic heating', fontweight='bold', pad=18, fontsize=12)
         self.ax.text(0, 1.02, 'Reduced topography - Control', ha='left', va='center', transform=self.ax.transAxes,
-                     fontsize=10)
+                     fontsize=14)
         # self.ax.text(1, 1.02, '2001-2005 JJA', ha='right', va='center', transform=self.ax.transAxes, fontsize=10)
 
     def save_fig(self, imagename=None, format='png', dpi=550, transparent=True):
@@ -212,11 +212,25 @@ if __name__ == '__main__':
     data_w2 = xr.open_dataset(
         '/project/pr133/rxiang/data/cosmo/EAS04_ctrl/szn/W/2001-2005.W.JJA.zonmean.nc')
 
-    W = data_w1['W'].values[0, :, :] - data_w2['W'].values[0, :, :]
-    U = data_u1['U'].values[0, :, :] - data_u2['U'].values[0, :, :]
-    V = data_v1['V'].values[0, :, :] - data_v2['V'].values[0, :, :]
+    data_t1 = xr.open_dataset(
+        '/project/pr133/rxiang/data/cosmo/EAS04_topo1/szn/T/2001-2005.T.JJA.zonmean.nc')
+    data_t2 = xr.open_dataset(
+        '/project/pr133/rxiang/data/cosmo/EAS04_ctrl/szn/T/2001-2005.T.JJA.zonmean.nc')
 
-    DIAB = data_d1['DIAB_SUM'].values[0, ...] - data_d2['DIAB_SUM'].values[0, ...]
+    rgas = 287.058
+    g = 9.80665
+
+    omega1 = data_w1['W'].values[0, ::-1, ...] * data_c2['pressure'].values[np.newaxis, ::-1, np.newaxis, np.newaxis] / (
+            rgas * data_t1['T'].values[0, ::-1, ...]) * g
+    omega2 = data_w2['W'].values[0, ::-1, ...] * data_c2['pressure'].values[np.newaxis, ::-1, np.newaxis, np.newaxis] / (
+                rgas * data_t2['T'].values[0, ::-1, ...]) * g
+
+    W = data_w1['W'].values[0, ::-1, ...] - data_w2['W'].values[0, ::-1, ...]
+    U = data_u1['U'].values[0, ::-1, ...] - data_u2['U'].values[0, ::-1, ...]
+    V = data_v1['V'].values[0, ::-1, ...] - data_v2['V'].values[0, ::-1, ...]
+    omega = omega1[0, ...] - omega2[0, ...]
+
+    DIAB = data_d1['DIAB_SUM'].values[0, ::-1, ...] - data_d2['DIAB_SUM'].values[0, ::-1, ...]
 
     lon = data_d1['lon'].values[...]
     lat = data_d1['lat'].values[...]
@@ -229,13 +243,13 @@ if __name__ == '__main__':
 
     # brunt = brunt_vaisala_frequency(h=vcoord_, pt=pt)
 
-    data = Plot_Cross(lon_start=0, lon_end=0, lat_start=20, lat_end=40, zmax=16)
+    data = Plot_Cross(lon_start=0, lon_end=0, lat_start=20, lat_end=40, zmax=14)
     data.add_profile(DIAB, DIAB)
 
     # dbz = data_t.variables['DBZ'][0, ...]
     # data.add_profile(dbz, varname='DBZ', colorbar=False)
 
-    data.save_fig('/project/pr133/rxiang/figure/EAS04/analysis/diabatic/topo1-ctrl', format='png', dpi=550,
+    data.save_fig('/project/pr133/rxiang/figure/paper1/results/TRED/diabatic_diff04.png', format='png', dpi=550,
                   transparent=True)
     plt.show()
     # data.save_fig()

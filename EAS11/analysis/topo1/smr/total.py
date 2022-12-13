@@ -55,6 +55,7 @@ ds.close()
 ds = xr.open_dataset('/project/pr133/rxiang/data/extpar/old/extpar_EAS_ext_12km_merit_adj.nc')
 hsurf_topo1 = ds['HSURF'].values[:, :]
 hsurf_diff = ndimage.gaussian_filter(hsurf_ctrl - hsurf_topo1, sigma=3, order=0)
+hsurf_ctrl = ndimage.gaussian_filter(hsurf_ctrl, sigma=3, order=0)
 lat_ = ds["lat"].values
 lon_ = ds["lon"].values
 ds.close()
@@ -69,8 +70,9 @@ wi = 15  # height in inches #15
 hi = 10  # width in inches #10
 ncol = 3  # edit here
 nrow = 3
-axs, cs, ct, topo = np.empty(shape=(nrow, ncol), dtype='object'), np.empty(shape=(nrow, ncol), dtype='object'), \
-                    np.empty(shape=(nrow, ncol), dtype='object'), np.empty(shape=(nrow, ncol), dtype='object')
+axs, cs, ct, topo, topo1 = np.empty(shape=(nrow, ncol), dtype='object'), np.empty(shape=(nrow, ncol), dtype='object'), \
+                            np.empty(shape=(nrow, ncol), dtype='object'), np.empty(shape=(nrow, ncol), dtype='object'),\
+                            np.empty(shape=(nrow, ncol), dtype='object')
 
 fig = plt.figure(figsize=(wi, hi))
 
@@ -91,6 +93,8 @@ for i in range(2):
         axs[i, j] = fig.add_subplot(gs1[i, j], projection=rot_pole_crs)
         axs[i, j] = plotcosmo(axs[i, j])
         topo[i, j] = axs[i, j].contour(lon_, lat_, hsurf_diff, levels=[500], colors='darkgreen', linewidths=1, transform=ccrs.PlateCarree())
+        topo[i, j] = axs[i, j].contour(lon_, lat_, hsurf_ctrl, levels=[3000], colors='darkgreen', linestyles='dashed', linewidths=1,
+                                      transform=ccrs.PlateCarree())
         # clabel = axs[i, j].clabel(topo[i, j], [500], inline=True, fontsize=13, use_clabeltext=True)
         # for l in clabel:
         #     l.set_rotation(0)
@@ -100,6 +104,9 @@ for j in range(3):
     axs[2, j] = fig.add_subplot(gs2[j], projection=rot_pole_crs)
     axs[2, j] = plotcosmo(axs[2, j])
     topo[2, j] = axs[2, j].contour(lon_, lat_, hsurf_diff, levels=[500], colors='darkgreen', linewidths=1,
+                                   transform=ccrs.PlateCarree())
+    topo[2, j] = axs[2, j].contour(lon_, lat_, hsurf_ctrl, levels=[3000], colors='darkgreen', linestyles='dashed',
+                                   linewidths=1,
                                    transform=ccrs.PlateCarree())
     # clabel = axs[2, j].clabel(topo[2, j], [500], inline=True, fontsize=13, use_clabeltext=True)
     # for l in clabel:
@@ -195,7 +202,7 @@ cax = fig.add_axes([(axs[1, 0].get_position().x0 + axs[1, 0].get_position().x1)/
                      (axs[1, 0].get_position().x0 + axs[1, 0].get_position().x1)/2), 0.02])
 cbar = fig.colorbar(cs[1, 2], cax=cax, orientation='horizontal', extend='max', ticks=np.linspace(0, 20, 11, endpoint=True))
 cbar.ax.tick_params(labelsize=13)
-cbar.ax.set_xlabel('mm/day', fontsize=13, labelpad=-0.01)
+cbar.ax.set_xlabel('mm day$^{-1}$', fontsize=13, labelpad=-0.01)
 
 # plot difference
 levels = MaxNLocator(nbins=23).tick_values(-20, 20)
@@ -216,17 +223,17 @@ cax = fig.add_axes([(axs[2, 0].get_position().x0 + axs[2, 0].get_position().x1)/
                     (axs[2, 0].get_position().x0 + axs[2, 0].get_position().x1)/2, 0.02])
 cbar = fig.colorbar(cs[2, 2], cax=cax, orientation='horizontal', extend='both', ticks=np.linspace(-5, 5, 11, endpoint=True))
 cbar.ax.tick_params(labelsize=13)
-cbar.ax.set_xlabel('mm/day', fontsize=13, labelpad=-0.01)
+cbar.ax.set_xlabel('mm day$^{-1}$', fontsize=13, labelpad=-0.01)
 
-axs[0, 0].set_title("Total rainfall", fontweight='bold', pad=10, fontsize=14)
-axs[0, 1].set_title("May to Sep", fontweight='bold', pad=10, fontsize=14)
-axs[0, 2].set_title("Nov to Mar", fontweight='bold', pad=10, fontsize=14)
+axs[0, 0].set_title("Annual precipitation", fontweight='bold', pad=7, fontsize=13, loc='left')
+axs[0, 1].set_title("May to Sep", fontweight='bold', pad=7, fontsize=13, loc='left')
+axs[0, 2].set_title("Nov to Mar", fontweight='bold', pad=7, fontsize=13, loc='left')
 
-axs[0, 0].text(-0.16, 0.55, 'Control', ha='center', va='center', rotation='vertical',
+axs[0, 0].text(-0.16, 0.55, 'CTRL', ha='center', va='center', rotation='vertical',
                transform=axs[0, 0].transAxes, fontsize=13, fontweight='bold')
-axs[1, 0].text(-0.16, 0.55, 'Reduced Topography', ha='center', va='center', rotation='vertical',
+axs[1, 0].text(-0.16, 0.55, 'TRED', ha='center', va='center', rotation='vertical',
                transform=axs[1, 0].transAxes, fontsize=13, fontweight='bold')
-axs[2, 0].text(-0.16, 0.55, 'Reduced - Ctrl', ha='center', va='center', rotation='vertical',
+axs[2, 0].text(-0.16, 0.55, 'TRED - CTRL', ha='center', va='center', rotation='vertical',
                transform=axs[2, 0].transAxes, fontsize=13, fontweight='bold')
 
 # fig.suptitle('Total Rainfall May to Sep', fontsize=16, fontweight='bold')
@@ -237,7 +244,7 @@ axs[2, 0].text(-0.16, 0.55, 'Reduced - Ctrl', ha='center', va='center', rotation
 # fig.set_figheight(wi * y2x_ratio)
 
 fig.show()
-plotpath = "/project/pr133/rxiang/figure/analysis/EAS11/precip/"
+plotpath = "/project/pr133/rxiang/figure/analysis/EAS11/topo1/"
 fig.savefig(plotpath + 'total.png', dpi=500)
 plt.close(fig)
 

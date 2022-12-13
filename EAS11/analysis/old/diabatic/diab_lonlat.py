@@ -39,12 +39,12 @@ class Plot_Cross(UserDict):
         self.ax.set_ylabel('Height (km)', fontsize=12, labelpad=1.5)
         self.ax.tick_params(axis='both', which='major', labelsize=12)
         self.axp = self.ax.twinx()
-        self.ax.set_ylim(0, pva.pres2alt(10000) / 1000)
-        self.axp.set_ylim(0, pva.pres2alt(10000) / 1000)
+        self.ax.set_ylim(0, pva.pres2alt(15000) / 1000)
+        self.axp.set_ylim(0, pva.pres2alt(15000) / 1000)
 
         self.ax.yaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator())
 
-        pres = np.array([100000, 92500, 85000, 70000, 60000, 50000, 40000, 30000, 20000, 10000])
+        pres = np.array([100000, 92500, 85000, 70000, 60000, 50000, 40000, 30000, 20000, 15000])
         alts = [alt for alt in pva.pres2alt(pres) / 1000 if alt <= zmax]
 
         self.axp.set_yticks(alts[:])
@@ -65,7 +65,7 @@ class Plot_Cross(UserDict):
 
     def add_terrain(self, xyline, level=57):
         # FIXME
-        f = xr.open_dataset('/project/pr133/rxiang/data/cross/terrain.ctrl.zonmean.nc')
+        f = xr.open_dataset('/project/pr133/rxiang/data/cross/terrain.topo2.zonmean.nc')
         hsurf = f['HSURF'].values[0, ...]
 
         hsurf = np.repeat(hsurf[np.newaxis, ...], level, axis=0)
@@ -111,22 +111,21 @@ class Plot_Cross(UserDict):
         self.add_terrain(self.xyline)
 
 
-        self.ax.set_xlim(20, 40)
-        self.ax.set_xticks(np.linspace(20, 40, 5, endpoint=True))
-        self.ax.set_xticklabels([u'20\N{DEGREE SIGN}N', u'25\N{DEGREE SIGN}N', u'30\N{DEGREE SIGN}N',
-                                 u'35\N{DEGREE SIGN}N', u'40\N{DEGREE SIGN}N'])
+        self.ax.set_xlim(10, 50)
+        self.ax.set_xticks(np.linspace(10, 50, 5, endpoint=True))
+        self.ax.set_xticklabels(['10°N', '20°N', '30°N', '40°N', '50°N'])
         self.ax.xaxis.set_label_coords(1.06, -0.018)
 
         cbar = plt.colorbar(ctf, orientation='horizontal', pad=0.01)
-        cbar.ax.set_xlabel('K day$^{-1}$', fontsize=11)
+        # cbar.ax.set_xlabel('K day$^{-1}$', fontsize=11)
         cbar.set_ticks([-2, -1.5, -1, -0.5, 0.5, 1, 2, 4, 6, 8, 10, 12])
         cbar.set_ticklabels([-2, -1.5, -1, -0.5, 0.5, 1, 2, 4, 6, 8, 10, 12])
         cbar.ax.tick_params(labelsize=10)
 
-        self.ax.set_title('Summer total diabatic heating (2001-2005)', fontweight='bold', pad=18, fontsize=12)
-        self.ax.text(0, 1.02, 'Control', ha='left', va='center', transform=self.ax.transAxes,
-                fontsize=10)
-        self.ax.text(1, 1.02, 'averaged within 95°E - 105°E', ha='right', va='center', transform=self.ax.transAxes, fontsize=10)
+        # self.ax.set_title('Summer total diabatic heating (2001-2005)', fontweight='bold', pad=18, fontsize=12)
+        self.ax.text(0, 1.025, '(b) TENV11', ha='left', va='center', transform=self.ax.transAxes,
+                fontsize=14)
+        # self.ax.text(1, 1.02, 'averaged within 95°E - 105°E', ha='right', va='center', transform=self.ax.transAxes, fontsize=10)
 
     def save_fig(self, imagename=None, format='png', dpi=550, transparent=True):
 
@@ -141,14 +140,14 @@ class Plot_Cross(UserDict):
 
 if __name__ == '__main__':
     data_d = xr.open_dataset(
-        '/project/pr133/rxiang/data/cosmo/EAS11_ctrl/szn/DIAB_SUM/2001-2005.DIAB_SUM.JJA.zonmean.nc')
-    data_c = xr.open_dataset('/store/c2sm/pr04/rxiang/data_lmp/01010100_EAS11_ctrl/lm_coarse/24h3D/TMPHYS_SUM.nc')
+        '/project/pr133/rxiang/data/cosmo/EAS11_topo2/szn/DIAB_SUM/2001-2005.DIAB_SUM.JJA.zonmean.nc')
+    data_c = xr.open_dataset('/store/c2sm/pr04/rxiang/data_lmp/01010100_EAS11_topo2/lm_coarse/24h3D/TMPHYS_SUM.nc')
 
     # W = wrf.destagger(data_w.variables['W'][0, ...], -3)
     # U = data_w.variables['U'][0, ...]
     # V = data_w.variables['V'][0, ...]
 
-    DIAB = data_d['DIAB_SUM'].values[0, ...]
+    DIAB = data_d['DIAB_SUM'].values[0, ::-1, ...]
 
     lon = data_d['lon'].values[...]
     lat = data_d['lat'].values[...]
@@ -159,12 +158,12 @@ if __name__ == '__main__':
 
     # brunt = brunt_vaisala_frequency(h=vcoord_, pt=pt)
 
-    data = Plot_Cross(lon_start=0, lon_end=0, lat_start=19.97, lat_end=40.98, zmax=16)
+    data = Plot_Cross(lon_start=0, lon_end=0, lat_start=10.07, lat_end=50, zmax=14)
     data.add_profile(DIAB, DIAB)
 
     # dbz = data_t.variables['DBZ'][0, ...]
     # data.add_profile(dbz, varname='DBZ', colorbar=False)
 
-    data.save_fig('/project/pr133/rxiang/figure/EAS11/analysis/diabatic/ctrl', format='png', dpi=550, transparent=True)
+    data.save_fig('/project/pr133/rxiang/figure/paper1/results/TENV/diabatic_topo2', format='png', dpi=550, transparent=True)
     plt.show()
     # data.save_fig()

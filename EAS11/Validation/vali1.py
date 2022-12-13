@@ -1,0 +1,362 @@
+# -------------------------------------------------------------------------------
+# modules
+#
+from netCDF4 import Dataset
+import xarray as xr
+import matplotlib.pyplot as plt
+import numpy as np
+from plotcosmomap import plotcosmo, pole, colorbar
+import cartopy.crs as ccrs
+from numpy import inf
+import matplotlib.gridspec as gridspec
+import cmcrameri.cm as cmc
+from matplotlib.colors import BoundaryNorm
+from matplotlib.ticker import MaxNLocator
+from mycolor import custom_div_cmap, cbr_wet, cbr_drywet, drywet, custom_seq_cmap_
+from mycolor import wind as windmap
+from pyproj import Transformer
+import scipy.ndimage as ndimage
+import matplotlib
+from matplotlib.patches import Rectangle
+import numpy.ma as ma
+
+font = {'size': 13}
+matplotlib.rc('font', **font)
+
+# -------------------------------------------------------------------------------
+# read data
+sims = ['LSM', 'ERA5', 'DIFF']
+seasons = ['DJF', 'MAM', 'JJA', 'SON']
+mdpath = "/project/pr133/rxiang/data/cosmo/EAS11_ctrl/szn"
+rmpath = "/project/pr133/rxiang/data/cosmo/EAS11_ctrl/remap"
+erapath = "/project/pr133/rxiang/data/era5/ot/szn"
+imergpath = "/project/pr133/rxiang/data/obs/pr/IMERG/szn"
+crupath = "/project/pr133/rxiang/data/obs/tmp/cru/szn"
+dt = {}
+labels = [['LSM', 'ERA5', 'LSM - ERA5'], ['LSM', 'ERA5', 'LSM - ERA5'],
+          ['LSM', 'IMERG', 'LSM - IMERG'], ['LSM', 'CRU', 'LSM - CRU']]
+vars = ['v850', 'u850', 'ws850', 'u500', 'v500', 'ws500', 'q850']
+dt['LSM'], dt['ERA5'], dt['LSM_ERA5'], dt['LSM_IMERG'], dt['LSM_CRU'], dt['DIFF'], \
+dt['IMERG'], dt['DIFF_IMERG'], dt['CRU'], dt['DIFF_CRU'] = \
+    {}, {}, {}, {}, {}, {}, {}, {}, {}, {}
+[pole_lat, pole_lon, lat, lon, rlat, rlon, rot_pole_crs] = pole()
+lb = [['a', 'b', 'c'], ['d', 'e', 'f'], ['g', 'h', 'i'], ['j', 'k', 'l']]
+
+for s in range(len(seasons)):
+    season = seasons[s]
+    # COSMO 12 km
+    dt['LSM'][season] = {}
+    data = xr.open_dataset(f'{mdpath}/U/2001-2005.U.85000.{season}.nc')
+    u = data['U'].values[0, 0, :, :]
+    data = xr.open_dataset(f'{mdpath}/V/2001-2005.V.85000.{season}.nc')
+    v = data['V'].values[0, 0, :, :]
+    ws = np.sqrt(u ** 2 + v ** 2)
+    dt['LSM'][season]['v850'] = v
+    dt['LSM'][season]['u850'] = u
+    dt['LSM'][season]['ws850'] = ws
+    data = xr.open_dataset(f'{mdpath}/U/2001-2005.U.50000.{season}.nc')
+    u = data['U'].values[0, 0, :, :]
+    data = xr.open_dataset(f'{mdpath}/V/2001-2005.V.50000.{season}.nc')
+    v = data['V'].values[0, 0, :, :]
+    data = xr.open_dataset(f'{mdpath}/QV/2001-2005.QV.85000.{season}.nc')
+    q = data['QV'].values[0, 0, :, :]
+    ws = np.sqrt(u ** 2 + v ** 2)
+    dt['LSM'][season]['v500'] = v
+    dt['LSM'][season]['u500'] = u
+    dt['LSM'][season]['ws500'] = ws
+    dt['LSM'][season]['q850'] = q * 1000
+    data = xr.open_dataset(f'{mdpath}/TOT_PREC/2001-2005.TOT_PREC.{season}.nc')
+    pr = data['TOT_PREC'].values[0, :, :]
+    dt['LSM'][season]['pr'] = pr
+    data = xr.open_dataset(f'{mdpath}/T_2M/2001-2005.T_2M.{season}.nc')
+    tmp = data['T_2M'].values[0, :, :]
+    dt['LSM'][season]['tmp'] = tmp
+    dt['LSM']['lon'] = rlon
+    dt['LSM']['lat'] = rlat
+    dt['LSM']['proj'] = rot_pole_crs
+    # COSMO 12km remap
+    dt['LSM_ERA5'][season] = {}
+    data = xr.open_dataset(f'{rmpath}/U/2001-2005.U.85000.{season}.remap.era5.nc')
+    u = data['U'].values[0, 0, :, :]
+    data = xr.open_dataset(f'{rmpath}/V/2001-2005.V.85000.{season}.remap.era5.nc')
+    v = data['V'].values[0, 0, :, :]
+    ws = np.sqrt(u ** 2 + v ** 2)
+    dt['LSM_ERA5'][season]['v850'] = v
+    dt['LSM_ERA5'][season]['u850'] = u
+    dt['LSM_ERA5'][season]['ws850'] = ws
+    data = xr.open_dataset(f'{rmpath}/U/2001-2005.U.50000.{season}.remap.era5.nc')
+    u = data['U'].values[0, 0, :, :]
+    data = xr.open_dataset(f'{rmpath}/V/2001-2005.V.50000.{season}.remap.era5.nc')
+    v = data['V'].values[0, 0, :, :]
+    data = xr.open_dataset(f'{rmpath}/QV/2001-2005.QV.85000.{season}.remap.era5.nc')
+    q = data['QV'].values[0, 0, :, :]
+    ws = np.sqrt(u ** 2 + v ** 2)
+    dt['LSM_ERA5'][season]['v500'] = v
+    dt['LSM_ERA5'][season]['u500'] = u
+    dt['LSM_ERA5'][season]['ws500'] = ws
+    dt['LSM_ERA5'][season]['q850'] = q * 1000
+    data = xr.open_dataset(f'{rmpath}/TOT_PREC/2001-2005.TOT_PREC.{season}.remap.imerg.nc')
+    pr = data['TOT_PREC'].values[0, :, :]
+    dt['LSM_IMERG'][season]['pr'] = pr
+    data = xr.open_dataset(f'{rmpath}/T_2M/2001-2005.T_2M.{season}.remap.cru.nc')
+    tmp = data['T_2M'].values[0, :, :]
+    dt['LSM_CRU'][season]['tmp'] = tmp
+    # ERA5
+    dt['ERA5'][season] = {}
+    data = xr.open_dataset(f'{erapath}/era5.mo.2001-2005.p.{season}.nc')
+    u = data['u'].values[0, 2, :, :]
+    v = data['v'].values[0, 2, :, :]
+    ws = np.sqrt(u ** 2 + v ** 2)
+    dt['ERA5'][season]['v850'] = v
+    dt['ERA5'][season]['u850'] = u
+    dt['ERA5'][season]['ws850'] = ws
+    u = data['u'].values[0, 1, :, :]
+    v = data['v'].values[0, 1, :, :]
+    ws = np.sqrt(u ** 2 + v ** 2)
+    q = data['q'].values[0, 2, :, :]
+    dt['ERA5'][season]['v500'] = v
+    dt['ERA5'][season]['u500'] = u
+    dt['ERA5'][season]['ws500'] = ws
+    dt['ERA5'][season]['q850'] = q * 1000
+    dt['ERA5']['lon'] = data['longitude'].values[...]
+    dt['ERA5']['lat'] = data['latitude'].values[...]
+    dt['ERA5']['proj'] = ccrs.PlateCarree()
+    # IMERG
+    dt['IMERG'][season] = {}
+    data = xr.open_dataset(f'{imergpath}/IMERG.2001-2005.corr.{season}.nc')
+    pr = data['precipitation_corr'].values[0, :, :]
+    dt['IMERG'][season]['pr'] = pr
+    dt['IMERG']['lon'] = data['lon'].values[...]
+    dt['IMERG']['lat'] = data['lat'].values[...]
+    dt['IMERG']['proj'] = ccrs.PlateCarree()
+    # CRU
+    dt['CRU'][season] = {}
+    data = xr.open_dataset(f'{crupath}/cru.2001-2005.05.{season}.nc')
+    tmp = data['tmp'].values[0, :, :]
+    dt['CRU'][season]['tmp'] = tmp
+    dt['CRU']['lon'] = data['lon'].values[...]
+    dt['CRU']['lat'] = data['lat'].values[...]
+    dt['CRU']['proj'] = ccrs.PlateCarree()
+
+# compute difference
+for s in range(len(seasons)):
+    season = seasons[s]
+    dt['DIFF'][season] = {}
+    dt['DIFF_IMERG'][season] = {}
+    dt['DIFF_CRU'][season] = {}
+    for v in range(len(vars)):
+        var = vars[v]
+        dt['DIFF'][season][var] = dt['LSM_ERA5'][season][var] - dt['ERA5'][season][var]
+    dt['DIFF_IMERG'][season]['pr'] = dt['LSM_IMERG'][season]['pr'] - dt['IMERG'][season]['pr']
+    dt['DIFF_CRU'][season]['tmp'] = dt['LSM_CRU'][season]['tmp'] - dt['CRU'][season]['tmp']
+    dt['DIFF_IMERG'][season]['R'] = \
+        ma.corrcoef(ma.masked_invalid(dt['LSM_IMERG'][season]['pr'].flatten()),
+                    ma.masked_invalid(dt['IMERG'][season]['pr'].flatten()))[0, 1]
+    dt['DIFF_IMERG'][season]['BIAS'] = np.nanmean(dt['LSM_IMERG'][season]['pr'] - dt['IMERG'][season]['pr'])
+    dt['DIFF_CRU'][season]['R'] = \
+    ma.corrcoef(ma.masked_invalid(dt['LSM_CRU'][season]['tmp'].flatten()), ma.masked_invalid(dt['CRU'][season]['tmp'].flatten()))[0, 1]
+    dt['DIFF_CRU'][season]['BIAS'] = np.nanmean(dt['LSM_CRU'][season]['tmp'] - dt['CRU'][season]['tmp'])
+
+dt['DIFF']['lon'], dt['DIFF_IMERG']['lon'], dt['DIFF_CRU']['lon'] = dt['ERA5']['lon'], dt['IMERG']['lon'], dt['CRU'][
+    'lon']
+dt['DIFF']['lat'], dt['DIFF_IMERG']['lat'], dt['DIFF_CRU']['lat'] = dt['ERA5']['lat'], dt['IMERG']['lat'], dt['CRU'][
+    'lat']
+dt['DIFF']['proj'], dt['DIFF_IMERG']['proj'], dt['DIFF_CRU']['proj'] = dt['ERA5']['proj'], dt['IMERG']['proj'], \
+                                                                       dt['CRU']['proj']
+
+###############################################################################
+# %% Plot
+###############################################################################
+[pole_lat, pole_lon, lat, lon, rlat, rlon, rot_pole_crs] = pole()
+rlon_, rlat_ = np.meshgrid(rlon, rlat)
+sims = ['LSM', 'ERA5', 'DIFF']
+fig = plt.figure(figsize=(12.5, 9))
+gs1 = gridspec.GridSpec(4, 2, left=0.05, bottom=0.03, right=0.575,
+                        top=0.95, hspace=0.25, wspace=0.18,
+                        width_ratios=[1, 1], height_ratios=[1, 1, 1, 1])
+gs2 = gridspec.GridSpec(4, 1, left=0.682, bottom=0.03, right=0.925,
+                        top=0.95, hspace=0.25, wspace=0.18)
+ncol = 3  # edit here
+nrow = 4
+
+axs, cs, ct, qk, q = np.empty(shape=(nrow, ncol), dtype='object'), np.empty(shape=(nrow, ncol), dtype='object'), \
+                     np.empty(shape=(nrow, ncol), dtype='object'), np.empty(shape=(nrow, ncol), dtype='object'), \
+                     np.empty(shape=(nrow, ncol), dtype='object')
+
+for i in range(nrow):
+    for j in range(ncol - 1):
+        axs[i, j] = fig.add_subplot(gs1[i, j], projection=rot_pole_crs)
+        axs[i, j] = plotcosmo(axs[i, j])
+    axs[i, 2] = fig.add_subplot(gs2[i, 0], projection=rot_pole_crs)
+    axs[i, 2] = plotcosmo(axs[i, 2])
+
+# plot wind 500
+levels1 = MaxNLocator(nbins=20).tick_values(0, 20)
+cmap1 = windmap(20, cmc.batlowW_r)
+norm1 = BoundaryNorm(levels1, ncolors=cmap1.N, clip=True)
+
+levels2 = MaxNLocator(nbins=21).tick_values(-10, 10)
+cmap2 = custom_div_cmap(21, cmc.broc_r)
+norm2 = matplotlib.colors.Normalize(vmin=-10, vmax=10)
+
+cmaps = [cmap1, cmap1, cmap2]
+norms = [norm1, norm1, norm2]
+scales = [200, 200, 150]
+steplons = [np.arange(0, 1058, 1)[::40], np.arange(0, 1440, 1)[::30], np.arange(0, 1440, 1)[::30]]
+steplats = [np.arange(0, 610, 1)[::40], np.arange(0, 369, 1)[::12], np.arange(0, 369, 1)[::12]]
+
+for j in range(3):
+    sim = sims[j]
+    cmap = cmaps[j]
+    norm = norms[j]
+    steplon = steplons[j]
+    steplat = steplats[j]
+    scale = scales[j]
+    cs[0, j] = axs[0, j].pcolormesh(dt[sim]['lon'], dt[sim]['lat'], dt[sim]['JJA']['ws500'], cmap=cmap, norm=norm,
+                                    shading="auto", transform=dt[sim]['proj'])
+    q[0, j] = axs[0, j].quiver(dt[sim]['lon'][steplon], dt[sim]['lat'][steplat],
+                               dt[sim]['JJA']['u500'][steplat, :][:, steplon],
+                               dt[sim]['JJA']['v500'][steplat, :][:, steplon], color='black', scale=scale,
+                               transform=dt[sim]['proj'])
+
+qk[0, 1] = axs[0, 1].quiverkey(q[0, 1], 0.88, 1.06, 10, r'$10$', labelpos='E', transform=axs[0, 1].transAxes,
+                               fontproperties={'size': 13})
+qk[0, 2] = axs[0, 2].quiverkey(q[0, 2], 0.88, 1.06, 10, r'$10$', labelpos='E', transform=axs[0, 2].transAxes,
+                               fontproperties={'size': 13})
+
+cax = fig.add_axes(
+    [axs[0, 1].get_position().x1 + 0.01, axs[0, 1].get_position().y0, 0.015, axs[0, 1].get_position().height])
+cbar = fig.colorbar(cs[0, 1], cax=cax, orientation='vertical', extend='max')
+cbar.ax.tick_params(labelsize=13)
+cax = fig.add_axes(
+    [axs[0, 2].get_position().x1 + 0.01, axs[0, 2].get_position().y0, 0.015, axs[0, 2].get_position().height])
+cbar = fig.colorbar(cs[0, 2], cax=cax, orientation='vertical', extend='both')
+cbar.ax.tick_params(labelsize=13)
+
+for i in range(nrow):
+    for j in range(ncol):
+        title = labels[i][j]
+        axs[i, j].set_title(f'{title}', pad=5, fontsize=14, loc='center')
+
+# plot uqv 850
+levels1 = MaxNLocator(nbins=16).tick_values(0, 16)
+cmap1 = plt.cm.get_cmap('YlGnBu')
+norm1 = BoundaryNorm(levels1, ncolors=cmap1.N, clip=True)
+
+levels2 = MaxNLocator(nbins=21).tick_values(-4, 4)
+cmap2 = drywet(21, cmc.vik_r)
+norm2 = matplotlib.colors.Normalize(vmin=-4, vmax=4)
+
+cmaps = [cmap1, cmap1, cmap2]
+norms = [norm1, norm1, norm2]
+scales = [200, 200, 150]
+
+for j in range(3):
+    sim = sims[j]
+    cmap = cmaps[j]
+    norm = norms[j]
+    scale = scales[j]
+    steplon = steplons[j]
+    steplat = steplats[j]
+    cs[1, j] = axs[1, j].pcolormesh(dt[sim]['lon'], dt[sim]['lat'], dt[sim]['JJA']['q850'], cmap=cmap, norm=norm,
+                                    shading="auto", transform=dt[sim]['proj'])
+    q[1, j] = axs[1, j].quiver(dt[sim]['lon'][steplon], dt[sim]['lat'][steplat],
+                               dt[sim]['JJA']['u850'][steplat, :][:, steplon],
+                               dt[sim]['JJA']['v850'][steplat, :][:, steplon],
+                               color='black', scale=scale, transform=dt[sim]['proj'])
+
+qk[1, 1] = axs[1, 1].quiverkey(q[1, 1], 0.88, 1.06, 10, r'$10$', labelpos='E', transform=axs[1, 1].transAxes,
+                               fontproperties={'size': 13})
+qk[1, 2] = axs[1, 2].quiverkey(q[1, 2], 0.88, 1.06, 10, r'$10$', labelpos='E', transform=axs[1, 2].transAxes,
+                               fontproperties={'size': 13})
+
+cax = fig.add_axes(
+    [axs[1, 1].get_position().x1 + 0.01, axs[1, 1].get_position().y0, 0.015, axs[1, 1].get_position().height])
+cbar = fig.colorbar(cs[1, 1], cax=cax, orientation='vertical', extend='max')
+cbar.ax.tick_params(labelsize=13)
+cax = fig.add_axes(
+    [axs[1, 2].get_position().x1 + 0.01, axs[1, 2].get_position().y0, 0.015, axs[1, 2].get_position().height])
+cbar = fig.colorbar(cs[1, 2], cax=cax, orientation='vertical', extend='both')
+cbar.ax.tick_params(labelsize=13)
+
+# plot precipitation
+levels1 = MaxNLocator(nbins=20).tick_values(0, 20)
+cmap1 = cmap = cmc.davos_r
+norm1 = BoundaryNorm(levels1, ncolors=cmap1.N, clip=True)
+
+levels2 = MaxNLocator(nbins=21).tick_values(-15, 15)
+cmap2 = drywet(21, cmc.vik_r)
+norm2 = matplotlib.colors.Normalize(vmin=-15, vmax=15)
+
+cmaps = [cmap1, cmap1, cmap2]
+norms = [norm1, norm1, norm2]
+sims = ['LSM', 'IMERG', 'DIFF_IMERG']
+
+for j in range(3):
+    sim = sims[j]
+    cmap = cmaps[j]
+    norm = norms[j]
+    cs[2, j] = axs[2, j].pcolormesh(dt[sim]['lon'], dt[sim]['lat'], dt[sim]['JJA']['pr'], cmap=cmap, norm=norm,
+                                    shading="auto", transform=dt[sim]['proj'])
+txt = dt['DIFF_IMERG']['JJA']['R']
+axs[2, 2].text(0.98, 0.92, 'R=%0.2f' % txt, fontsize=13, horizontalalignment='right',
+               verticalalignment='center', transform=axs[2, 2].transAxes)
+txt = dt['DIFF_IMERG']['JJA']['BIAS']
+axs[2, 2].text(0.98, 0.81, 'BIAS=%0.2f' % txt, fontsize=13, horizontalalignment='right',
+               verticalalignment='center', transform=axs[2, 2].transAxes)
+
+cax = fig.add_axes(
+    [axs[2, 1].get_position().x1 + 0.01, axs[2, 1].get_position().y0, 0.015, axs[2, 1].get_position().height])
+cbar = fig.colorbar(cs[1, 1], cax=cax, orientation='vertical', extend='max', ticks=np.linspace(0, 20, 5, endpoint=True))
+cbar.ax.tick_params(labelsize=13)
+cax = fig.add_axes(
+    [axs[2, 2].get_position().x1 + 0.01, axs[2, 2].get_position().y0, 0.015, axs[2, 2].get_position().height])
+cbar = fig.colorbar(cs[1, 2], cax=cax, orientation='vertical', extend='both', ticks=np.linspace(-15, 15, 7, endpoint=True))
+cbar.ax.tick_params(labelsize=13)
+
+# plot tmp
+levels1 = MaxNLocator(nbins=35).tick_values(-35, 35)
+cmap1 = cmc.roma_r
+norm1 = BoundaryNorm(levels1, ncolors=cmap1.N, clip=True)
+
+levels2 = MaxNLocator(nbins=27).tick_values(-9, 9)
+cmap2 = cmap = custom_div_cmap(27, cmc.vik)
+norm2 = matplotlib.colors.Normalize(vmin=-9, vmax=9)
+
+cmaps = [cmap1, cmap1, cmap2]
+norms = [norm1, norm1, norm2]
+sims = ['LSM', 'CRU', 'DIFF_CRU']
+
+for j in range(3):
+    sim = sims[j]
+    cmap = cmaps[j]
+    norm = norms[j]
+    cs[2, j] = axs[3, j].pcolormesh(dt[sim]['lon'], dt[sim]['lat'], dt[sim]['JJA']['tmp'], cmap=cmap, norm=norm,
+                                    shading="auto", transform=dt[sim]['proj'])
+txt = dt['DIFF_CRU']['JJA']['R']
+axs[3, 2].text(0.98, 0.92, 'R=%0.2f' % txt, fontsize=13, horizontalalignment='right',
+               verticalalignment='center', transform=axs[3, 2].transAxes)
+txt = dt['DIFF_CRU']['JJA']['BIAS']
+axs[3, 2].text(0.98, 0.81, 'BIAS=%0.2f' % txt, fontsize=13, horizontalalignment='right',
+               verticalalignment='center', transform=axs[3, 2].transAxes)
+
+cax = fig.add_axes(
+    [axs[3, 1].get_position().x1 + 0.01, axs[3, 1].get_position().y0, 0.015, axs[3, 1].get_position().height])
+cbar = fig.colorbar(cs[1, 1], cax=cax, orientation='vertical', extend='max', ticks=np.linspace(-30, 30, 5, endpoint=True))
+cbar.ax.tick_params(labelsize=13)
+cax = fig.add_axes(
+    [axs[3, 2].get_position().x1 + 0.01, axs[3, 2].get_position().y0, 0.015, axs[3, 2].get_position().height])
+cbar = fig.colorbar(cs[1, 2], cax=cax, orientation='vertical', extend='both', ticks=np.linspace(-9, 9, 7, endpoint=True))
+cbar.ax.tick_params(labelsize=13)
+# ---
+for i in range(nrow):
+    for j in range(ncol):
+        label = lb[i][j]
+        t = axs[i, j].text(0.01, 0.985, f'({label})', ha='left', va='top',
+                           transform=axs[i, j].transAxes, fontsize=14)
+        t.set_bbox(dict(facecolor='white', alpha=0.7, pad=1, edgecolor='none'))
+
+plt.show()
+# plotpath = "/project/pr133/rxiang/figure/paper1/validation/LSM/"
+# fig.savefig(plotpath + 'vali1.png', dpi=500)
+# plt.close(fig)

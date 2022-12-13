@@ -20,34 +20,37 @@ from mycolor import custom_div_cmap, drywet
 font = {'size': 14}
 matplotlib.rc('font', **font)
 
-lonmin = [70, 85, 95, 110, 130]
-lonmax = [80, 95, 105, 120, 140]
+lonmin = [70, 80, 90, 100, 110, 120, 130, 140]
+lonmax = [80, 90, 100, 110, 120, 130, 140, 150]
 
 # lonmin = [70]
 # lonmax = [80]
 
+# %%
 for i, j in zip(lonmin, lonmax):
     data = xr.open_dataset('/project/pr133/rxiang/data/cosmo/EAS11_ctrl/monsoon/TOT_PREC/hovmoller/' + f'01-05.TOT_PREC.cpm.{i}-{j}.nc')
     cpm_ctrl = data['TOT_PREC'].values[...]
-    data = xr.open_dataset(f'/project/pr133/rxiang/data/cosmo/EAS11_topo1/monsoon/TOT_PREC/hovmoller/' + f'01-05.TOT_PREC.cpm.{i}-{j}.nc')
-    cpm_topo1 = data['TOT_PREC'].values[...]
+    lat1 = data['lat'].values[...]
+    time1 = data['time'].values[...]
+    data = xr.open_dataset('/project/pr133/rxiang/data/obs/pr/IMERG/hovmoller/' + f'IMERG.2001-2005.cpm.{i}-{j}.nc')
+    cpm_imerg = data['pr'].values[...]
+    lat2 = data['lat'].values[...]
+    time2 = data['time'].values[...]
 
-    lat = data['lat'].values[...]
-    time = data['time'].values[...]
-
-    time_, lat_ = np.meshgrid(time, lat)
+    time1_, lat1_ = np.meshgrid(time1, lat1)
+    time2_, lat2_ = np.meshgrid(time2, lat2)
 
     # plot
-    ar = 3.3  # initial aspect ratio for first trial
-    hi = 5.8  # height in inches
+    ar = 2.5  # initial aspect ratio for first trial
+    hi = 4.2  # height in inches
     wi = hi * ar  # height in inches
-    ncol = 4  # edit here
+    ncol = 3  # edit here
     nrow = 1
-    axs, cs, ct = np.empty(4, dtype='object'), np.empty(4, dtype='object'), np.empty(4, dtype='object')
+    axs, cs, ct = np.empty(3, dtype='object'), np.empty(3, dtype='object'), np.empty(3, dtype='object')
 
     fig = plt.figure(figsize=(wi, hi))
-    left, bottom, right, top = 0.035, 0.18, 0.99, 0.89
-    gs = gridspec.GridSpec(nrows=1, ncols=4, width_ratios=[.75, 4, 4, 4], left=left, bottom=bottom, right=right, top=top, wspace=0.2, hspace=0.1)
+    left, bottom, right, top = 0.05, 0.235, 0.99, 0.93
+    gs = gridspec.GridSpec(nrows=1, ncols=3, width_ratios=[.56, 2.5, 2.5], left=left, bottom=bottom, right=right, top=top, wspace=0.25, hspace=0.4)
 
     y_tick_labels = [u'5\N{DEGREE SIGN}N', u'10\N{DEGREE SIGN}N', u'15\N{DEGREE SIGN}N', u'20\N{DEGREE SIGN}N', u'25\N{DEGREE SIGN}N',
                      u'30\N{DEGREE SIGN}N', u'35\N{DEGREE SIGN}N', u'40\N{DEGREE SIGN}N', u'45\N{DEGREE SIGN}N',
@@ -72,66 +75,53 @@ for i, j in zip(lonmin, lonmax):
     # right plot for Hovmoller diagram
     ax2 = fig.add_subplot(gs[0, 1])
     ax3 = fig.add_subplot(gs[0, 2])
-    ax4 = fig.add_subplot(gs[0, 3])
     # Plot of chosen variable averaged over longitude and slightly smoothed
     levels = MaxNLocator(nbins=25).tick_values(0, 25)
     cmap = cmc.davos_r
     norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)
 
-    cf2 = ax2.pcolormesh(time_, lat_, np.transpose(cpm_ctrl[:, :, 0]), cmap=cmap, norm=norm)
-    cf3 = ax3.pcolormesh(time_, lat_, np.transpose(cpm_topo1[:, :, 0]), cmap=cmap, norm=norm)
+    cf2 = ax2.pcolormesh(time1_, lat1_, np.transpose(cpm_ctrl[:, :, 0]), cmap=cmap, norm=norm)
+    cf3 = ax3.pcolormesh(time2_, lat2_, np.transpose(cpm_imerg[:, :, 0]), cmap=cmap, norm=norm)
 
-    levels = MaxNLocator(nbins=23).tick_values(-10, 10)
-    cmap = drywet(25, cmc.vik_r)
-    norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)
-    cf4 = ax4.pcolormesh(time_, lat_, np.transpose(cpm_topo1[:, :, 0]) - np.transpose(cpm_ctrl[:, :, 0]), cmap=cmap, clim=(-10, 10))
-    ct2 = ax2.contour(time_, lat_, mpcalc.smooth_n_point(np.transpose(cpm_ctrl[:, :, 0]), 5, 1),
+    ct2 = ax2.contour(time1_, lat1_, mpcalc.smooth_n_point(np.transpose(cpm_ctrl[:, :, 0]), 5, 1),
                       levels=[5, 10, 15, 20], colors='k', linewidths=1)
-    ct3 = ax3.contour(time_, lat_, mpcalc.smooth_n_point(np.transpose(cpm_topo1[:, :, 0]), 5, 1),
+    ct3 = ax3.contour(time2_, lat2_, mpcalc.smooth_n_point(np.transpose(cpm_imerg[:, :, 0]), 5, 1),
                       levels=[5, 10, 15, 20], colors='k', linewidths=1)
-    ct4 = ax4.contour(time_, lat_, mpcalc.smooth_n_point(np.transpose(cpm_topo1[:, :, 0]) - np.transpose(cpm_ctrl[:, :, 0]), 9, 1),
-                      colors='k', linewidths=1)
 
-    ax2.text(0, 1.01, 'Control', ha='left', va='bottom', transform=ax2.transAxes, fontsize=14)
-    ax3.text(0, 1.01, 'Reduced topography', ha='left', va='bottom', transform=ax3.transAxes, fontsize=14)
-    ax4.text(0, 1.01, 'Reduced topography - Control', ha='left', va='bottom', transform=ax4.transAxes, fontsize=14)
+    ax2.text(0, 1.01, 'LSM', ha='left', va='bottom', transform=ax2.transAxes, fontsize=14)
+    ax3.text(0, 1.01, 'IMERG', ha='left', va='bottom', transform=ax3.transAxes, fontsize=14)
 
-    for ax, ct in zip([ax2, ax3, ax4], [ct2, ct3, ct4]):
+    for ax, ct in zip([ax2, ax3], [ct2, ct3]):
         clabel = ax.clabel(ct, inline=True, use_clabeltext=True, fontsize=13)
         for l in clabel:
             l.set_rotation(0)
         [txt.set_bbox(dict(facecolor='white', edgecolor='none', pad=0, alpha=0.5)) for txt in clabel]
 
-    cax = fig.add_axes([ax2.get_position().x0, ax2.get_position().y0 - 0.09, ax2.get_position().width*2+0.04, 0.02])
+    cax = fig.add_axes([ax2.get_position().x0, ax2.get_position().y0 - 0.12, ax3.get_position().x1-ax2.get_position().x0, 0.04])
     cbar1 = fig.colorbar(cf2, cax=cax, ticks=np.linspace(0, 24, 13, endpoint=True), orientation='horizontal', extend='max')
     cbar1.ax.tick_params(labelsize=13)
     cbar1.ax.set_xlabel('mm/day', fontsize=13, labelpad=-0.01)
 
-    cax = fig.add_axes(
-        [ax4.get_position().x0, ax4.get_position().y0 - 0.09, ax4.get_position().width, 0.02])
-    cbar2 = fig.colorbar(cf4, cax=cax, ticks=np.linspace(-10, 10, 11, endpoint=True), orientation='horizontal', extend='both')
-    cbar2.ax.tick_params(labelsize=13)
-    cbar2.ax.set_xlabel('mm/day', fontsize=13, labelpad=-0.01)
-
     # Make some ticks and tick labels
-    for ax in ax2, ax3, ax4:
-        ax.set_xticks(time[3::6])
-        ax.set_xticklabels(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])
+    for ax in ax2, ax3:
+        ax.set_xticks(time1[3::6])
+        # ax.set_xticklabels(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])
+        ax.set_xticklabels(['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'])
         ax.set_ylim(5, 50)
         ax.set_yticks([5, 10, 15, 20, 25, 30, 35, 40, 45, 50])
         ax.set_yticklabels(y_tick_labels)
         ax.grid(linestyle='dotted', linewidth=2)
 
-    fig.suptitle(f'Precipitation Climatology ({i}°-{j}°E)', fontsize=16, fontweight='bold')
+    # fig.suptitle(f'Precipitation Climatology ({i}°-{j}°E)', fontsize=16, fontweight='bold')
 
     # Set some titles
     # plt.title('250-hPa V-wind', loc='left', fontsize=10)
     # plt.title('Time Range: {0:%Y%m%d %HZ} - {1:%Y%m%d %HZ}'.format(vtimes[0], vtimes[-1]),
               # loc='right', fontsize=10)
 
-    # plt.show()
-    plotpath = "/project/pr133/rxiang/figure/EAS11/analysis/monsoon/topo1/hovmoller/"
-    fig.savefig(plotpath + f'{i}°-{j}°E.png', dpi=500)
+    plt.show()
+    plotpath = "/project/pr133/rxiang/figure/paper1/validation/LSM/"
+    fig.savefig(plotpath + f'hovmoller.{i}°-{j}°E.png', dpi=500)
     plt.close(fig)
 
 
