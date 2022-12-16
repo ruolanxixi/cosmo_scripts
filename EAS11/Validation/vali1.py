@@ -25,7 +25,7 @@ matplotlib.rc('font', **font)
 
 # -------------------------------------------------------------------------------
 # read data
-sims = ['LSM', 'ERA5', 'DIFF']
+sims = ['CTRL11', 'ERA5', 'DIFF']
 seasons = ['DJF', 'MAM', 'JJA', 'SON']
 mdpath = "/project/pr133/rxiang/data/cosmo/EAS11_ctrl/szn"
 rmpath = "/project/pr133/rxiang/data/cosmo/EAS11_ctrl/remap"
@@ -33,10 +33,10 @@ erapath = "/project/pr133/rxiang/data/era5/ot/szn"
 imergpath = "/project/pr133/rxiang/data/obs/pr/IMERG/szn"
 crupath = "/project/pr133/rxiang/data/obs/tmp/cru/szn"
 dt = {}
-labels = [['LSM', 'ERA5', 'LSM - ERA5'], ['LSM', 'ERA5', 'LSM - ERA5'],
-          ['LSM', 'IMERG', 'LSM - IMERG'], ['LSM', 'CRU', 'LSM - CRU']]
+labels = [['CTRL11', 'ERA5', 'CTRL11 - ERA5'], ['CTRL11', 'ERA5', 'CTRL11 - ERA5'],
+          ['CTRL11', 'IMERG', 'CTRL11 - IMERG'], ['CTRL11', 'CRU', 'CTRL11 - CRU']]
 vars = ['v850', 'u850', 'ws850', 'u500', 'v500', 'ws500', 'q850']
-dt['LSM'], dt['ERA5'], dt['LSM_ERA5'], dt['LSM_IMERG'], dt['LSM_CRU'], dt['DIFF'], \
+dt['CTRL11'], dt['ERA5'], dt['CTRL11_ERA5'], dt['CTRL11_IMERG'], dt['CTRL11_CRU'], dt['DIFF'], \
 dt['IMERG'], dt['DIFF_IMERG'], dt['CRU'], dt['DIFF_CRU'] = \
     {}, {}, {}, {}, {}, {}, {}, {}, {}, {}
 [pole_lat, pole_lon, lat, lon, rlat, rlon, rot_pole_crs] = pole()
@@ -45,15 +45,15 @@ lb = [['a', 'b', 'c'], ['d', 'e', 'f'], ['g', 'h', 'i'], ['j', 'k', 'l']]
 for s in range(len(seasons)):
     season = seasons[s]
     # COSMO 12 km
-    dt['LSM'][season] = {}
+    dt['CTRL11'][season] = {}
     data = xr.open_dataset(f'{mdpath}/U/2001-2005.U.85000.{season}.nc')
     u = data['U'].values[0, 0, :, :]
     data = xr.open_dataset(f'{mdpath}/V/2001-2005.V.85000.{season}.nc')
     v = data['V'].values[0, 0, :, :]
     ws = np.sqrt(u ** 2 + v ** 2)
-    dt['LSM'][season]['v850'] = v
-    dt['LSM'][season]['u850'] = u
-    dt['LSM'][season]['ws850'] = ws
+    dt['CTRL11'][season]['v850'] = v
+    dt['CTRL11'][season]['u850'] = u
+    dt['CTRL11'][season]['ws850'] = ws
     data = xr.open_dataset(f'{mdpath}/U/2001-2005.U.50000.{season}.nc')
     u = data['U'].values[0, 0, :, :]
     data = xr.open_dataset(f'{mdpath}/V/2001-2005.V.50000.{season}.nc')
@@ -61,29 +61,29 @@ for s in range(len(seasons)):
     data = xr.open_dataset(f'{mdpath}/QV/2001-2005.QV.85000.{season}.nc')
     q = data['QV'].values[0, 0, :, :]
     ws = np.sqrt(u ** 2 + v ** 2)
-    dt['LSM'][season]['v500'] = v
-    dt['LSM'][season]['u500'] = u
-    dt['LSM'][season]['ws500'] = ws
-    dt['LSM'][season]['q850'] = q * 1000
+    dt['CTRL11'][season]['v500'] = v
+    dt['CTRL11'][season]['u500'] = u
+    dt['CTRL11'][season]['ws500'] = ws
+    dt['CTRL11'][season]['q850'] = q * 1000
     data = xr.open_dataset(f'{mdpath}/TOT_PREC/2001-2005.TOT_PREC.{season}.nc')
     pr = data['TOT_PREC'].values[0, :, :]
-    dt['LSM'][season]['pr'] = pr
+    dt['CTRL11'][season]['pr'] = pr
     data = xr.open_dataset(f'{mdpath}/T_2M/2001-2005.T_2M.{season}.nc')
     tmp = data['T_2M'].values[0, :, :] - 273.15
-    dt['LSM'][season]['tmp'] = tmp
-    dt['LSM']['lon'] = rlon
-    dt['LSM']['lat'] = rlat
-    dt['LSM']['proj'] = rot_pole_crs
+    dt['CTRL11'][season]['tmp'] = tmp
+    dt['CTRL11']['lon'] = rlon
+    dt['CTRL11']['lat'] = rlat
+    dt['CTRL11']['proj'] = rot_pole_crs
     # COSMO 12km remap
-    dt['LSM_ERA5'][season] = {}
+    dt['CTRL11_ERA5'][season] = {}
     data = xr.open_dataset(f'{rmpath}/U/2001-2005.U.85000.{season}.remap.era5.nc')
     u = data['U'].values[0, 0, :, :]
     data = xr.open_dataset(f'{rmpath}/V/2001-2005.V.85000.{season}.remap.era5.nc')
     v = data['V'].values[0, 0, :, :]
     ws = np.sqrt(u ** 2 + v ** 2)
-    dt['LSM_ERA5'][season]['v850'] = v
-    dt['LSM_ERA5'][season]['u850'] = u
-    dt['LSM_ERA5'][season]['ws850'] = ws
+    dt['CTRL11_ERA5'][season]['v850'] = v
+    dt['CTRL11_ERA5'][season]['u850'] = u
+    dt['CTRL11_ERA5'][season]['ws850'] = ws
     data = xr.open_dataset(f'{rmpath}/U/2001-2005.U.50000.{season}.remap.era5.nc')
     u = data['U'].values[0, 0, :, :]
     data = xr.open_dataset(f'{rmpath}/V/2001-2005.V.50000.{season}.remap.era5.nc')
@@ -91,18 +91,18 @@ for s in range(len(seasons)):
     data = xr.open_dataset(f'{rmpath}/QV/2001-2005.QV.85000.{season}.remap.era5.nc')
     q = data['QV'].values[0, 0, :, :]
     ws = np.sqrt(u ** 2 + v ** 2)
-    dt['LSM_ERA5'][season]['v500'] = v
-    dt['LSM_ERA5'][season]['u500'] = u
-    dt['LSM_ERA5'][season]['ws500'] = ws
-    dt['LSM_ERA5'][season]['q850'] = q * 1000
+    dt['CTRL11_ERA5'][season]['v500'] = v
+    dt['CTRL11_ERA5'][season]['u500'] = u
+    dt['CTRL11_ERA5'][season]['ws500'] = ws
+    dt['CTRL11_ERA5'][season]['q850'] = q * 1000
     data = xr.open_dataset(f'{rmpath}/TOT_PREC/2001-2005.TOT_PREC.{season}.remap.imerg.nc')
     pr = data['TOT_PREC'].values[0, :, :]
-    dt['LSM_IMERG'][season] = {}
-    dt['LSM_IMERG'][season]['pr'] = pr
+    dt['CTRL11_IMERG'][season] = {}
+    dt['CTRL11_IMERG'][season]['pr'] = pr
     data = xr.open_dataset(f'{rmpath}/T_2M/2001-2005.T_2M.{season}.remap.cru.nc')
     tmp = data['T_2M'].values[0, :, :] - 273.15
-    dt['LSM_CRU'][season] = {}
-    dt['LSM_CRU'][season]['tmp'] = tmp
+    dt['CTRL11_CRU'][season] = {}
+    dt['CTRL11_CRU'][season]['tmp'] = tmp
     # ERA5
     dt['ERA5'][season] = {}
     data = xr.open_dataset(f'{erapath}/era5.mo.2001-2005.p.{season}.nc')
@@ -148,20 +148,20 @@ for s in range(len(seasons)):
     dt['DIFF_CRU'][season] = {}
     for v in range(len(vars)):
         var = vars[v]
-        dt['DIFF'][season][var] = dt['LSM_ERA5'][season][var] - dt['ERA5'][season][var]
+        dt['DIFF'][season][var] = dt['CTRL11_ERA5'][season][var] - dt['ERA5'][season][var]
     dt['DIFF'][season]['R'] = \
-        ma.corrcoef(ma.masked_invalid(dt['LSM_ERA5'][season]['q850'].flatten()),
+        ma.corrcoef(ma.masked_invalid(dt['CTRL11_ERA5'][season]['q850'].flatten()),
                     ma.masked_invalid(dt['ERA5'][season]['q850'].flatten()))[0, 1]
-    dt['DIFF'][season]['BIAS'] = np.nanmean(dt['LSM_ERA5'][season]['q850'] - dt['ERA5'][season]['q850'])
-    dt['DIFF_IMERG'][season]['pr'] = dt['LSM_IMERG'][season]['pr'] - dt['IMERG'][season]['pr']
-    dt['DIFF_CRU'][season]['tmp'] = dt['LSM_CRU'][season]['tmp'] - dt['CRU'][season]['tmp']
+    dt['DIFF'][season]['BIAS'] = np.nanmean(dt['CTRL11_ERA5'][season]['q850'] - dt['ERA5'][season]['q850'])
+    dt['DIFF_IMERG'][season]['pr'] = dt['CTRL11_IMERG'][season]['pr'] - dt['IMERG'][season]['pr']
+    dt['DIFF_CRU'][season]['tmp'] = dt['CTRL11_CRU'][season]['tmp'] - dt['CRU'][season]['tmp']
     dt['DIFF_IMERG'][season]['R'] = \
-        ma.corrcoef(ma.masked_invalid(dt['LSM_IMERG'][season]['pr'].flatten()),
+        ma.corrcoef(ma.masked_invalid(dt['CTRL11_IMERG'][season]['pr'].flatten()),
                     ma.masked_invalid(dt['IMERG'][season]['pr'].flatten()))[0, 1]
-    dt['DIFF_IMERG'][season]['BIAS'] = np.nanmean(dt['LSM_IMERG'][season]['pr'] - dt['IMERG'][season]['pr'])
+    dt['DIFF_IMERG'][season]['BIAS'] = np.nanmean(dt['CTRL11_IMERG'][season]['pr'] - dt['IMERG'][season]['pr'])
     dt['DIFF_CRU'][season]['R'] = \
-    ma.corrcoef(ma.masked_invalid(dt['LSM_CRU'][season]['tmp'].flatten()), ma.masked_invalid(dt['CRU'][season]['tmp'].flatten()))[0, 1]
-    dt['DIFF_CRU'][season]['BIAS'] = np.nanmean(dt['LSM_CRU'][season]['tmp'] - dt['CRU'][season]['tmp'])
+    ma.corrcoef(ma.masked_invalid(dt['CTRL11_CRU'][season]['tmp'].flatten()), ma.masked_invalid(dt['CRU'][season]['tmp'].flatten()))[0, 1]
+    dt['DIFF_CRU'][season]['BIAS'] = np.nanmean(dt['CTRL11_CRU'][season]['tmp'] - dt['CRU'][season]['tmp'])
 
 dt['DIFF']['lon'], dt['DIFF_IMERG']['lon'], dt['DIFF_CRU']['lon'] = dt['ERA5']['lon'], dt['IMERG']['lon'], dt['CRU'][
     'lon']
@@ -175,13 +175,13 @@ dt['DIFF']['proj'], dt['DIFF_IMERG']['proj'], dt['DIFF_CRU']['proj'] = dt['ERA5'
 ###############################################################################
 [pole_lat, pole_lon, lat, lon, rlat, rlon, rot_pole_crs] = pole()
 rlon_, rlat_ = np.meshgrid(rlon, rlat)
-sims = ['LSM', 'ERA5', 'DIFF']
+sims = ['CTRL11', 'ERA5', 'DIFF']
 fig = plt.figure(figsize=(12.5, 9))
-gs1 = gridspec.GridSpec(4, 2, left=0.05, bottom=0.03, right=0.575,
-                        top=0.95, hspace=0.15, wspace=0.1,
+gs1 = gridspec.GridSpec(4, 2, left=0.05, bottom=0.03, right=0.6,
+                        top=0.97, hspace=0.12, wspace=0.08,
                         width_ratios=[1, 1], height_ratios=[1, 1, 1, 1])
-gs2 = gridspec.GridSpec(4, 1, left=0.682, bottom=0.03, right=0.925,
-                        top=0.95, hspace=0.25, wspace=0.18)
+gs2 = gridspec.GridSpec(4, 1, left=0.66, bottom=0.03, right=0.925,
+                        top=0.97, hspace=0.12, wspace=0.08)
 ncol = 3  # edit here
 nrow = 4
 
@@ -305,7 +305,7 @@ norm2 = matplotlib.colors.Normalize(vmin=-15, vmax=15)
 
 cmaps = [cmap1, cmap1, cmap2]
 norms = [norm1, norm1, norm2]
-sims = ['LSM', 'IMERG', 'DIFF_IMERG']
+sims = ['CTRL11', 'IMERG', 'DIFF_IMERG']
 
 for j in range(3):
     sim = sims[j]
@@ -324,7 +324,7 @@ t.set_bbox(dict(facecolor='white', alpha=0.7, pad=1, edgecolor='none'))
 
 cax = fig.add_axes(
     [axs[2, 1].get_position().x1 + 0.01, axs[2, 1].get_position().y0, 0.015, axs[2, 1].get_position().height])
-cbar = fig.colorbar(cs[2, 1], cax=cax, orientation='vertical', extend='both', ticks=np.linspace(0, 20, 5, endpoint=True))
+cbar = fig.colorbar(cs[2, 1], cax=cax, orientation='vertical', extend='max', ticks=np.linspace(0, 20, 5, endpoint=True))
 cbar.ax.tick_params(labelsize=13)
 cax = fig.add_axes(
     [axs[2, 2].get_position().x1 + 0.01, axs[2, 2].get_position().y0, 0.015, axs[2, 2].get_position().height])
@@ -342,7 +342,7 @@ norm2 = matplotlib.colors.Normalize(vmin=-9, vmax=9)
 
 cmaps = [cmap1, cmap1, cmap2]
 norms = [norm1, norm1, norm2]
-sims = ['LSM', 'CRU', 'DIFF_CRU']
+sims = ['CTRL11', 'CRU', 'DIFF_CRU']
 
 for j in range(3):
     sim = sims[j]
@@ -361,7 +361,7 @@ t.set_bbox(dict(facecolor='white', alpha=0.7, pad=1, edgecolor='none'))
 
 cax = fig.add_axes(
     [axs[3, 1].get_position().x1 + 0.01, axs[3, 1].get_position().y0, 0.015, axs[3, 1].get_position().height])
-cbar = fig.colorbar(cs[3, 1], cax=cax, orientation='vertical', extend='max', ticks=np.linspace(0, 36, 7, endpoint=True))
+cbar = fig.colorbar(cs[3, 1], cax=cax, orientation='vertical', extend='both', ticks=np.linspace(0, 36, 7, endpoint=True))
 cbar.ax.tick_params(labelsize=13)
 cax = fig.add_axes(
     [axs[3, 2].get_position().x1 + 0.01, axs[3, 2].get_position().y0, 0.015, axs[3, 2].get_position().height])
@@ -391,6 +391,6 @@ for j in range(ncol):
     axs[3, j].text(0.92, -0.02, '160°E', ha='center', va='top', transform=axs[3, j].transAxes, fontsize=13)
 
 plt.show()
-# plotpath = "/project/pr133/rxiang/figure/paper1/validation/LSM/"
-# fig.savefig(plotpath + 'vali1.png', dpi=500)
-# plt.close(fig)
+plotpath = "/project/pr133/rxiang/figure/paper1/validation/LSM/"
+fig.savefig(plotpath + 'vali.png', dpi=500)
+plt.close(fig)

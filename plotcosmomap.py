@@ -96,7 +96,7 @@ def plotcosmo(ax):
     ax.add_feature(cfeature.COASTLINE)
     ax.add_feature(cfeature.BORDERS, linestyle=':')
     ax.add_feature(cfeature.LAKES, alpha=0.5)
-    ax.add_feature(cfeature.RIVERS)
+    # ax.add_feature(cfeature.RIVERS)
 
     # add_gridline_labels(ax, labels_set=[10, 20, 30, 40, 50, 60, 70], side='left')
     # add_gridline_labels(ax, labels_set=[0, 10, 20, 30, 40, 50, 60], side='right')
@@ -159,45 +159,14 @@ def plotcosmo_notick(ax):
     """
 
     ax.set_extent([65, 173, 7, 61], crs=ccrs.PlateCarree())  # for extended 12km domain
-    # ax.add_feature(cfeature.LAND)
-    # ax.stock_img()
-    # ax.add_feature(cfeature.OCEAN, zorder=100)
-    # ax.add_feature(cfeature.LAND, edgecolor='k')
     ax.add_feature(cfeature.COASTLINE)
     ax.add_feature(cfeature.BORDERS, linestyle=':')
     ax.add_feature(cfeature.LAKES, alpha=0.5)
-    ax.add_feature(cfeature.RIVERS)
 
-    # add_gridline_labels(ax, labels_set=[10, 20, 30, 40, 50, 60, 70], side='left')
-    # add_gridline_labels(ax, labels_set=[0, 10, 20, 30, 40, 50, 60], side='right')
-    # add_gridline_labels(ax, labels_set=[60, 100, 140, 180], side='top')
-    # add_gridline_labels(ax, labels_set=[80, 100, 120, 140, 160], side='bottom')
     gl = ax.gridlines(draw_labels=False, dms=True, x_inline=False, y_inline=False, linewidth=1,
                       color='grey', alpha=0.7, linestyle='--')
     gl.xlocator = mticker.FixedLocator([80, 100, 120, 140, 160])
     gl.ylocator = mticker.FixedLocator([0, 10, 20, 30, 40, 50, 60])
-
-    # add ticks manually
-    # ax.text(-0.008, 0.95, '50°N', ha='right', va='center', transform=ax.transAxes, fontsize=13)
-    # ax.text(-0.008, 0.77, '40°N', ha='right', va='center', transform=ax.transAxes, fontsize=13)
-    # ax.text(-0.008, 0.59, '30°N', ha='right', va='center', transform=ax.transAxes, fontsize=13)
-    # ax.text(-0.008, 0.41, '20°N', ha='right', va='center', transform=ax.transAxes, fontsize=13)
-    # ax.text(-0.008, 0.23, '10°N', ha='right', va='center', transform=ax.transAxes, fontsize=13)
-    # ax.text(-0.008, 0.05, '0°N', ha='right', va='center', transform=ax.transAxes, fontsize=13)
-    #
-    # ax.text(0.12, -0.02, '80°E', ha='center', va='top', transform=ax.transAxes, fontsize=13)
-    # ax.text(0.32, -0.02, '100°E', ha='center', va='top', transform=ax.transAxes, fontsize=13)
-    # ax.text(0.52, -0.02, '120°E', ha='center', va='top', transform=ax.transAxes, fontsize=13)
-    # ax.text(0.72, -0.02, '140°E', ha='center', va='top', transform=ax.transAxes, fontsize=13)
-    # ax.text(0.92, -0.02, '160°E', ha='center', va='top', transform=ax.transAxes, fontsize=13)
-
-    # ax.set_xticks([80, 100, 120, 140, 160], crs=ccrs.PlateCarree())
-    # ax.set_yticks([0, 10, 20, 30, 40, 50, 60], crs=ccrs.PlateCarree())
-    # lon_formatter = LongitudeFormatter(number_format='.0f', degree_symbol='°')
-    # lat_formatter = LatitudeFormatter(number_format='.0f', degree_symbol='°')
-    # ax.xaxis.set_major_formatter(lon_formatter)
-    # ax.yaxis.set_major_formatter(lat_formatter)
-
 
     return ax
 
@@ -237,7 +206,7 @@ def plotcosmo04(ax):
     ax.add_feature(cfeature.COASTLINE)
     ax.add_feature(cfeature.BORDERS, linestyle=':')
     ax.add_feature(cfeature.LAKES, alpha=0.5)
-    ax.add_feature(cfeature.RIVERS)
+    # ax.add_feature(cfeature.RIVERS)
 
     # add_gridline_labels(ax, labels_set=[10, 20, 30, 40, 50, 60, 70], side='left')
     # add_gridline_labels(ax, labels_set=[0, 10, 20, 30, 40, 50, 60], side='right')
@@ -265,6 +234,46 @@ def plotcosmo04(ax):
     # lat_formatter = LatitudeFormatter(number_format='.0f', degree_symbol='°')
     # ax.xaxis.set_major_formatter(lon_formatter)
     # ax.yaxis.set_major_formatter(lat_formatter)
+
+    return ax
+
+
+def plotcosmo04_notick(ax):
+    """
+    A function to draw the background map for plotting CCLM output.
+            The output-map will be ploted on a rotated pole grid.
+
+            Args:
+                    infile: an xarray data array or a structure that contains lat and lon data
+
+                    ax: axes
+
+                    plabels (optional): label definition for parallels
+
+                    mlabels (optional): labels for meridians
+
+                    additional optional arguments with default are resolution of the coastlines, linewidth for meridians and the fontsize of the labels. additional text and line **kwargs can also be passed
+
+            Returns:
+                    m: the basemap map projection (rotated pole) used in CCLM
+
+            Example usage:
+                    from plotcosmomap import plotcosmomap
+
+                    mydata=xr.open_dataset('mypath')
+
+                    m, xi, yi = plotcosmomap(mydata); m.pcolormesh(xi, yi, mydata, cmap='plasma')
+    """
+
+    ax.set_extent([89, 112.5, 22.2, 39], crs=ccrs.PlateCarree())  # for extended 12km domain
+    ax.add_feature(cfeature.COASTLINE)
+    ax.add_feature(cfeature.BORDERS, linestyle=':')
+    ax.add_feature(cfeature.LAKES, alpha=0.5)
+
+    gl = ax.gridlines(draw_labels=False, dms=True, x_inline=False, y_inline=False, linewidth=1,
+                      color='grey', alpha=0.5, linestyle='--')
+    gl.xlocator = mticker.FixedLocator([90, 100, 110, 120])
+    gl.ylocator = mticker.FixedLocator([20, 25, 30, 35, 40])
 
     return ax
 
