@@ -26,9 +26,9 @@ import textwrap
 
 # Paths to folders
 # path_mod = "/scratch/snx3000/rxiang/IMERG/day/"
-path_mod = "/project/pr133/rxiang/data/cosmo/EAS04_ctrl/indices/"
+path_mod = "/project/pr133/rxiang/data/cosmo/EAS04_topo2/indices/"
 path_out = "/scratch/snx3000/rxiang/IMERG/indices/"
-path_out = "/project/pr133/rxiang/data/cosmo/EAS04_ctrl/indices/"
+path_out = "/project/pr133/rxiang/data/cosmo/EAS04_topo2/indices/"
 
 
 ###############################################################################
@@ -73,7 +73,7 @@ mod = "COSMO"  # ~8.2 GB per file
 # mod = "CTRL04"
 
 # Settings
-intra_yr_per = "MAM"  # "year", "JJA", "SON", "DJF", "MAM"
+intra_yr_per = "JJA"  # "year", "JJA", "SON", "DJF", "MAM"
 temp_gran = "day"  # temporal granularity; "1hr" or "day"
 ts_cons_perc = "all"  # "all", "wet"
 # time steps considered for computing percentiles (Schär et al., 2016)
@@ -218,7 +218,7 @@ for ind, year in enumerate(years):
         len_t = ds.coords["time"].size
         prec = ds[var].values
         ds.close()
-    prec *= con_fac[temp_gran]  # convert units to [mm h-1] or [mm day-1]
+    # prec *= con_fac[temp_gran]  # convert units to [mm h-1] or [mm day-1]
     print("Data opened (" + "%.1f" % (time.time() - t_beg) + " s)")
     num_ts_per_block[ind] = len_t
 

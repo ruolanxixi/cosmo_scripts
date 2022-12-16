@@ -102,15 +102,15 @@ level1 = MaxNLocator(nbins=20).tick_values(0, 20)
 cmap1 = cmc.davos_r
 norm1 = BoundaryNorm(level1, ncolors=cmap1.N, clip=True)
 
-level2 = MaxNLocator(nbins=20).tick_values(0, 1)
+level2 = MaxNLocator(nbins=18).tick_values(0, 0.9)
 cmap2 = cmc.roma_r
 norm2 = BoundaryNorm(level2, ncolors=cmap2.N, clip=True)
 
-level3 = MaxNLocator(nbins=20).tick_values(0, 100)
+level3 = MaxNLocator(nbins=18).tick_values(0, 90)
 cmap3 = cmc.davos_r
 norm3 = BoundaryNorm(level3, ncolors=cmap2.N, clip=True)
 
-level4 = MaxNLocator(nbins=20).tick_values(0, 100)
+level4 = MaxNLocator(nbins=18).tick_values(0, 90)
 cmap4 = cmc.davos_r
 norm4 = BoundaryNorm(level4, ncolors=cmap2.N, clip=True)
 
@@ -152,10 +152,10 @@ for j in range(ncol):
 
 for i in range(len(vars)):
     var = vars[i]
-    rect = patches.Rectangle((0.23, 0.75), 0.72, 0.24, linewidth=1, edgecolor='none', facecolor='white', alpha=0.5,
+    rect = patches.Rectangle((0.25, 0.75), 0.8, 0.24, linewidth=1, edgecolor='none', facecolor='white', alpha=0.5,
                              transform=axs[i, 2].transAxes)
     axs[i, 2].add_patch(rect)
-    t1 = axs[i, 2].text(0.76, 0.95, "BIAS", fontsize=9, horizontalalignment='center',
+    t1 = axs[i, 2].text(0.78, 0.95, "BIAS", fontsize=9, horizontalalignment='center',
                         verticalalignment='center', transform=axs[i, 2].transAxes)
     t2 = axs[i, 2].text(0.92, 0.95, "R", fontsize=9, horizontalalignment='center',
                         verticalalignment='center', transform=axs[i, 2].transAxes)
@@ -166,10 +166,10 @@ for i in range(len(vars)):
     # Create a Rectangle patch
     # Add the patch to the Axes
     txt = data['CTRL04'][var]['BIAS']
-    t5 = axs[i, 2].text(0.76, 0.87, '%0.2f' % txt, fontsize=9, horizontalalignment='center',
+    t5 = axs[i, 2].text(0.78, 0.87, '%0.2f' % txt, fontsize=9, horizontalalignment='center',
                        verticalalignment='center', transform=axs[i, 2].transAxes)
     txt = data['CTRL11'][var]['BIAS']
-    t6 = axs[i, 2].text(0.76, 0.79, '%0.2f' % txt, fontsize=9, horizontalalignment='center',
+    t6 = axs[i, 2].text(0.78, 0.79, '%0.2f' % txt, fontsize=9, horizontalalignment='center',
                        verticalalignment='center', transform=axs[i, 2].transAxes)
     txt = data['CTRL04'][var]['R']
     t7 = axs[i, 2].text(0.92, 0.87, '%0.2f' % txt, fontsize=9, horizontalalignment='center',
@@ -178,7 +178,9 @@ for i in range(len(vars)):
     t8 = axs[i, 2].text(0.92, 0.79, '%0.2f' % txt, fontsize=9, horizontalalignment='center',
                        verticalalignment='center', transform=axs[i, 2].transAxes)
 
+extends = ['max', 'neither', 'neither', 'neither']
 for i in range(nrow):
+    extend = extends[i]
     cax = fig.add_axes(
         [axs[i, 2].get_position().x1 + 0.01, axs[i, 2].get_position().y0, 0.015, axs[i, 2].get_position().height])
     cbar = fig.colorbar(cs[i, 2], cax=cax, orientation='vertical', extend='max')
