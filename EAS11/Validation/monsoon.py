@@ -23,8 +23,8 @@ matplotlib.rc('font', **font)
 lonmin = [70, 80, 90, 100, 110, 120, 130, 140]
 lonmax = [80, 90, 100, 110, 120, 130, 140, 150]
 
-# lonmin = [70]
-# lonmax = [80]
+lonmin = [70, 110]
+lonmax = [80, 120]
 
 lb = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
 # %%

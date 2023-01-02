@@ -88,6 +88,21 @@ for j in range(len(vars)):
     data['diff'][var] = {}
     data['diff'][var]["value"] = (data['TRED04'][var]["value"] - data['CTRL04'][var]["value"]) / data['CTRL04'][var]["value"] * 100
 
+ctrlpath = "/project/pr133/rxiang/data/cosmo/EAS04_ctrl/monsoon/IVT/smr"
+topo1path = "/project/pr133/rxiang/data/cosmo/EAS04_topo1/monsoon/IVT/smr"
+paths = [ctrlpath, topo1path]
+vars = ['IUQ', 'IVQ']
+for i in range(len(sims)):
+    sim = sims[i]
+    path = paths[i]
+    data[sim] = {}
+    f = xr.open_dataset(f'{path}/01-05.IVT.smr.nc')
+    for j in range(len(vars)):
+        var = vars[j]
+        data[sim][var] = {}
+        ds = np.nanmean(f[var].values[...], axis=0)
+        data[sim][var]["value"] = ds
+
 # load topo
 ds = xr.open_dataset('/project/pr133/rxiang/data/extpar/extpar_BECCY_4.4km_merit_unmod_topo.nc')
 hsurf_ctrl = ds['HSURF'].values[:, :]

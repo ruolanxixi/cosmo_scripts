@@ -9,7 +9,6 @@ from math import radians, cos, sin, asin, sqrt, ceil, floor
 from pyproj import Geod
 import pvlib.atmosphere as pva
 from netCDF4 import Dataset
-import wrf
 
 ###############################################################################
 

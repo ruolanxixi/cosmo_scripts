@@ -14,49 +14,35 @@ mdpath = "/scratch/snx3000/rxiang/test"
 
 ptop = 100 * 100
 g = 9.8
+rgas = 287.058            # J/(kg-K) => m2/(s2 K)
 
 q = xr.open_mfdataset(f'{mdpath}/01_QV.nc', chunks={'time': '500MB'}).QV  # kg/kg
-u = xr.open_mfdataset(f'{mdpath}/01_U.nc', chunks={'time': '500MB'}).U
-v = xr.open_mfdataset(f'{mdpath}/01_V.nc', chunks={'time': '500MB'}).V
+w = xr.open_mfdataset(f'{mdpath}/01_W.nc', chunks={'time': '500MB'}).W
+t = xr.open_mfdataset(f'{mdpath}/01_T.nc', chunks={'time': '500MB'}).T
 plev = xr.open_mfdataset(f'{mdpath}/01_QV.nc', chunks={'time': '500MB'}).pressure  # Pa
 psfc = xr.open_mfdataset(f'{mdpath}/01_PS.nc', chunks={'time': '500MB'}).PS  # Pa
 
+
 # compute the height between the layer
 dp = geocat.comp.dpres_plevel(plev, psfc, ptop)  # pa
+
 # Layer Mass Weighting
 dpg = dp / g  # kg/m2
+
 # del plev, psfc, ptop, dp
 
-# 水汽通量
-uq = u * q
-vq = v * q
+# omega
+rho = plev/(rgas*t)        # density => kg/m3
+omega = -w*rho*g           # Pa/s
+mfc = omega*q*dp
 
-uq_dpg = uq * dpg.values  # m/s kg/kg kg/m2 -> kg / s / m
-vq_dpg = vq * dpg.values
-
-# 散度
-lons = q.lon.values
-lats = q.lat.values
-dx, dy = mpcalc.lat_lon_grid_deltas(lons, lats)
-# del u, q, v, lons, lats
-
-uq_dpg = uq * dpg.values  # m/s kg/kg kg/m2 -> g/s/m
-vq_dpg = vq * dpg.values
-
-duvq = mpcalc.divergence(uq/g, vq/g, dx=dx[np.newaxis, np.newaxis, :, :], dy=dy[np.newaxis, np.newaxis, :, :], x_dim=-1, y_dim=-2)  # s-1 kg/kg
-duvq_dpg = duvq * dp.values  # s-1 kg/kg kg/m2 -> kg/m2/s
-# del uq, vq, dpg, dx, dy, duvq
 
 #%%
 # 整层水汽通量
-IUQ = uq_dpg.sum(axis=1, dtype=np.float32)  # kg/s/m
-IVQ = vq_dpg.sum(axis=1, dtype=np.float32)
-IUQ.name = 'IUQ'
-IVQ.name = 'IVQ'
-IUQ.attrs['long_name'] = 'Zonal integrated water vapour flux'
-IVQ.attrs['long_name'] = 'Meridional integrated water vapour flux'
+VMFC= mfc.sum(axis=1, dtype=np.float32)  # kg/s/m
+VMFC.name = 'VMFC'
+VMFC.attrs['long_name'] = 'Vertically integrated vertical moisture flux divergence'
 IUQ.attrs["units"] = "kg m-1 s-1"
-IVQ.attrs["units"] = "kg m-1 s-1"
 
 # del uq_dpg, vq_dpg
 

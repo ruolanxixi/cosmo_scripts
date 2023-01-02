@@ -1,39 +1,100 @@
 # -------------------------------------------------------------------------------
 # modules
 #
-from netCDF4 import Dataset
 import xarray as xr
 import matplotlib.pyplot as plt
 import numpy as np
-from plotcosmomap import pole04, colorbar, plotcosmo04_notick, pole
 import cartopy.crs as ccrs
-from numpy import inf
 import matplotlib.gridspec as gridspec
-import cmcrameri.cm as cmc
 from matplotlib.colors import BoundaryNorm
 from matplotlib.ticker import MaxNLocator
-from mycolor import custom_div_cmap, cbr_wet, cbr_drywet, drywet, custom_seq_cmap_
-from mycolor import wind as windmap
-from pyproj import Transformer
-import scipy.ndimage as ndimage
 import matplotlib
-from matplotlib.patches import Rectangle
+from matplotlib.colors import LinearSegmentedColormap
 import numpy.ma as ma
 import matplotlib.patches as patches
+import cartopy.feature as cfeature
+import matplotlib.ticker as mticker
 
 font = {'size': 13}
 matplotlib.rc('font', **font)
 
+
+# precipitation color map
+def prcp(numcolors):
+    colvals = [[254, 217, 118, 255], # [254, 178, 76, 255],
+               [255, 237, 160, 255],
+               [237, 250, 194, 255],
+               [205, 255, 205, 255],
+               [153, 240, 178, 255],
+               [83, 189, 159, 255],
+               [50, 166, 150, 255],
+               [50, 150, 180, 255],
+               [5, 112, 176, 255],
+               [5, 80, 140, 255],
+               [10, 31, 150, 255],
+               [44, 2, 70, 255],
+               [106, 44, 90, 255]]
+               # [168, 65, 91, 255]]
+    rgb = []
+    for i in range(len(colvals)):
+        z = [x / 255 for x in colvals[i]]
+        rgb.append(z)
+
+    cmap = LinearSegmentedColormap.from_list('', rgb, numcolors)
+
+    return cmap
+
+def plotcosmo04_notick(ax):
+    ax.set_extent([89, 112.5, 22.2, 39], crs=ccrs.PlateCarree())  # for extended 12km domain
+    ax.add_feature(cfeature.COASTLINE)
+    ax.add_feature(cfeature.BORDERS, linestyle=':')
+    ax.add_feature(cfeature.LAKES, alpha=0.5)
+
+    gl = ax.gridlines(draw_labels=False, dms=True, x_inline=False, y_inline=False, linewidth=1,
+                      color='grey', alpha=0.5, linestyle='--')
+    gl.xlocator = mticker.FixedLocator([90, 100, 110, 120])
+    gl.ylocator = mticker.FixedLocator([20, 25, 30, 35, 40])
+
+    return ax
+
+def pole():
+    file = "/ruolan/CTRL11/day/01_TOT_PREC.nc"
+    ds = xr.open_dataset(f'{file}')
+    pole_lat = ds["rotated_pole"].grid_north_pole_latitude
+    pole_lon = ds["rotated_pole"].grid_north_pole_longitude
+    lat = ds["lat"].values
+    lon = ds["lon"].values
+    rlat = ds["rlat"].values
+    rlon = ds["rlon"].values
+    rot_pole_crs = ccrs.RotatedPole(pole_latitude=pole_lat, pole_longitude=pole_lon)
+
+    return pole_lat, pole_lon, lat, lon, rlat, rlon, rot_pole_crs
+
+def pole04():
+    file = "/ruolan/CTRL04/day/01_TOT_PREC.nc"
+    ds = xr.open_dataset(f'{file}')
+    pole_lat = ds["rotated_pole"].grid_north_pole_latitude
+    pole_lon = ds["rotated_pole"].grid_north_pole_longitude
+    lat = ds["lat"].values
+    lon = ds["lon"].values
+    rlat = ds["rlat"].values
+    rlon = ds["rlon"].values
+    rot_pole_crs = ccrs.RotatedPole(pole_latitude=pole_lat, pole_longitude=pole_lon)
+
+    return pole_lat, pole_lon, lat, lon, rlat, rlon, rot_pole_crs
 # -------------------------------------------------------------------------------
 # read data
-sims = ['CTRL04', 'CTRL11', 'IMERG']
+sims = ['obs', 'CTRL04', 'CTRL11']
 seasons = "JJA"
-cpmpath = "/project/pr133/rxiang/data/cosmo/EAS04_ctrl/indices"
-lsmpath = "/project/pr133/rxiang/data/cosmo/EAS11_ctrl/indices"
-imergpath = "/scratch/snx3000/rxiang/IMERG/indices"
-paths = [cpmpath, lsmpath, imergpath]
+
+# --- edit here
+obspath = "/scratch/snx3000/rxiang/obs/indices/"
+# ---
+cpmpath = "/project/pr133/rxiang/data/cosmo/EAS04_ctrl/indices/day"
+lsmpath = "/project/pr133/rxiang/data/cosmo/EAS11_ctrl/indices/day"
+paths = [obspath, cpmpath, lsmpath]
 data = {}
-vars = ['mean', 'wet_day_freq', 'perc_95.00', 'perc_99.00']
+vars = ['mean', 'wet_day_freq', 'intensity', 'perc_97.50']
 
 [pole_lat04, pole_lon04, lat04, lon04, rlat04, rlon04, rot_pole_crs04] = pole04()
 [pole_lat, pole_lon, lat, lon, rlat, rlon, rot_pole_crs] = pole()
@@ -51,15 +112,14 @@ for i in range(len(sims)):
         ds = f[var].values[:, :]
         data[sim][var]["value"] = ds
 
-models = ['EAS04', 'EAS11']
 for i in range(2):
-    model = models[i]
-    sim = sims[i]
-    path = f"/project/pr133/rxiang/data/cosmo/{model}_ctrl/remap/TOT_PREC/"
-    f = xr.open_dataset(f'{path}/2001-2005_JJA_all_day_perc.remap.imerg_full.nc')
+    sim = sims[i+1]
+    path = f"/ruolan/{sim}/"
+    # remap simulations to observation
+    f = xr.open_dataset(f'{path}/2001-2005_JJA_all_day_perc.remap.nc')
     fslice = f.sel(**{"lat": slice(22, 40),
                       "lon": slice(89, 113)})
-    fim = xr.open_dataset(f'{imergpath}/2001-2005_JJA_all_day_perc.nc')
+    fim = xr.open_dataset(f'{obspath}/2001-2005_JJA_all_day_perc.nc')
     fimslice = fim.sel(**{"lat": slice(22, 40),
                       "lon": slice(89, 113)})
     for j in range(len(vars)):
@@ -69,15 +129,18 @@ for i in range(2):
         data[sim][var]["R"] = ma.corrcoef(ma.masked_invalid(dsim.flatten()), ma.masked_invalid(ds.flatten()))[0, 1]
         data[sim][var]["BIAS"] = np.nanmean(ds - dsim)
 
+# --- edit here
+f = xr.open_dataset(f'{obspath}/2001-2005_JJA_all_day_perc.nc')
+data['obs']['lon'] = f['lon'].values[...]
+data['obs']['lat'] = f['lat'].values[...]
+data['obs']['proj'] = ccrs.PlateCarree()
+# ---
 data['CTRL04']['lon'] = rlon04
 data['CTRL04']['lat'] = rlat04
 data['CTRL04']['proj'] = rot_pole_crs04
 data['CTRL11']['lon'] = rlon
 data['CTRL11']['lat'] = rlat
 data['CTRL11']['proj'] = rot_pole_crs
-data['IMERG']['lon'] = f['lon'].values[...]
-data['IMERG']['lat'] = f['lat'].values[...]
-data['IMERG']['proj'] = ccrs.PlateCarree()
 
 # %%
 ar = 1.0  # initial aspect ratio for first trial
@@ -99,24 +162,29 @@ gs = gridspec.GridSpec(nrows=nrow, ncols=ncol, left=left, bottom=bottom, right=r
                        wspace=0.1, hspace=0.01)
 
 level1 = MaxNLocator(nbins=20).tick_values(0, 20)
-cmap1 = cmc.davos_r
+cmap1 = prcp(20)
 norm1 = BoundaryNorm(level1, ncolors=cmap1.N, clip=True)
+tick1 = np.linspace(0, 20, 5, endpoint=True)
 
-level2 = MaxNLocator(nbins=18).tick_values(0, 0.9)
-cmap2 = cmc.roma_r
+level2 = MaxNLocator(nbins=20).tick_values(0, 1)
+cmap2 = prcp(20)
 norm2 = BoundaryNorm(level2, ncolors=cmap2.N, clip=True)
+tick2 = np.linspace(0, 1, 6, endpoint=True)
 
-level3 = MaxNLocator(nbins=18).tick_values(0, 90)
-cmap3 = cmc.davos_r
-norm3 = BoundaryNorm(level3, ncolors=cmap2.N, clip=True)
+level3 = MaxNLocator(nbins=30).tick_values(0, 30)
+cmap3 = prcp(30)
+norm3 = BoundaryNorm(level3, ncolors=cmap3.N, clip=True)
+tick3 = np.linspace(0, 30, 7, endpoint=True)
 
-level4 = MaxNLocator(nbins=18).tick_values(0, 90)
-cmap4 = cmc.davos_r
-norm4 = BoundaryNorm(level4, ncolors=cmap2.N, clip=True)
+level4 = MaxNLocator(nbins=30).tick_values(0, 150)
+cmap4 = prcp(30)
+norm4 = BoundaryNorm(level4, ncolors=cmap4.N, clip=True)
+tick4 = np.linspace(0, 150, 6, endpoint=True)
 
 cmaps = [cmap1, cmap2, cmap3, cmap4]
 norms = [norm1, norm2, norm3, norm4]
 levels = [level1, level2, level3, level4]
+ticks = [tick1, tick2, tick3, tick4]
 
 for i in range(len(vars)):
     var = vars[i]
@@ -159,9 +227,9 @@ for i in range(len(vars)):
                         verticalalignment='center', transform=axs[i, 2].transAxes)
     t2 = axs[i, 2].text(0.92, 0.95, "R", fontsize=9, horizontalalignment='center',
                         verticalalignment='center', transform=axs[i, 2].transAxes)
-    t3 = axs[i, 2].text(0.48, 0.87, f"CTRL04 - IMERG", fontsize=9, horizontalalignment='center',
+    t3 = axs[i, 2].text(0.51, 0.87, f"CTRL04 - obs", fontsize=9, horizontalalignment='center',
                         verticalalignment='center', transform=axs[i, 2].transAxes)
-    t4 = axs[i, 2].text(0.48, 0.79, f"CTRL11 - IMERG", fontsize=9, horizontalalignment='center',
+    t4 = axs[i, 2].text(0.51, 0.79, f"CTRL11 - obs", fontsize=9, horizontalalignment='center',
                         verticalalignment='center', transform=axs[i, 2].transAxes)
     # Create a Rectangle patch
     # Add the patch to the Axes
@@ -178,12 +246,17 @@ for i in range(len(vars)):
     t8 = axs[i, 2].text(0.92, 0.79, '%0.2f' % txt, fontsize=9, horizontalalignment='center',
                        verticalalignment='center', transform=axs[i, 2].transAxes)
 
-extends = ['max', 'neither', 'neither', 'neither']
+extends = ['max', 'neither', 'max', 'max']
 for i in range(nrow):
-    extend = extends[i]
+    ex = extends[i]
+    tick = ticks[i]
     cax = fig.add_axes(
         [axs[i, 2].get_position().x1 + 0.01, axs[i, 2].get_position().y0, 0.015, axs[i, 2].get_position().height])
-    cbar = fig.colorbar(cs[i, 2], cax=cax, orientation='vertical', extend='max')
+    cbar = fig.colorbar(cs[i, 2], cax=cax, orientation='vertical', extend=ex, ticks=tick)
     cbar.ax.tick_params(labelsize=13)
 
 plt.show()
+plotpath = "/project/pr133/rxiang/figure/paper1/validation/CPM/"
+fig.savefig(plotpath + 'extreme1.png', dpi=500)
+plt.close(fig)
+

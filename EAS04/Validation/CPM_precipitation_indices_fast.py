@@ -12,7 +12,6 @@
 # - Schär et al. (2016): Percentile indices for assessing changes in heavy
 #   precipitation events
 #
-# Author: Christian R. Steger, November 2022
 
 # Load modules
 import numpy as np
@@ -23,13 +22,21 @@ import glob
 from itertools import compress
 import numba as nb
 import textwrap
+import os
 
 # Paths to folders
-# path_mod = "/scratch/snx3000/rxiang/IMERG/day/"
-path_mod = "/project/pr133/rxiang/data/cosmo/EAS04_topo2/indices/"
+path_mod = "/scratch/snx3000/rxiang/IMERG/day/"
+# path_mod = "/project/pr133/rxiang/data/cosmo/EAS04_ctrl/1h/TOT_PREC/"
 path_out = "/scratch/snx3000/rxiang/IMERG/indices/"
-path_out = "/project/pr133/rxiang/data/cosmo/EAS04_topo2/indices/"
+# path_out = "/project/pr133/rxiang/data/cosmo/EAS04_ctrl/indices/hr/"
 
+# Check whether the output path exists or not
+isExist = os.path.exists(path_out)
+if not isExist:
+
+   # Create a new directory if it does not exist
+   os.makedirs(path_out)
+   print("The new directory is created!")
 
 ###############################################################################
 # Functions to update maximal precipitation values
@@ -68,16 +75,16 @@ def update_max_values_wet_day(prec_keep, prec, len_y, len_x, num_keep,
 ###############################################################################
 
 # Simulations (yearly NetCDF blocks)
-# mod = "IMERG"  # ~1.3G per file
-mod = "COSMO"  # ~8.2 GB per file
+mod = "IMERG"  # ~1.3G per file
+# mod = "COSMO"  # ~8.2 GB per file
 # mod = "CTRL04"
 
 # Settings
-intra_yr_per = "JJA"  # "year", "JJA", "SON", "DJF", "MAM"
+intra_yr_per = "JJA"  # "year", "JJA", "SON", "DJF", "MAM", "smr"
 temp_gran = "day"  # temporal granularity; "1hr" or "day"
 ts_cons_perc = "all"  # "all", "wet"
 # time steps considered for computing percentiles (Schär et al., 2016)
-qs = np.array([90.0, 95.0, 99.0, 99.9])  # percentiles [0.0, 100.0]
+qs = np.array([90.0, 95.0, 97.5, 99.0, 99.9, 99.99])  # percentiles [0.0, 100.0]
 years = np.arange(2001, 2006)  # years 1996 - 2005
 # years = np.arange(1998, 2008)  # for HadREM3-RA-UM10.1
 prec_thresh = {"1hr": 0.1, "day": 1.0}  # [mm]
@@ -95,15 +102,16 @@ if ts_cons_perc not in ("all", "wet"):
     raise ValueError("Unknown value for 'ts_cons_perc'")
 if (qs.min() < 85.0) or (qs.max() > 100.0):
     raise ValueError("Allowed range for qs of [85.0, 100.0] is exceeded")
-if intra_yr_per not in ("year", "JJA", "SON", "DJF", "MAM"):
+if intra_yr_per not in ("year", "JJA", "SON", "DJF", "MAM", "smr"):
     raise ValueError("Unknown value for 'intra_yr_per'")
 
 # Adapt model input path to temporal granularity
 path_mod_tg = path_mod.replace("temp_gran", temp_gran)
 
 # Get relevant files
-# files = glob.glob(path_mod_tg + "????.day.corr.nc")
-files = glob.glob(path_mod_tg + "??_TOT_PREC.nc")
+# files = glob.glob(path_mod_tg + "??_TOT_PREC.nc")
+# files = glob.glob(path_mod_tg + "??_TOT_PREC_rmdplc_sft.nc")
+files = glob.glob(path_mod_tg + "????.day.corr.nc")
 files.sort()
 # mask_files = [(int(i[-11:-7]) >= years[0]) & (int(i[-11:-7]) <= years[-1])
 #               for i in files]
@@ -141,9 +149,11 @@ if mod_cal in ("standard", "gregorian", "proleptic_gregorian"):
         num_days = 92 * len(years)
     elif intra_yr_per == "SON":
         num_days = 91 * len(years)
-    else:
+    elif intra_yr_per == "DJF":
         num_days = 62 * len(years) \
                    + sum([cal.monthrange(i, 2)[1] for i in years])
+    else:
+        num_days = 153 * len(years)
 elif mod_cal == "360_day":
     if intra_yr_per == "year":
         num_days = len(years) * 360
@@ -212,9 +222,15 @@ for ind, year in enumerate(years):
             ds.close()
             print("Data blocks loaded: " + str(i + 1) + "/" + str(num_blocks))
         # ---------------------------------------------------------------------
-    else:
+    elif intra_yr_per in ("MAM", "JJA", "DJF", "SON"):
         ds = xr.open_dataset(file_in)
         ds = ds.sel(time=ds["time.season"] == intra_yr_per)
+        len_t = ds.coords["time"].size
+        prec = ds[var].values
+        ds.close()
+    else:
+        ds = xr.open_dataset(file_in)
+        ds = ds.sel(time=ds['time'].dt.month.isin((5, 6, 7, 8, 9)))
         len_t = ds.coords["time"].size
         prec = ds[var].values
         ds.close()

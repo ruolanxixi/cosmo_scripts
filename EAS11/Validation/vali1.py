@@ -33,8 +33,8 @@ erapath = "/project/pr133/rxiang/data/era5/ot/szn"
 imergpath = "/project/pr133/rxiang/data/obs/pr/IMERG/szn"
 crupath = "/project/pr133/rxiang/data/obs/tmp/cru/szn"
 dt = {}
-labels = [['CTRL11', 'ERA5', 'CTRL11 - ERA5'], ['CTRL11', 'ERA5', 'CTRL11 - ERA5'],
-          ['CTRL11', 'IMERG', 'CTRL11 - IMERG'], ['CTRL11', 'CRU', 'CTRL11 - CRU']]
+labels = [['CTRL11', 'IMERG', 'CTRL11 - IMERG'], ['CTRL11', 'CRU', 'CTRL11 - CRU'],
+          ['CTRL11', 'ERA5', 'CTRL11 - ERA5'], ['CTRL11', 'ERA5', 'CTRL11 - ERA5']]
 vars = ['v850', 'u850', 'ws850', 'u500', 'v500', 'ws500', 'q850']
 dt['CTRL11'], dt['ERA5'], dt['CTRL11_ERA5'], dt['CTRL11_IMERG'], dt['CTRL11_CRU'], dt['DIFF'], \
 dt['IMERG'], dt['DIFF_IMERG'], dt['CRU'], dt['DIFF_CRU'] = \
@@ -218,25 +218,25 @@ for j in range(3):
     steplon = steplons[j]
     steplat = steplats[j]
     scale = scales[j]
-    cs[0, j] = axs[0, j].pcolormesh(dt[sim]['lon'], dt[sim]['lat'], dt[sim]['JJA']['ws500'], cmap=cmap, norm=norm,
+    cs[2, j] = axs[2, j].pcolormesh(dt[sim]['lon'], dt[sim]['lat'], dt[sim]['JJA']['ws500'], cmap=cmap, norm=norm,
                                     shading="auto", transform=dt[sim]['proj'])
-    q[0, j] = axs[0, j].quiver(dt[sim]['lon'][steplon], dt[sim]['lat'][steplat],
+    q[2, j] = axs[2, j].quiver(dt[sim]['lon'][steplon], dt[sim]['lat'][steplat],
                                dt[sim]['JJA']['u500'][steplat, :][:, steplon],
                                dt[sim]['JJA']['v500'][steplat, :][:, steplon], color='black', scale=scale,
                                transform=dt[sim]['proj'])
 
-qk[0, 1] = axs[0, 1].quiverkey(q[0, 1], 0.88, 1.06, 10, r'$10$', labelpos='E', transform=axs[0, 1].transAxes,
+qk[2, 1] = axs[2, 1].quiverkey(q[2, 1], 0.88, 1.06, 10, r'$10$', labelpos='E', transform=axs[2, 1].transAxes,
                                fontproperties={'size': 13})
-qk[0, 2] = axs[0, 2].quiverkey(q[0, 2], 0.88, 1.06, 10, r'$10$', labelpos='E', transform=axs[0, 2].transAxes,
+qk[2, 2] = axs[2, 2].quiverkey(q[2, 2], 0.88, 1.06, 10, r'$10$', labelpos='E', transform=axs[2, 2].transAxes,
                                fontproperties={'size': 13})
 
 cax = fig.add_axes(
-    [axs[0, 1].get_position().x1 + 0.01, axs[0, 1].get_position().y0, 0.015, axs[0, 1].get_position().height])
-cbar = fig.colorbar(cs[0, 1], cax=cax, orientation='vertical', extend='max')
+    [axs[2, 1].get_position().x1 + 0.01, axs[2, 1].get_position().y0, 0.015, axs[2, 1].get_position().height])
+cbar = fig.colorbar(cs[2, 1], cax=cax, orientation='vertical', extend='max')
 cbar.ax.tick_params(labelsize=13)
 cax = fig.add_axes(
-    [axs[0, 2].get_position().x1 + 0.01, axs[0, 2].get_position().y0, 0.015, axs[0, 2].get_position().height])
-cbar = fig.colorbar(cs[0, 2], cax=cax, orientation='vertical', extend='both')
+    [axs[2, 2].get_position().x1 + 0.01, axs[2, 2].get_position().y0, 0.015, axs[2, 2].get_position().height])
+cbar = fig.colorbar(cs[2, 2], cax=cax, orientation='vertical', extend='both')
 cbar.ax.tick_params(labelsize=13)
 
 for i in range(nrow):
@@ -264,34 +264,34 @@ for j in range(3):
     scale = scales[j]
     steplon = steplons[j]
     steplat = steplats[j]
-    cs[1, j] = axs[1, j].pcolormesh(dt[sim]['lon'], dt[sim]['lat'], dt[sim]['JJA']['q850'], cmap=cmap, norm=norm,
+    cs[3, j] = axs[3, j].pcolormesh(dt[sim]['lon'], dt[sim]['lat'], dt[sim]['JJA']['q850'], cmap=cmap, norm=norm,
                                     shading="auto", transform=dt[sim]['proj'])
-    q[1, j] = axs[1, j].quiver(dt[sim]['lon'][steplon], dt[sim]['lat'][steplat],
+    q[3, j] = axs[3, j].quiver(dt[sim]['lon'][steplon], dt[sim]['lat'][steplat],
                                dt[sim]['JJA']['u850'][steplat, :][:, steplon],
                                dt[sim]['JJA']['v850'][steplat, :][:, steplon],
                                color='black', scale=scale, transform=dt[sim]['proj'])
 
-qk[1, 1] = axs[1, 1].quiverkey(q[1, 1], 0.88, 1.06, 10, r'$10$', labelpos='E', transform=axs[1, 1].transAxes,
+qk[3, 1] = axs[3, 1].quiverkey(q[3, 1], 0.88, 1.06, 10, r'$10$', labelpos='E', transform=axs[3, 1].transAxes,
                                fontproperties={'size': 13})
-qk[1, 2] = axs[1, 2].quiverkey(q[1, 2], 0.88, 1.06, 10, r'$10$', labelpos='E', transform=axs[1, 2].transAxes,
+qk[3, 2] = axs[3, 2].quiverkey(q[3, 2], 0.88, 1.06, 10, r'$10$', labelpos='E', transform=axs[3, 2].transAxes,
                                fontproperties={'size': 13})
 
 txt = dt['DIFF']['JJA']['R']
-t = axs[1, 2].text(0.99, 0.92, 'R=%0.2f' % txt, fontsize=13, horizontalalignment='right',
-               verticalalignment='center', transform=axs[1, 2].transAxes)
+t = axs[3, 2].text(0.99, 0.92, 'R=%0.2f' % txt, fontsize=13, horizontalalignment='right',
+               verticalalignment='center', transform=axs[3, 2].transAxes)
 t.set_bbox(dict(facecolor='white', alpha=0.7, pad=1, edgecolor='none'))
 txt = dt['DIFF']['JJA']['BIAS']
-t = axs[1, 2].text(0.99, 0.81, 'BIAS=%0.2f' % txt, fontsize=13, horizontalalignment='right',
-               verticalalignment='center', transform=axs[1, 2].transAxes)
+t = axs[3, 2].text(0.99, 0.81, 'BIAS=%0.2f' % txt, fontsize=13, horizontalalignment='right',
+               verticalalignment='center', transform=axs[3, 2].transAxes)
 t.set_bbox(dict(facecolor='white', alpha=0.7, pad=1, edgecolor='none'))
 
 cax = fig.add_axes(
-    [axs[1, 1].get_position().x1 + 0.01, axs[1, 1].get_position().y0, 0.015, axs[1, 1].get_position().height])
-cbar = fig.colorbar(cs[1, 1], cax=cax, orientation='vertical', extend='max')
+    [axs[3, 1].get_position().x1 + 0.01, axs[3, 1].get_position().y0, 0.015, axs[3, 1].get_position().height])
+cbar = fig.colorbar(cs[3, 1], cax=cax, orientation='vertical', extend='max')
 cbar.ax.tick_params(labelsize=13)
 cax = fig.add_axes(
-    [axs[1, 2].get_position().x1 + 0.01, axs[1, 2].get_position().y0, 0.015, axs[1, 2].get_position().height])
-cbar = fig.colorbar(cs[1, 2], cax=cax, orientation='vertical', extend='both')
+    [axs[3, 2].get_position().x1 + 0.01, axs[3, 2].get_position().y0, 0.015, axs[3, 2].get_position().height])
+cbar = fig.colorbar(cs[3, 2], cax=cax, orientation='vertical', extend='both')
 cbar.ax.tick_params(labelsize=13)
 
 # plot precipitation
@@ -311,24 +311,24 @@ for j in range(3):
     sim = sims[j]
     cmap = cmaps[j]
     norm = norms[j]
-    cs[2, j] = axs[2, j].pcolormesh(dt[sim]['lon'], dt[sim]['lat'], dt[sim]['JJA']['pr'], cmap=cmap, norm=norm,
+    cs[0, j] = axs[0, j].pcolormesh(dt[sim]['lon'], dt[sim]['lat'], dt[sim]['JJA']['pr'], cmap=cmap, norm=norm,
                                     shading="auto", transform=dt[sim]['proj'])
 txt = dt['DIFF_IMERG']['JJA']['R']
-t = axs[2, 2].text(0.99, 0.92, 'R=%0.2f' % txt, fontsize=13, horizontalalignment='right',
-               verticalalignment='center', transform=axs[2, 2].transAxes)
+t = axs[0, 2].text(0.99, 0.92, 'R=%0.2f' % txt, fontsize=13, horizontalalignment='right',
+               verticalalignment='center', transform=axs[0, 2].transAxes)
 t.set_bbox(dict(facecolor='white', alpha=0.7, pad=1, edgecolor='none'))
 txt = dt['DIFF_IMERG']['JJA']['BIAS']
-t = axs[2, 2].text(0.99, 0.81, 'BIAS=%0.2f' % txt, fontsize=13, horizontalalignment='right',
-               verticalalignment='center', transform=axs[2, 2].transAxes)
+t = axs[0, 2].text(0.99, 0.81, 'BIAS=%0.2f' % txt, fontsize=13, horizontalalignment='right',
+               verticalalignment='center', transform=axs[0, 2].transAxes)
 t.set_bbox(dict(facecolor='white', alpha=0.7, pad=1, edgecolor='none'))
 
 cax = fig.add_axes(
-    [axs[2, 1].get_position().x1 + 0.01, axs[2, 1].get_position().y0, 0.015, axs[2, 1].get_position().height])
-cbar = fig.colorbar(cs[2, 1], cax=cax, orientation='vertical', extend='max', ticks=np.linspace(0, 20, 5, endpoint=True))
+    [axs[0, 1].get_position().x1 + 0.01, axs[0, 1].get_position().y0, 0.015, axs[0, 1].get_position().height])
+cbar = fig.colorbar(cs[0, 1], cax=cax, orientation='vertical', extend='max', ticks=np.linspace(0, 20, 5, endpoint=True))
 cbar.ax.tick_params(labelsize=13)
 cax = fig.add_axes(
-    [axs[2, 2].get_position().x1 + 0.01, axs[2, 2].get_position().y0, 0.015, axs[2, 2].get_position().height])
-cbar = fig.colorbar(cs[2, 2], cax=cax, orientation='vertical', extend='both', ticks=np.linspace(-15, 15, 7, endpoint=True))
+    [axs[0, 2].get_position().x1 + 0.01, axs[0, 2].get_position().y0, 0.015, axs[0, 2].get_position().height])
+cbar = fig.colorbar(cs[0, 2], cax=cax, orientation='vertical', extend='both', ticks=np.linspace(-15, 15, 7, endpoint=True))
 cbar.ax.tick_params(labelsize=13)
 
 # plot tmp
@@ -348,24 +348,24 @@ for j in range(3):
     sim = sims[j]
     cmap = cmaps[j]
     norm = norms[j]
-    cs[3, j] = axs[3, j].pcolormesh(dt[sim]['lon'], dt[sim]['lat'], dt[sim]['JJA']['tmp'], cmap=cmap, norm=norm,
+    cs[1, j] = axs[1, j].pcolormesh(dt[sim]['lon'], dt[sim]['lat'], dt[sim]['JJA']['tmp'], cmap=cmap, norm=norm,
                                     shading="auto", transform=dt[sim]['proj'])
 txt = dt['DIFF_CRU']['JJA']['R']
-t = axs[3, 2].text(0.99, 0.92, 'R=%0.2f' % txt, fontsize=13, horizontalalignment='right',
-               verticalalignment='center', transform=axs[3, 2].transAxes)
+t = axs[1, 2].text(0.99, 0.92, 'R=%0.2f' % txt, fontsize=13, horizontalalignment='right',
+               verticalalignment='center', transform=axs[1, 2].transAxes)
 t.set_bbox(dict(facecolor='white', alpha=0.7, pad=1, edgecolor='none'))
 txt = dt['DIFF_CRU']['JJA']['BIAS']
-t = axs[3, 2].text(0.99, 0.81, 'BIAS=%0.2f' % txt, fontsize=13, horizontalalignment='right',
-               verticalalignment='center', transform=axs[3, 2].transAxes)
+t = axs[1, 2].text(0.99, 0.81, 'BIAS=%0.2f' % txt, fontsize=13, horizontalalignment='right',
+               verticalalignment='center', transform=axs[1, 2].transAxes)
 t.set_bbox(dict(facecolor='white', alpha=0.7, pad=1, edgecolor='none'))
 
 cax = fig.add_axes(
-    [axs[3, 1].get_position().x1 + 0.01, axs[3, 1].get_position().y0, 0.015, axs[3, 1].get_position().height])
-cbar = fig.colorbar(cs[3, 1], cax=cax, orientation='vertical', extend='both', ticks=np.linspace(0, 36, 7, endpoint=True))
+    [axs[1, 1].get_position().x1 + 0.01, axs[1, 1].get_position().y0, 0.015, axs[1, 1].get_position().height])
+cbar = fig.colorbar(cs[1, 1], cax=cax, orientation='vertical', extend='both', ticks=np.linspace(0, 36, 7, endpoint=True))
 cbar.ax.tick_params(labelsize=13)
 cax = fig.add_axes(
-    [axs[3, 2].get_position().x1 + 0.01, axs[3, 2].get_position().y0, 0.015, axs[3, 2].get_position().height])
-cbar = fig.colorbar(cs[3, 2], cax=cax, orientation='vertical', extend='both', ticks=np.linspace(-9, 9, 7, endpoint=True))
+    [axs[1, 2].get_position().x1 + 0.01, axs[1, 2].get_position().y0, 0.015, axs[1, 2].get_position().height])
+cbar = fig.colorbar(cs[1, 2], cax=cax, orientation='vertical', extend='both', ticks=np.linspace(-9, 9, 7, endpoint=True))
 cbar.ax.tick_params(labelsize=13)
 # ---
 for i in range(nrow):

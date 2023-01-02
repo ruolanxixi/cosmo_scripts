@@ -362,3 +362,28 @@ def wind(numcolors, colormap):
     cmap = LinearSegmentedColormap.from_list(name=colormap, colors=colors, N=numcolors)
 
     return cmap
+
+
+def conv(numcolors):
+    colvals = [[263, 77, 50, 255],
+               [253, 56, 59, 255],
+               [255, 33, 75, 255],
+               [209, 73, 76, 255],
+               [205, 52, 91, 255],
+               [195, 16, 96, 255],
+               [255, 255, 255, 255],
+               [54, 34, 99, 255],
+               [40, 78, 99, 255],
+               [22, 97, 93, 255],
+               [231, 22, 0, 255],
+               [356, 98, 65, 255],
+               [0, 0, 0, 255]]
+
+    rgb = []
+    for i in range(len(colvals)):
+        z = [x / 255 for x in colvals[i]]
+        rgb.append(z)
+
+    cmap = LinearSegmentedColormap.from_list('', rgb, numcolors)
+
+    return cmap

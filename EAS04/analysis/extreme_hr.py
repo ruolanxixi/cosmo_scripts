@@ -15,7 +15,6 @@ from matplotlib.colors import LinearSegmentedColormap
 from mycolor import custom_div_cmap, cbr_wet, cbr_drywet, drywet, custom_seq_cmap_
 import numpy.ma as ma
 import matplotlib.patches as patches
-import scipy.ndimage as ndimage
 
 font = {'size': 13}
 matplotlib.rc('font', **font)
@@ -48,17 +47,16 @@ def prcp(numcolors):
 
 # -------------------------------------------------------------------------------
 # read data
-sims = ['CTRL04', 'TRED04']
+sims = ['CTRL04', 'TRED04', 'TENV04']
 seasons = "JJA"
 
 # --- edit here
-ctrlpath = "/project/pr133/rxiang/data/cosmo/EAS04_ctrl/indices"
-topo1path = "/project/pr133/rxiang/data/cosmo/EAS04_topo1/indices"
-paths = [ctrlpath, topo1path]
+ctrlpath = "/project/pr133/rxiang/data/cosmo/EAS04_ctrl/indices/hr"
+topo1path = "/project/pr133/rxiang/data/cosmo/EAS04_topo1/indices/hr"
+topo2path = "/project/pr133/rxiang/data/cosmo/EAS04_topo2/indices/hr"
+paths = [ctrlpath, topo1path, topo2path]
 data = {}
-vars1 = ['mean', 'perc_95.00', 'perc_99.00']
-vars2 = ['perc_99.90']
-vars = ['mean', 'perc_95.00', 'perc_99.00', 'perc_99.90']
+vars = ['perc_97.50', 'perc_99.90', 'perc_99.99']
 
 [pole_lat04, pole_lon04, lat04, lon04, rlat04, rlon04, rot_pole_crs04] = pole04()
 
@@ -68,37 +66,22 @@ for i in range(len(sims)):
     sim = sims[i]
     path = paths[i]
     data[sim] = {}
-    f = xr.open_dataset(f'{path}/day/2001-2005_smr_all_day_perc.nc')
-    for j in range(len(vars1)):
-        var = vars1[j]
-        data[sim][var] = {}
-        ds = f[var].values[:, :]
-        data[sim][var]["value"] = ds
-    f = xr.open_dataset(f'{path}/hr/2001-2005_smr_all_day_perc.nc')
-    for j in range(len(vars2)):
-        var = vars2[j]
+    f = xr.open_dataset(f'{path}/2001-2005_smr_all_day_perc.nc')
+    for j in range(len(vars)):
+        var = vars[j]
         data[sim][var] = {}
         ds = f[var].values[:, :]
         data[sim][var]["value"] = ds
 
 np.seterr(divide='ignore', invalid='ignore')
-data['diff'] = {}
+data['diff1'], data['diff2'] = {}, {}
 for j in range(len(vars)):
     var = vars[j]
-    data['diff'][var] = {}
-    data['diff'][var]["value"] = (data['TRED04'][var]["value"] - data['CTRL04'][var]["value"]) / data['CTRL04'][var]["value"] * 100
+    data['diff1'][var] = {}
+    data['diff2'][var] = {}
+    data['diff1'][var]["value"] = (data['TRED04'][var]["value"] - data['CTRL04'][var]["value"]) / data['CTRL04'][var]["value"] * 100
+    data['diff2'][var]["value"] = (data['TENV04'][var]["value"] - data['CTRL04'][var]["value"]) / data['CTRL04'][var]["value"] * 100
 
-# load topo
-ds = xr.open_dataset('/project/pr133/rxiang/data/extpar/extpar_BECCY_4.4km_merit_unmod_topo.nc')
-hsurf_ctrl = ds['HSURF'].values[:, :]
-ds.close()
-ds = xr.open_dataset('/project/pr133/rxiang/data/extpar/extpar_BECCY_4.4km_merit_reduced_topo_adj.nc')
-hsurf_topo1 = ds['HSURF'].values[:, :]
-hsurf_diff = ndimage.gaussian_filter(hsurf_ctrl - hsurf_topo1, sigma=5, order=0)
-hsurf_ctrl = ndimage.gaussian_filter(hsurf_ctrl, sigma=3, order=0)
-lat_ = ds["lat"].values
-lon_ = ds["lon"].values
-ds.close()
 
 # models = ['EAS04', 'EAS11']
 # for i in range(2):
@@ -121,9 +104,9 @@ ds.close()
 # %%
 ar = 1.0  # initial aspect ratio for first trial
 wi = 9.5  # height in inches #15
-hi = 9.2  # width in inches #10
+hi = 7.5  # width in inches #10
 ncol = 3  # edit here
-nrow = 4
+nrow = 3
 axs, cs, ct, topo, q, qk, topo1 = np.empty(shape=(nrow, ncol), dtype='object'), np.empty(shape=(nrow, ncol),
                                                                                          dtype='object'), \
                                   np.empty(shape=(nrow, ncol), dtype='object'), np.empty(shape=(nrow, ncol),
@@ -133,66 +116,56 @@ axs, cs, ct, topo, q, qk, topo1 = np.empty(shape=(nrow, ncol), dtype='object'), 
     shape=(nrow, ncol), dtype='object')
 
 fig = plt.figure(figsize=(wi, hi))
-gs1 = gridspec.GridSpec(4, 2, left=0.06, bottom=0.024, right=0.58,
-                        top=0.97, hspace=0.1, wspace=0.1, width_ratios=[1, 1], height_ratios=[1, 1, 1, 1])
-gs2 = gridspec.GridSpec(4, 1, left=0.66, bottom=0.024, right=0.91,
-                        top=0.97, hspace=0.1, wspace=0.1, height_ratios=[1, 1, 1, 1])
+gs1 = gridspec.GridSpec(3, 1, left=0.06, bottom=0.024, right=0.307,
+                        top=0.97, hspace=0.1, wspace=0.1, height_ratios=[1, 1, 1])
+gs2 = gridspec.GridSpec(3, 2, left=0.39, bottom=0.024, right=0.91,
+                        top=0.97, hspace=0.1, wspace=0.1, width_ratios=[1, 1], height_ratios=[1, 1, 1])
 
-level1 = MaxNLocator(nbins=20).tick_values(0, 20)
+level1 = MaxNLocator(nbins=20).tick_values(0, 10)
 cmap1 = prcp(20)
 norm1 = BoundaryNorm(level1, ncolors=cmap1.N, clip=True)
-tick1 = np.linspace(0, 20, 5, endpoint=True)
+tick1 = np.linspace(0, 10, 6, endpoint=True)
 
-level2 = MaxNLocator(nbins=20).tick_values(0, 80)
-cmap2 = prcp(20)
+level2 = MaxNLocator(nbins=24).tick_values(0, 50)
+cmap2 = prcp(24)
 norm2 = BoundaryNorm(level2, ncolors=cmap2.N, clip=True)
-tick2 = np.linspace(0, 80, 5, endpoint=True)
+tick2 = np.linspace(0, 50, 6, endpoint=True)
 
-level3 = MaxNLocator(nbins=20).tick_values(0, 100)
-cmap3 = prcp(20)
+level3 = MaxNLocator(nbins=24).tick_values(0, 80)
+cmap3 = prcp(24)
 norm3 = BoundaryNorm(level3, ncolors=cmap3.N, clip=True)
-tick3 = np.linspace(0, 100, 6, endpoint=True)
+tick3 = np.linspace(0, 80, 5, endpoint=True)
 
-level4 = MaxNLocator(nbins=20).tick_values(0, 40)
-cmap4 = prcp(20)
-norm4 = BoundaryNorm(level4, ncolors=cmap4.N, clip=True)
-tick4 = np.linspace(0, 40, 5, endpoint=True)
-
-cmaps1 = [cmap1, cmap2, cmap3, cmap4]
-norms1 = [norm1, norm2, norm3, norm4]
-levels1 = [level1, level2, level3, level4]
-ticks1 = [tick1, tick2, tick3, tick4]
+cmaps1 = [cmap1, cmap2, cmap3]
+norms1 = [norm1, norm2, norm3]
+levels1 = [level1, level2, level3]
+ticks1 = [tick1, tick2, tick3]
 
 level1 = MaxNLocator(nbins=20).tick_values(-60, 60)
 cmap1 = drywet(21, cmc.vik_r)
 norm1 = matplotlib.colors.Normalize(vmin=-60, vmax=60)
 tick1 = np.linspace(-60, 60, 5, endpoint=True)
 
-level2 = MaxNLocator(nbins=20).tick_values(-60, 60)
+level2 = MaxNLocator(nbins=20).tick_values(-40, 40)
 cmap2 = drywet(21, cmc.vik_r)
-norm2 = matplotlib.colors.Normalize(vmin=-60, vmax=60)
-tick2 = np.linspace(-60, 60, 5, endpoint=True)
+norm2 = matplotlib.colors.Normalize(vmin=-40, vmax=40)
+tick2 = np.linspace(-40, 40, 5, endpoint=True)
 
-level3 = MaxNLocator(nbins=20).tick_values(-60, 60)
+level3 = MaxNLocator(nbins=20).tick_values(-20, 20)
 cmap3 = drywet(21, cmc.vik_r)
-norm3 = matplotlib.colors.Normalize(vmin=-60, vmax=60)
-tick3 = np.linspace(-60, 60, 5, endpoint=True)
+norm3 = matplotlib.colors.Normalize(vmin=-20, vmax=20)
+tick3 = np.linspace(-20, 20, 5, endpoint=True)
 
-level4 = MaxNLocator(nbins=20).tick_values(-60, 60)
-cmap4 = drywet(21, cmc.vik_r)
-norm4 = matplotlib.colors.Normalize(vmin=-60, vmax=60)
-tick4 = np.linspace(-60, 60, 5, endpoint=True)
+cmaps2 = [cmap1, cmap2, cmap3]
+norms2 = [norm1, norm2, norm3]
+levels2 = [level1, level2, level3]
+ticks2 = [tick1, tick2, tick3]
 
-cmaps2 = [cmap1, cmap2, cmap3, cmap4]
-norms2 = [norm1, norm2, norm3, norm4]
-levels2 = [level1, level2, level3, level4]
-ticks2 = [tick1, tick2, tick3, tick4]
-
-
+diffs = ['diff1', 'diff2']
 for i in range(len(vars)):
     var = vars[i]
     cmap, norm, level = cmaps1[i], norms1[i], levels1[i]
-    for j in range(2):
+    for j in range(1):
         sim = sims[j]
         axs[i, j] = fig.add_subplot(gs1[i, j], projection=rot_pole_crs04)
         axs[i, j] = plotcosmo04_notick(axs[i, j])
@@ -200,12 +173,11 @@ for i in range(len(vars)):
                                         cmap=cmap, norm=norm, shading="auto", transform=rot_pole_crs04)
     cmap, norm, level = cmaps2[i], norms2[i], levels2[i]
     for j in range(2):
-        axs[i, 2] = fig.add_subplot(gs2[i, 0], projection=rot_pole_crs04)
-        axs[i, 2] = plotcosmo04_notick(axs[i, 2])
-        cs[i, 2] = axs[i, 2].pcolormesh(rlon04, rlat04, data['diff'][var]["value"],
+        sim = diffs[j]
+        axs[i, j+1] = fig.add_subplot(gs2[i, j], projection=rot_pole_crs04)
+        axs[i, j+1] = plotcosmo04_notick(axs[i, j+1])
+        cs[i, j+1] = axs[i, j+1].pcolormesh(rlon04, rlat04, data[sim][var]["value"],
                                         cmap=cmap, norm=norm, shading="auto", transform=rot_pole_crs04)
-        topo[i, 2] = axs[i, 2].contour(lon_, lat_, hsurf_diff, levels=[500], colors='darkgreen', linewidths=1,
-                                       transform=ccrs.PlateCarree())
 
 for i in range(nrow):
     axs[i, 0].text(-0.01, 0.83, '35°N', ha='right', va='center', transform=axs[i, 0].transAxes, fontsize=14)
@@ -214,18 +186,18 @@ for i in range(nrow):
     axs[i, 0].text(-0.01, 0.05, '20°N', ha='right', va='center', transform=axs[i, 0].transAxes, fontsize=14)
 
 for j in range(ncol):
-    axs[3, j].text(0.04, -0.02, '90°E', ha='center', va='top', transform=axs[3, j].transAxes, fontsize=14)
-    axs[3, j].text(0.46, -0.02, '100°E', ha='center', va='top', transform=axs[3, j].transAxes, fontsize=14)
-    axs[3, j].text(0.86, -0.02, '110°E', ha='center', va='top', transform=axs[3, j].transAxes, fontsize=14)
+    axs[2, j].text(0.04, -0.02, '90°E', ha='center', va='top', transform=axs[2, j].transAxes, fontsize=14)
+    axs[2, j].text(0.46, -0.02, '100°E', ha='center', va='top', transform=axs[2, j].transAxes, fontsize=14)
+    axs[2, j].text(0.86, -0.02, '110°E', ha='center', va='top', transform=axs[2, j].transAxes, fontsize=14)
 
 for i in range(nrow):
     for j in range(ncol):
         label = lb[i][j]
-        t = axs[i, j].text(0.01, 0.987, f'({label})', ha='left', va='top',
+        t = axs[i, j].text(0.01, 0.985, f'({label})', ha='left', va='top',
                            transform=axs[i, j].transAxes, fontsize=14)
         t.set_bbox(dict(facecolor='white', alpha=0.7, pad=1, edgecolor='none'))
 
-titles = ['CTRL04', 'TRED04', 'TRED04-CTRL04']
+titles = ['CTRL04', 'TRED04-CTRL04', 'TENV04-CTRL04']
 for j in range(ncol):
     title = titles[j]
     axs[0, j].set_title(f'{title}', pad=5, fontsize=14, loc='center')
@@ -263,8 +235,8 @@ for i in range(nrow):
     extend = extends[i]
     tick = ticks1[i]
     cax = fig.add_axes(
-        [axs[i, 1].get_position().x1 + 0.01, axs[i, 1].get_position().y0, 0.015, axs[i, 1].get_position().height])
-    cbar = fig.colorbar(cs[i, 1], cax=cax, orientation='vertical', extend='max', ticks=tick)
+        [axs[i, 0].get_position().x1 + 0.01, axs[i, 0].get_position().y0, 0.015, axs[i, 0].get_position().height])
+    cbar = fig.colorbar(cs[i, 0], cax=cax, orientation='vertical', extend='max', ticks=tick)
     cbar.ax.tick_params(labelsize=13)
 
 for i in range(nrow):
@@ -277,7 +249,7 @@ for i in range(nrow):
 
 plt.show()
 plotpath = "/project/pr133/rxiang/figure/paper1/results/extreme/"
-fig.savefig(plotpath + 'extreme1.png', dpi=500)
+fig.savefig(plotpath + 'extreme2.png', dpi=500)
 plt.close(fig)
 
 

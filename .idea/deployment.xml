@@ -5,7 +5,7 @@
       <paths name="rxiang@daint.cscs.ch:22 password">
         <serverdata>
           <mappings>
-            <mapping deploy="/project/pr133/rxiang/script/mapping_iac" local="$PROJECT_DIR$" />
+            <mapping deploy="/project/pr133/rxiang/script/mapping_cosmo" local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>
