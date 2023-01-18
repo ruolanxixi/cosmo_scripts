@@ -321,8 +321,8 @@ def plotcosmo04sm(ax):
     # add_gridline_labels(ax, labels_set=[80, 100, 120, 140, 160], side='bottom')
     gl = ax.gridlines(draw_labels=False, dms=True, x_inline=False, y_inline=False, linewidth=1,
                       color='grey', alpha=0.5, linestyle='--')
-    gl.xlocator = mticker.FixedLocator([95, 100, 105])
-    gl.ylocator = mticker.FixedLocator([20, 25, 30])
+    gl.xlocator = mticker.FixedLocator([96, 98, 100, 102, 104])
+    gl.ylocator = mticker.FixedLocator([20, 24, 26, 28, 30])
 
     # add ticks manually
     ax.text(-0.01, 0.9, '30°N', ha='right', va='center', transform=ax.transAxes, fontsize=14)
@@ -340,6 +340,19 @@ def plotcosmo04sm(ax):
     # lat_formatter = LatitudeFormatter(number_format='.0f', degree_symbol='°')
     # ax.xaxis.set_major_formatter(lon_formatter)
     # ax.yaxis.set_major_formatter(lat_formatter)
+
+    return ax
+
+def plotcosmo04sm_notick(ax):
+    ax.set_extent([95, 106, 21.9, 31.1], crs=ccrs.PlateCarree())  # for extended 12km domain
+    ax.add_feature(cfeature.COASTLINE)
+    ax.add_feature(cfeature.BORDERS, linestyle=':')
+    ax.add_feature(cfeature.LAKES, alpha=0.5)
+
+    gl = ax.gridlines(draw_labels=False, dms=True, x_inline=False, y_inline=False, linewidth=1,
+                      color='grey', alpha=0.5, linestyle='--')
+    gl.xlocator = mticker.FixedLocator([95, 100, 105])
+    gl.ylocator = mticker.FixedLocator([20, 25, 30])
 
     return ax
 

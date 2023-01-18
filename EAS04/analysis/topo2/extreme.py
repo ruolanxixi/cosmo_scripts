@@ -4,7 +4,7 @@
 import xarray as xr
 import matplotlib.pyplot as plt
 import numpy as np
-from plotcosmomap import pole04, colorbar, plotcosmo04_notick, pole
+from plotcosmomap import pole04, colorbar, plotcosmo04sm_notick, pole
 import cartopy.crs as ccrs
 import matplotlib.gridspec as gridspec
 import cmcrameri.cm as cmc
@@ -53,7 +53,7 @@ seasons = "JJA"
 
 # --- edit here
 ctrlpath = "/project/pr133/rxiang/data/cosmo/EAS04_ctrl/indices"
-topo1path = "/project/pr133/rxiang/data/cosmo/EAS04_topo1/indices"
+topo1path = "/project/pr133/rxiang/data/cosmo/EAS04_topo2/indices"
 paths = [ctrlpath, topo1path]
 data = {}
 vars1 = ['mean', 'perc_95.00', 'perc_99.00']
@@ -92,9 +92,9 @@ for j in range(len(vars)):
 ds = xr.open_dataset('/project/pr133/rxiang/data/extpar/extpar_BECCY_4.4km_merit_unmod_topo.nc')
 hsurf_ctrl = ds['HSURF'].values[:, :]
 ds.close()
-ds = xr.open_dataset('/project/pr133/rxiang/data/extpar/extpar_BECCY_4.4km_merit_reduced_topo_adj.nc')
-hsurf_topo1 = ds['HSURF'].values[:, :]
-hsurf_diff = ndimage.gaussian_filter(hsurf_ctrl - hsurf_topo1, sigma=5, order=0)
+ds = xr.open_dataset('/project/pr133/rxiang/data/extpar/extpar_BECCY_4.4km_merit_env_topo_adj.nc')
+hsurf_topo2 = ds['HSURF'].values[:, :]
+hsurf_diff = ndimage.gaussian_filter(hsurf_topo2 - hsurf_ctrl, sigma=9, order=0)
 hsurf_ctrl = ndimage.gaussian_filter(hsurf_ctrl, sigma=3, order=0)
 lat_ = ds["lat"].values
 lon_ = ds["lon"].values
@@ -120,7 +120,7 @@ ds.close()
 
 # %%
 ar = 1.0  # initial aspect ratio for first trial
-wi = 9.5  # height in inches #15
+wi = 8.8  # height in inches #15
 hi = 9.2  # width in inches #10
 ncol = 3  # edit here
 nrow = 4
@@ -195,28 +195,26 @@ for i in range(len(vars)):
     for j in range(2):
         sim = sims[j]
         axs[i, j] = fig.add_subplot(gs1[i, j], projection=rot_pole_crs04)
-        axs[i, j] = plotcosmo04_notick(axs[i, j])
+        axs[i, j] = plotcosmo04sm_notick(axs[i, j])
         cs[i, j] = axs[i, j].pcolormesh(rlon04, rlat04, data[sim][var]["value"],
                                         cmap=cmap, norm=norm, shading="auto", transform=rot_pole_crs04)
     cmap, norm, level = cmaps2[i], norms2[i], levels2[i]
     for j in range(2):
         axs[i, 2] = fig.add_subplot(gs2[i, 0], projection=rot_pole_crs04)
-        axs[i, 2] = plotcosmo04_notick(axs[i, 2])
+        axs[i, 2] = plotcosmo04sm_notick(axs[i, 2])
         cs[i, 2] = axs[i, 2].pcolormesh(rlon04, rlat04, data['diff'][var]["value"],
                                         cmap=cmap, norm=norm, shading="auto", transform=rot_pole_crs04)
-        topo[i, 2] = axs[i, 2].contour(lon_, lat_, hsurf_diff, levels=[500], colors='darkgreen', linewidths=1,
+        topo[i, 2] = axs[i, 2].contour(lon_, lat_, hsurf_diff, levels=[100], colors='darkgreen', linewidths=1,
                                        transform=ccrs.PlateCarree())
 
 for i in range(nrow):
-    axs[i, 0].text(-0.01, 0.83, '35°N', ha='right', va='center', transform=axs[i, 0].transAxes, fontsize=14)
-    axs[i, 0].text(-0.01, 0.57, '30°N', ha='right', va='center', transform=axs[i, 0].transAxes, fontsize=14)
-    axs[i, 0].text(-0.01, 0.31, '25°N', ha='right', va='center', transform=axs[i, 0].transAxes, fontsize=14)
-    axs[i, 0].text(-0.01, 0.05, '20°N', ha='right', va='center', transform=axs[i, 0].transAxes, fontsize=14)
+    axs[i, 0].text(-0.01, 0.91, '30°N', ha='right', va='center', transform=axs[i, 0].transAxes, fontsize=14)
+    axs[i, 0].text(-0.01, 0.45, '25°N', ha='right', va='center', transform=axs[i, 0].transAxes, fontsize=14)
 
 for j in range(ncol):
-    axs[3, j].text(0.04, -0.02, '90°E', ha='center', va='top', transform=axs[3, j].transAxes, fontsize=14)
+    axs[3, j].text(0.04, -0.02, '95°E', ha='center', va='top', transform=axs[3, j].transAxes, fontsize=14)
     axs[3, j].text(0.46, -0.02, '100°E', ha='center', va='top', transform=axs[3, j].transAxes, fontsize=14)
-    axs[3, j].text(0.88, -0.02, '110°E', ha='center', va='top', transform=axs[3, j].transAxes, fontsize=14)
+    axs[3, j].text(0.88, -0.02, '105°E', ha='center', va='top', transform=axs[3, j].transAxes, fontsize=14)
 
 for i in range(nrow):
     for j in range(ncol):
@@ -225,7 +223,7 @@ for i in range(nrow):
                            transform=axs[i, j].transAxes, fontsize=14)
         t.set_bbox(dict(facecolor='white', alpha=0.7, pad=1, edgecolor='none'))
 
-titles = ['CTRL04', 'TRED04', 'TRED04-CTRL04']
+titles = ['CTRL04', 'TENV04', 'TENV04-CTRL04']
 for j in range(ncol):
     title = titles[j]
     axs[0, j].set_title(f'{title}', pad=5, fontsize=14, loc='center')
@@ -277,7 +275,7 @@ for i in range(nrow):
 
 plt.show()
 plotpath = "/project/pr133/rxiang/figure/paper1/results/extreme/"
-fig.savefig(plotpath + 'extreme1.png', dpi=500)
+fig.savefig(plotpath + 'extreme3.png', dpi=500)
 plt.close(fig)
 
 

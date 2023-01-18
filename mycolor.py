@@ -232,7 +232,7 @@ def custom_seq_cmap(numcolors, colormap):
     return cmap
 
 
-def custom_white_cmap(numcolors, colormap):
+def custom_white_cmap(numcolors, colormap, white, negative):
     """ Create a custom diverging colormap with three colors
 
     Default is blue to white to red with 11 colors.  Colors can be specified
@@ -243,7 +243,14 @@ def custom_white_cmap(numcolors, colormap):
 
     colors_blue = colormap(np.linspace(0, 1, 20))
     colors_white = np.array([1, 1, 1, 1])
-    colors = np.vstack((colors_white, colors_blue))
+
+    if white == 1:
+        colors = np.vstack((colors_white, colors_blue))
+    else:
+        colors = colors_blue
+
+    if negative == 1:
+        colors = colors[::-1]
 
     cmap = LinearSegmentedColormap.from_list(name=colormap, colors=colors, N=numcolors)
 
@@ -387,3 +394,4 @@ def conv(numcolors):
     cmap = LinearSegmentedColormap.from_list('', rgb, numcolors)
 
     return cmap
+
