@@ -66,13 +66,15 @@ for i in range(ncol):
     axs[0, i] = fig.add_subplot(gs[i], projection=rot_pole_crs)
     axs[0, i].set_extent(map_ext, crs=ccrs.PlateCarree())
     axs[0, i].set_aspect("auto")
-    gl = axs[0, i].gridlines(draw_labels=False, dms=True, x_inline=False, y_inline=False, linewidth=1,
-                      color='grey', alpha=0.5, linestyle='--')
-    gl.xlocator = mticker.FixedLocator([85, 90, 95, 100, 105, 110])
+
     axs[0, i].add_feature(cfeature.OCEAN, zorder=100, edgecolor='k')
     axs[0, i].add_feature(cfeature.COASTLINE)
     axs[0, i].add_feature(cfeature.BORDERS, linestyle=':')
     axs[0, i].add_feature(cfeature.RIVERS, alpha=0.5)
+
+    gl = axs[0, i].gridlines(draw_labels=False, linewidth=1,
+                             color='grey', alpha=0.5, linestyle='--', zorder=101)
+    gl.xlocator = mticker.FixedLocator([85, 90, 95, 100, 105, 110])
 
 
 cs[0, 0] = axs[0, 0].pcolormesh(rlon, rlat, ctrl, cmap=cmap, norm=norm, shading="auto", transform=rot_pole_crs)
@@ -101,7 +103,7 @@ for j in range(ncol):
 
 plt.show()
 plotpath = "/project/pr133/rxiang/figure/paper1/topo/"
-fig.savefig(plotpath + 'topo.png', dpi=500)
+fig.savefig(plotpath + 'topo.png', dpi=500, transparent=True)
 plt.close(fig)
 
 
