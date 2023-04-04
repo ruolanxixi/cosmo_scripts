@@ -204,8 +204,8 @@ def custom_div_cmap(numcolors, colormap):
 
     from matplotlib.colors import LinearSegmentedColormap
 
-    colors_red = colormap(np.linspace(0, 0.5, 20))
-    colors_blue = colormap(np.linspace(0.5, 1, 20))
+    colors_red = colormap(np.linspace(0, 0.49, 20))
+    colors_blue = colormap(np.linspace(0.51, 1, 20))
     colors_white = np.array([1, 1, 1, 1])
     colors = np.vstack((colors_red, colors_white, colors_blue))
 
@@ -392,6 +392,51 @@ def conv(numcolors):
         rgb.append(z)
 
     cmap = LinearSegmentedColormap.from_list('', rgb, numcolors)
+
+    return cmap
+
+
+def prcp(numcolors):
+    colvals = [[254, 217, 118, 255], # [254, 178, 76, 255],
+               [255, 237, 160, 255],
+               [237, 250, 194, 255],
+               [205, 255, 205, 255],
+               [153, 240, 178, 255],
+               [83, 189, 159, 255],
+               [50, 166, 150, 255],
+               [50, 150, 180, 255],
+               [5, 112, 176, 255],
+               [5, 80, 140, 255],
+               [10, 31, 150, 255],
+               [44, 2, 70, 255],
+               [106, 44, 90, 255]]
+               # [168, 65, 91, 255]]
+    rgb = []
+    for i in range(len(colvals)):
+        z = [x / 255 for x in colvals[i]]
+        rgb.append(z)
+
+    cmap = LinearSegmentedColormap.from_list('', rgb, numcolors)
+
+    return cmap
+
+
+def cape(numcolors):
+    """ Create a custom diverging colormap with three colors
+
+    Default is blue to white to red with 11 colors.  Colors can be specified
+    in any way understandable by matplotlib.colors.ColorConverter.to_rgb()
+    """
+
+    from matplotlib.colors import LinearSegmentedColormap
+
+    # colors_red = mpl.colormaps['hot_r'](np.linspace(0, 1, 20))
+    colors_red = mpl.colormaps['plasma_r'](np.linspace(0, 1, 20))
+    colors_blue = cmc.vik(np.linspace(0, 0.5, 20))
+    colors_white = np.array([1, 1, 1, 1])
+    colors = np.vstack((colors_blue, colors_white, colors_red))
+
+    cmap = LinearSegmentedColormap.from_list('', colors=colors, N=numcolors)
 
     return cmap
 
