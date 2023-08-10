@@ -20,7 +20,7 @@ matplotlib.rc('font', **font)
 ###########################################
 #%% load data
 ###########################################
-delta_path = '/project/pr133/rxiang/data/pgw/deltas1/day/ECHAM5'
+delta_path = '/project/pr133/rxiang/data/pgw/deltas/native/day/ECHAM5'
 
 var2d_names = ['hurs', 'ps', 'siconc', 'tas', 'ts', 'zg']
 var3d_names = ['ua', 'va', 'zg', 'hur', 'ta']
@@ -30,7 +30,7 @@ climate2 = 'piControl'
 climate3 = 'delta'
 
 climates = [climate1, climate2, climate3]
-labels = {'piControl': 'Pre-industrial', 'delta': 'PI - LGM', 'lgm': 'Last glacial maximum'}
+labels = {'piControl': 'Pre-industrial', 'delta': 'LGM - PI', 'lgm': 'Last glacial maximum'}
 
 data = {}
 
@@ -76,7 +76,7 @@ lat_, lon_ = np.meshgrid(lon, lat)
 ###########################################
 #%% plot
 ###########################################
-var2d_names = ['zg']
+# var2d_names = ['zg']
 mons = ['JAN', 'JUL']
 for ii in range(len(var2d_names)):
     var = var2d_names[ii]

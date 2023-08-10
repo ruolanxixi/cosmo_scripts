@@ -188,10 +188,10 @@ cmap1 = drywet(41, cmc.vik_r)
 norm1 = matplotlib.colors.Normalize(vmin=-60, vmax=60)
 tick1 = np.linspace(-60, 60, 5, endpoint=True)
 
-level2 = MaxNLocator(nbins=20).tick_values(-60, 120)
+level2 = MaxNLocator(nbins=20).tick_values(-60, 60)
 cmap2 = drywet(41, cmc.vik_r)
-norm2 = matplotlib.colors.TwoSlopeNorm(vmin=-60, vcenter=0., vmax=120)
-tick2 = [-60, -30, 0, 60, 120]
+norm2 = matplotlib.colors.TwoSlopeNorm(vmin=-60, vcenter=0., vmax=60)
+tick2 = [-60, -30, 0, 30, 60]
 
 level3 = MaxNLocator(nbins=20).tick_values(-60, 60)
 cmap3 = drywet(41, cmc.vik_r)
@@ -203,11 +203,11 @@ cmap4 = drywet(41, cmc.vik_r)
 norm4 = matplotlib.colors.Normalize(vmin=-60, vmax=60)
 tick4 = np.linspace(-60, 60, 5, endpoint=True)
 
-level5 = MaxNLocator(nbins=40).tick_values(-30, 300)
-cmap5 = custom_div_cmap(41, cmc.vik)
+level5 = MaxNLocator(nbins=30).tick_values(-300, 300)
+cmap5 = custom_div_cmap(31, cmc.vik)
 # cmap5 = cape(42)
-norm5 = matplotlib.colors.TwoSlopeNorm(vmin=-40, vcenter=0., vmax=300)
-tick5 = [-30, -10, -20, 0, 100, 200, 300]
+norm5 = matplotlib.colors.TwoSlopeNorm(vmin=-300, vcenter=0., vmax=300)
+tick5 = [-300, -100, -200, 0, 100, 200, 300]
 
 cmaps2 = [cmap2, cmap1, cmap3, cmap4, cmap5]
 norms2 = [norm2, norm1, norm3, norm4, norm5]

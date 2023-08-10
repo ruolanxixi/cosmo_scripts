@@ -249,8 +249,9 @@ def custom_white_cmap(numcolors, colormap):
 
     from matplotlib.colors import LinearSegmentedColormap
 
-    colors_blue = colormap(np.linspace(1, 1, 20))
+    colors_blue = colormap(np.linspace(0, 1, 100))
     colors_white = np.array([1, 1, 1, 1])
+    colors = np.vstack((colors_white, colors_blue))
 
     cmap = LinearSegmentedColormap.from_list(name=colormap, colors=colors, N=numcolors)
 

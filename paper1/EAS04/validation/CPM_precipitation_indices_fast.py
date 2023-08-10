@@ -25,10 +25,10 @@ import textwrap
 import os
 
 # Paths to folders
-path_mod = "/scratch/snx3000/rxiang/IMERG/day/"
-# path_mod = "/project/pr133/rxiang/data/cosmo/EAS04_ctrl/1h/TOT_PREC/"
-path_out = "/scratch/snx3000/rxiang/IMERG/indices/"
-# path_out = "/project/pr133/rxiang/data/cosmo/EAS04_ctrl/indices/hr/"
+# path_mod = "/scratch/snx3000/rxiang/IMERG/day/"
+path_mod = "/project/pr133/rxiang/data/cosmo/EAS11_lgm/day/TOT_PREC/"
+# path_out = "/scratch/snx3000/rxiang/IMERG/indices/"
+path_out = "/project/pr133/rxiang/data/cosmo/EAS11_lgm/indices/day/"
 
 # Check whether the output path exists or not
 isExist = os.path.exists(path_out)
@@ -75,12 +75,12 @@ def update_max_values_wet_day(prec_keep, prec, len_y, len_x, num_keep,
 ###############################################################################
 
 # Simulations (yearly NetCDF blocks)
-mod = "IMERG"  # ~1.3G per file
-# mod = "COSMO"  # ~8.2 GB per file
+# mod = "IMERG"  # ~1.3G per file
+mod = "COSMO"  # ~8.2 GB per file
 # mod = "CTRL04"
 
 # Settings
-intra_yr_per = "JJA"  # "year", "JJA", "SON", "DJF", "MAM", "smr"
+intra_yr_per = "smr"  # "year", "JJA", "SON", "DJF", "MAM", "smr"
 temp_gran = "day"  # temporal granularity; "1hr" or "day"
 ts_cons_perc = "all"  # "all", "wet"
 # time steps considered for computing percentiles (Schär et al., 2016)
@@ -109,9 +109,9 @@ if intra_yr_per not in ("year", "JJA", "SON", "DJF", "MAM", "smr"):
 path_mod_tg = path_mod.replace("temp_gran", temp_gran)
 
 # Get relevant files
-# files = glob.glob(path_mod_tg + "??_TOT_PREC.nc")
+files = glob.glob(path_mod_tg + "0?_TOT_PREC.nc")
 # files = glob.glob(path_mod_tg + "??_TOT_PREC_rmdplc_sft.nc")
-files = glob.glob(path_mod_tg + "????.day.corr.nc")
+# files = glob.glob(path_mod_tg + "????.day.corr.nc")
 files.sort()
 # mask_files = [(int(i[-11:-7]) >= years[0]) & (int(i[-11:-7]) <= years[-1])
 #               for i in files]

@@ -1,21 +1,13 @@
 ###########################################
 #%% load module
 ###########################################
-from netCDF4 import Dataset
-import xarray as xr
+import cartopy.crs as ccrs
+import cmcrameri.cm as cmc
+import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import numpy as np
-from plotcosmomap import plotcosmo, pole, colorbar
-import cartopy.crs as ccrs
-from numpy import inf
-import matplotlib.gridspec as gridspec
-import cmcrameri.cm as cmc
+import xarray as xr
 from matplotlib.colors import BoundaryNorm
-from matplotlib.ticker import MaxNLocator
-from mycolor import custom_div_cmap, cbr_wet, cbr_drywet, drywet, custom_seq_cmap_, wind
-from pyproj import Transformer
-import scipy.ndimage as ndimage
-import matplotlib
 
 ###########################################
 #%% load data
@@ -41,7 +33,7 @@ for sim in sims:
 #%% plot
 ###########################################
 wi = 16  # height in inches #15
-hi = 4  # width in inches #10
+hi = 4.5  # width in inches #10
 ncol = 5  # edit here
 nrow = 2
 axs, cs, ct, topo, q, qk, topo1 = np.empty(shape=(nrow, ncol), dtype='object'), np.empty(shape=(nrow, ncol),
@@ -53,7 +45,7 @@ axs, cs, ct, topo, q, qk, topo1 = np.empty(shape=(nrow, ncol), dtype='object'), 
     shape=(nrow, ncol), dtype='object')
 
 fig = plt.figure(figsize=(wi, hi))
-left, bottom, right, top = 0.03, 0.14, 0.98, 0.95
+left, bottom, right, top = 0.03, 0.12, 0.98, 0.9
 gs = gridspec.GridSpec(nrows=2, ncols=5, left=left, bottom=bottom, right=right, top=top, wspace=0.015, hspace=0.05)
 
 # cmap1 = cmc.lapaz_r
@@ -73,7 +65,7 @@ gs = gridspec.GridSpec(nrows=2, ncols=5, left=left, bottom=bottom, right=right, 
 # norm4 = BoundaryNorm(levels4, ncolors=cmap1.N, clip=True)
 # tick4 = np.linspace(0, 0.4, 5, endpoint=True)
 cmap = cmc.lapaz_r
-levels = np.linspace(0, 0.3, 20, endpoint=True)
+levels = np.linspace(0, 0.3, 19, endpoint=True)
 norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)
 tick = np.linspace(0, 0.3, 4, endpoint=True)
 
@@ -105,6 +97,8 @@ for j in range(len(vars)):
     cbar = fig.colorbar(cs[1, j], cax=cax, orientation='horizontal', extend='max', ticks=tick)
     cbar.ax.tick_params(labelsize=13)
 
+fig.suptitle('Aerosol Optical Depth at a wavelength of 550nm', fontsize=14, fontweight='bold')
+
 plt.show()
-# plotpath = "/project/pr133/rxiang/figure/echam5/"
-# fig.savefig(plotpath + 'temp2' + f'{mon}.png', dpi=500)
+plotpath = "/project/pr133/rxiang/figure/paper2/setup/"
+fig.savefig(plotpath + 'aerosol.png', dpi=500, transparent=True)

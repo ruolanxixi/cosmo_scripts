@@ -46,16 +46,16 @@ def compute_pvalue(ctrl, topo):
 ###############################################################################
 # Data
 ###############################################################################
-sims = ['ctrl', 'topo1']
+sims = ['ctrl', 'lgm']
 path = "/project/pr133/rxiang/data/cosmo/"
 
 data = {}
-labels = ['CTRL11', 'TRED11', 'TRED11 - CTRL11']
+labels = ['PD', 'LGM', 'LGM - PD']
 lb = [['a', 'b', 'c'], ['d', 'e', 'f'], ['g', 'h', 'i'], ['j', 'k', 'l']]
 
 g = 9.80665
 
-vars = ['TOT_PREC', 'IUQ', 'IVQ', 'TQF', 'FI500', 'U500', 'V500', 'WS500', 'PMSL', 'U850', 'V850', 'WS850', 'T500']
+vars = ['TOT_PREC', 'T_2M', 'IUQ', 'IVQ', 'TQF', 'FI500', 'U500', 'V500', 'WS500', 'PMSL', 'U850', 'V850', 'WS850', 'T500']
 # load data
 for s in range(len(sims)):
     sim = sims[s]
@@ -63,6 +63,9 @@ for s in range(len(sims)):
     ds = xr.open_dataset(f'{path}' + f'EAS11_{sim}/monsoon/TOT_PREC/' + f'01-05.TOT_PREC.wtr.yearmean.nc')
     wtr = ds['TOT_PREC'].values[...]
     data[sim]['TOT_PREC'] = wtr
+    ds = xr.open_dataset(f'{path}' + f'EAS11_lgm_ssu/monsoon/T_2M/' + f'01-05.T_2M.wtr.yearmean.nc')
+    wtr = ds['T_2M'].values[...]
+    data[sim]['T_2M'] = wtr
     ds = xr.open_dataset(f'{path}' + f'EAS11_{sim}/monsoon/IVT/' + f'01-05.IVT.wtr.yearmean.nc')
     iuq = ds['IUQ'].values[:, :, :]
     data[sim]['IUQ'] = iuq
@@ -97,53 +100,41 @@ for s in range(len(sims)):
 data['diff'] = {}
 for v in range(len(vars)):
     var = vars[v]
-    data['diff'][var] = data['topo1'][var] - data['ctrl'][var]
-
-# load topo
-ds = xr.open_dataset('/project/pr133/rxiang/data/extpar/extpar_EAS_ext_12km_merit_unmod_topo.nc')
-hsurf_ctrl = ds['HSURF'].values[:, :]
-ds.close()
-ds = xr.open_dataset('/project/pr133/rxiang/data/extpar/old/extpar_EAS_ext_12km_merit_adj.nc')
-hsurf_topo1 = ds['HSURF'].values[:, :]
-hsurf_diff = ndimage.gaussian_filter(hsurf_ctrl - hsurf_topo1, sigma=3, order=0)
-hsurf_ctrl = ndimage.gaussian_filter(hsurf_ctrl, sigma=3, order=0)
-lat_ = ds["lat"].values
-lon_ = ds["lon"].values
-ds.close()
+    data['diff'][var] = data['lgm_ssu'][var] - data['ctrl'][var]
 
 ###############################################################################
 # %% Compute p-value
 ###############################################################################
-# p1, corr_p1 = compute_pvalue(data['ctrl']['TOT_PREC'], data['topo1']['TOT_PREC'])
+# p1, corr_p1 = compute_pvalue(data['ctrl']['TOT_PREC'], data['lgm_ssu']['TOT_PREC'])
 # mask1 = np.full_like(p1, fill_value=np.nan)
 # mask1[p1 > 0.05] = 1
-# np.save('/project/pr133/rxiang/data/cosmo/sgnfctt/topo1_TOT_PREC_wtr.npy', mask1)
+# np.save('/project/pr133/rxiang/data/cosmo/sgnfctt/lgm_ssu_TOT_PREC_wtr.npy', mask1)
 #
-# # p2, corr_p2 = compute_pvalue(data['ctrl']['TQF'], data['topo1']['TQF'])
+# # p2, corr_p2 = compute_pvalue(data['ctrl']['TQF'], data['lgm_ssu']['TQF'])
 # # mask2 = np.full_like(p2, fill_value=np.nan)
 # # mask2[p2 > 0.05] = 1
-# # np.save('/project/pr133/rxiang/data/cosmo/sgnfctt/topo1_TQF_wtr.npy', mask2)
+# # np.save('/project/pr133/rxiang/data/cosmo/sgnfctt/lgm_ssu_TQF_wtr.npy', mask2)
 #
-# p3, corr_p3 = compute_pvalue(data['ctrl']['PMSL'], data['topo1']['PMSL'])
+# p3, corr_p3 = compute_pvalue(data['ctrl']['PMSL'], data['lgm_ssu']['PMSL'])
 # mask3 = np.full_like(p3, fill_value=np.nan)
 # mask3[p3 > 0.05] = 1
-# np.save('/project/pr133/rxiang/data/cosmo/sgnfctt/topo1_PMSL_wtr.npy', mask3)
+# np.save('/project/pr133/rxiang/data/cosmo/sgnfctt/lgm_ssu_PMSL_wtr.npy', mask3)
 #
-# p4, corr_p4 = compute_pvalue(data['ctrl']['FI'], data['topo1']['FI'])
+# p4, corr_p4 = compute_pvalue(data['ctrl']['FI'], data['lgm_ssu']['FI'])
 # mask4 = np.full_like(p4, fill_value=np.nan)
 # mask4[p4 > 0.05] = 1
-# np.save('/project/pr133/rxiang/data/cosmo/sgnfctt/topo1_FI500_wtr.npy', mask4)
+# np.save('/project/pr133/rxiang/data/cosmo/sgnfctt/lgm_ssu_FI500_wtr.npy', mask4)
 
-mask1 = np.load('/project/pr133/rxiang/data/cosmo/sgnfctt/topo1_TOT_PREC_wtr.npy')
-mask3 = np.load('/project/pr133/rxiang/data/cosmo/sgnfctt/topo1_PMSL_wtr.npy')
-mask4 = np.load('/project/pr133/rxiang/data/cosmo/sgnfctt/topo1_FI500_wtr.npy')
+# mask1 = np.load('/project/pr133/rxiang/data/cosmo/sgnfctt/lgm_ssu_TOT_PREC_wtr.npy')
+# mask3 = np.load('/project/pr133/rxiang/data/cosmo/sgnfctt/lgm_ssu_PMSL_wtr.npy')
+# mask4 = np.load('/project/pr133/rxiang/data/cosmo/sgnfctt/lgm_ssu_FI500_wtr.npy')
 
 ###############################################################################
 # %% Plot
 ###############################################################################
 [pole_lat, pole_lon, lat, lon, rlat, rlon, rot_pole_crs] = pole()
 rlon_, rlat_ = np.meshgrid(rlon, rlat)
-sims = ['ctrl', 'topo1', 'diff']
+sims = ['ctrl', 'lgm_ssu', 'diff']
 fig = plt.figure(figsize=(11, 7.5))
 gs1 = gridspec.GridSpec(4, 2, left=0.05, bottom=0.03, right=0.585,
                         top=0.96, hspace=0.05, wspace=0.05,
@@ -165,10 +156,10 @@ for i in range(nrow):
     axs[i, 2] = plotcosmo_notick_nogrid(axs[i, 2])
 
 # plot topo_diff
-for i in range(nrow):
-    axs[i, 2] = plotcosmo_notick(axs[i, 2])
-    topo[i, 2] = axs[i, 2].contour(lon_, lat_, hsurf_diff, levels=[500], colors='darkgreen', linewidths=1,
-                                   transform=ccrs.PlateCarree())
+# for i in range(nrow):
+#     axs[i, 2] = plotcosmo_notick(axs[i, 2])
+#     topo[i, 2] = axs[i, 2].contour(lon_, lat_, hsurf_diff, levels=[500], colors='darkgreen', linewidths=1,
+#                                    transform=ccrs.PlateCarree())
 
 axs[1, 2] = plotcosmo_notick(axs[1, 2])
 #############################################################################
@@ -189,8 +180,13 @@ for j in range(ncol):
     cmap = cmaps[j]
     norm = norms[j]
     cs[0, j] = axs[0, j].pcolormesh(rlon, rlat, np.nanmean(data[sim]['TOT_PREC'], axis=0), cmap=cmap, norm=norm, shading="auto")
+    axs[0, j].barbs(rlon[::55], rlat[::55], np.nanmean(data[sim]['U850'], axis=0)[::55, ::55].to('kt').m,
+                    np.nanmean(data[sim]['V850'], axis=0)[::55, ::55].to('kt').m,
+                    data[sim]['WS850'][::55, ::55].to('kt').m,
+                    pivot='middle', color='black', length=4.5, linewidth=0.6,
+                    sizes=dict(emptybarb=0.07, spacing=0.2))
 # --
-ha = axs[0, 2].contourf(rlon, rlat, mask1, levels=1, colors='none', hatches=['////'], rasterized=True, zorder=101)
+# ha = axs[0, 2].contourf(rlon, rlat, mask1, levels=1, colors='none', hatches=['////'], rasterized=True, zorder=101)
 # --
 cax = fig.add_axes(
     [axs[0, 1].get_position().x1 + 0.01, axs[0, 1].get_position().y0, 0.015, axs[0, 1].get_position().height])
@@ -242,14 +238,16 @@ cbar = fig.colorbar(q[1, 2], cax=cax, orientation='vertical', extend='both')
 cbar.ax.tick_params(labelsize=13)
 
 # --- plot SLP
-levels1 = MaxNLocator(nbins=13).tick_values(1000, 1030)
 # cmap1 = plt.cm.get_cmap("Spectral")
+# levels1 = np.linspace(230, 290, 31, endpoint=True)
+levels1 = np.linspace(1000, 1050, 28, endpoint=True)
 cmap1 = cmc.roma_r
 norm1 = BoundaryNorm(levels1, ncolors=cmap1.N, clip=True)
-levels2 = MaxNLocator(nbins=15).tick_values(-6, 6)
 cmap2 = custom_div_cmap(25, cmc.vik)
-norm2 = colors.TwoSlopeNorm(vmin=-6., vcenter=0., vmax=6.)
+norm2 = colors.TwoSlopeNorm(vmin=-10., vcenter=0., vmax=20.)
 # --
+levels1 = np.linspace(1000, 1050, 9, endpoint=True)
+levels2 = [-20, -15, -10, -5, 5, 10, 15, 20]
 levels = [levels1, levels1, levels2]
 norms = [norm1, norm1, norm2]
 cmaps = [cmap1, cmap1, cmap2]
@@ -258,18 +256,25 @@ for j in range(ncol):
     sim = sims[j]
     cmap = cmaps[j]
     norm = norms[j]
+    level = levels[j]
     cs[2, j] = axs[2, j].pcolormesh(rlon, rlat, np.nanmean(data[sim]['PMSL'], axis=0), cmap=cmap, norm=norm, shading="auto")
+    # ct[2, j] = axs[2, j].contour(rlon, rlat, np.nanmean(data[sim]['PMSL'], axis=0), levels=level,
+    #                              colors='k', linewidths=.8)
+    # clabel = axs[2, j].clabel(ct[2, j], levels=level, inline=True, fontsize=10,
+    #                           use_clabeltext=True)
+    # for l in clabel:
+    #     l.set_rotation(0)
 # --
-ha = axs[2, 2].contourf(rlon, rlat, mask3, levels=1, colors='none', hatches=['////'], rasterized=True, zorder=101)
+# ha = axs[2, 2].contourf(rlon, rlat, mask3, levels=1, colors='none', hatches=['////'], rasterized=True, zorder=101)
 # --
 cax = fig.add_axes(
     [axs[2, 1].get_position().x1 + 0.01, axs[2, 1].get_position().y0, 0.015, axs[2, 1].get_position().height])
-cbar = fig.colorbar(cs[2, 1], cax=cax, orientation='vertical', extend='both', ticks=[1000, 1005, 1010, 1015, 1020, 1025, 1030])
+cbar = fig.colorbar(cs[2, 1], cax=cax, orientation='vertical', extend='both', ticks=np.linspace(1000, 1050, 6, endpoint=True))
 cbar.ax.tick_params(labelsize=13)
 cbar.ax.ticklabel_format(useOffset=False)
 cax = fig.add_axes(
     [axs[2, 2].get_position().x1 + 0.01, axs[2, 2].get_position().y0, 0.015, axs[2, 2].get_position().height])
-cbar = fig.colorbar(cs[2, 2], cax=cax, orientation='vertical', extend='both', ticks=[-3, -6, 0, 3, 6])
+cbar = fig.colorbar(cs[2, 2], cax=cax, orientation='vertical', extend='both', ticks=[-10, -5, 0, 10, 20])
 cbar.ax.tick_params(labelsize=13)
 # --
 for j in range(ncol):
@@ -294,7 +299,7 @@ for j in range(ncol):
 #     norm = norms[j]
 #     scale = scales[j]
 #     cs[2, j] = axs[2, j].pcolormesh(rlon, rlat, data[sim]['FI'], cmap=cmap, norm=norm, shading="auto")
-# 
+#
 # # --
 # cax = fig.add_axes(
 #     [axs[2, 1].get_position().x1 + 0.01, axs[2, 1].get_position().y0, 0.015, axs[2, 1].get_position().height])
@@ -341,10 +346,10 @@ for j in range(ncol):
 cmap1 = cmc.roma_r
 norm1 = BoundaryNorm(np.linspace(232, 272, 41, endpoint=True), ncolors=cmap1.N, clip=True)
 cmap2 = custom_div_cmap(25, cmc.vik)
-norm2 = colors.TwoSlopeNorm(vmin=-2, vcenter=0., vmax=2.)
+norm2 = colors.TwoSlopeNorm(vmin=-10, vcenter=0., vmax=10.)
 
 levels1 = np.linspace(5200, 5900, 8, endpoint=True)
-levels2 = [-24, -18, -12, -6, 6, 12]
+levels2 = [-60, -40, -20, 20, 40, 60]
 # --
 levels = [levels1, levels1, levels2]
 norms = [norm1, norm1, norm2]
@@ -360,17 +365,13 @@ for j in range(ncol):
     ct[3, j] = axs[3, j].contour(rlon, rlat, np.nanmean(data[sim]['FI500'], axis=0), levels=level,
                                  colors='k', linewidths=.8)
     wind_slice = (slice(None, None, 5), slice(None, None, 5))
-    axs[3, j].barbs(rlon[::55], rlat[::55], np.nanmean(data[sim]['U500'], axis=0)[::55, ::55].to('kt').m,
-                    np.nanmean(data[sim]['V500'], axis=0)[::55, ::55].to('kt').m,
-                    data[sim]['WS500'][::55, ::55].to('kt').m,
-                    pivot='middle', color='black', length=4.5, linewidth=0.6,
-                    sizes=dict(emptybarb=0.07, spacing=0.2))
+
     clabel = axs[3, j].clabel(ct[3, j], levels=level, inline=True, fontsize=10,
                               use_clabeltext=True)
     for l in clabel:
         l.set_rotation(0)
 # --
-ha = axs[3, 2].contourf(rlon, rlat, mask3, levels=1, colors='none', hatches=['////'], rasterized=True, zorder=101)
+# ha = axs[3, 2].contourf(rlon, rlat, mask3, levels=1, colors='none', hatches=['////'], rasterized=True, zorder=101)
 # --
 cax = fig.add_axes(
     [axs[3, 1].get_position().x1 + 0.01, axs[3, 1].get_position().y0, 0.015, axs[3, 1].get_position().height])
@@ -378,7 +379,7 @@ cbar = fig.colorbar(cs[3, 1], cax=cax, orientation='vertical', extend='both', ti
 cbar.ax.tick_params(labelsize=13)
 cax = fig.add_axes(
     [axs[3, 2].get_position().x1 + 0.01, axs[3, 2].get_position().y0, 0.015, axs[3, 2].get_position().height])
-cbar = fig.colorbar(cs[3, 2], cax=cax, orientation='vertical', extend='both', ticks=[-2, -1, 0, 1, 2])
+cbar = fig.colorbar(cs[3, 2], cax=cax, orientation='vertical', extend='both', ticks=[-10, -5, 0, 5, 10])
 cbar.ax.tick_params(labelsize=13)
 
 #############################################################################
@@ -406,7 +407,7 @@ for j in range(ncol):
 
 
 plt.show()
-plotpath = "/project/pr133/rxiang/figure/paper1/results/TRED/"
+plotpath = "/project/pr133/rxiang/figure/paper2/results/lgm/"
 fig.savefig(plotpath + 'wtr.png', dpi=500)
 plt.close(fig)
 

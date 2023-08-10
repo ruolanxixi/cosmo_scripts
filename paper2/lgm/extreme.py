@@ -52,19 +52,18 @@ def prcp(numcolors):
 
 # -------------------------------------------------------------------------------
 # read data
-sims = ['CTRL04', 'TRED04']
+sims = ['PD', 'LGM']
 seasons = "JJA"
 
 # --- edit here
-ctrlpath = "/project/pr133/rxiang/data/cosmo/EAS04_ctrl/indices"
-topo1path = "/project/pr133/rxiang/data/cosmo/EAS04_topo1/indices"
-paths = [ctrlpath, topo1path]
+ctrlpath = "/project/pr133/rxiang/data/cosmo/EAS11_ctrl/indices"
+lgmpath = "/project/pr133/rxiang/data/cosmo/EAS11_lgm/indices"
+paths = [ctrlpath, lgmpath]
 data = {}
 vars1 = ['mean', 'perc_95.00', 'perc_99.00']
-vars2 = ['perc_99.90']
-vars = ['IVT', 'mean', 'perc_99.00', 'perc_99.90', 'CAPE_ML']
+vars = ['IVT', 'mean', 'perc_95.00', 'perc_99.00']
 
-[pole_lat04, pole_lon04, lat04, lon04, rlat04, rlon04, rot_pole_crs04] = pole04()
+[pole_lat, pole_lon, lat, lon, rlat, rlon, rot_pole_crs] = pole()
 
 lb = [['a', 'b', 'c'], ['d', 'e', 'f'], ['g', 'h', 'i'], ['j', 'k', 'l'], ['m', 'n', 'o']]
 
@@ -77,14 +76,9 @@ for i in range(len(sims)):
         var = vars1[j]
         ds = f[var].values[:, :]
         data[sim][var] = ds
-    f = xr.open_dataset(f'{path}/hr/2001-2005_smr_all_day_perc.nc')
-    for j in range(len(vars2)):
-        var = vars2[j]
-        ds = f[var].values[:, :]
-        data[sim][var] = ds
 
-ctrlpath = "/project/pr133/rxiang/data/cosmo/EAS04_ctrl/monsoon"
-topo1path = "/project/pr133/rxiang/data/cosmo/EAS04_topo1/monsoon"
+ctrlpath = "/project/pr133/rxiang/data/cosmo/EAS11_ctrl/monsoon"
+topo1path = "/project/pr133/rxiang/data/cosmo/EAS11_lgm/monsoon"
 paths = [ctrlpath, topo1path]
 vars3 = ['IVQ', 'IUQ']
 
@@ -93,44 +87,30 @@ for i in range(len(sims)):
     path = paths[i]
     for j in range(len(vars3)):
         var = vars3[j]
-        file = xr.open_dataset(f'{path}/IVT/smr/01-05.IVT.smr.nc')
+        file = xr.open_dataset(f'{path}/IVT/01-05.IVT.smr.yearmean.nc')
         ds = file[var].values[:, :, :]
         data[sim][var] = np.nanmean(ds, axis=0)
     data[sim]['IVT'] = np.nanmean(np.sqrt(file['IVQ'].values[:, :, :]**2+file['IUQ'].values[:, :, :]**2), axis=0)
-    f = xr.open_dataset(f'{path}/CAPE_ML/smr/01-05.CAPE_ML.smr.nc')
-    ds = f['CAPE_ML'].values[:, :]
-    data[sim]['CAPE_ML'] = np.nanmean(ds, axis=0)
 
 
-vars4 = ['mean', 'IVT', 'perc_99.00', 'perc_99.90', 'CAPE_ML', 'IVQ', 'IUQ']
+vars4 = ['mean', 'IVT', 'perc_95.00', 'perc_99.00', 'IVQ', 'IUQ']
 np.seterr(divide='ignore', invalid='ignore')
 data['diff'] = {}
 for j in range(len(vars4)):
     var = vars4[j]
     if var in ["IVQ", "IUQ", "IVT"]:
-        data['diff'][var] = data['TRED04'][var] - data['CTRL04'][var]
+        data['diff'][var] = data['LGM'][var] - data['PD'][var]
     else:
-        data['diff'][var] = (data['TRED04'][var] - data['CTRL04'][var]) / data['CTRL04'][var] * 100
+        data['diff'][var] = (data['LGM'][var] - data['PD'][var]) / data['PD'][var] * 100
 
-
-# load topo
-ds = xr.open_dataset('/project/pr133/rxiang/data/extpar/extpar_BECCY_4.4km_merit_unmod_topo.nc')
-hsurf_ctrl = ds['HSURF'].values[:, :]
-ds.close()
-ds = xr.open_dataset('/project/pr133/rxiang/data/extpar/extpar_BECCY_4.4km_merit_reduced_topo_adj.nc')
-hsurf_topo1 = ds['HSURF'].values[:, :]
-hsurf_diff = ndimage.gaussian_filter(hsurf_ctrl - hsurf_topo1, sigma=5, order=0)
-hsurf_ctrl = ndimage.gaussian_filter(hsurf_ctrl, sigma=3, order=0)
-lat_ = ds["lat"].values
-lon_ = ds["lon"].values
-ds.close()
+vars = ['IVT', 'mean', 'perc_95.00']
 
 # %%
 ar = 1.0  # initial aspect ratio for first trial
 wi = 8.5  # height in inches #15
-hi = 9.7  # width in inches #10
+hi = 6  # width in inches #10
 ncol = 3  # edit here
-nrow = 5
+nrow = 3
 axs, cs, ct, topo, q, qk, topo1 = np.empty(shape=(nrow, ncol), dtype='object'), np.empty(shape=(nrow, ncol),
                                                                                          dtype='object'), \
                                   np.empty(shape=(nrow, ncol), dtype='object'), np.empty(shape=(nrow, ncol),
@@ -140,10 +120,10 @@ axs, cs, ct, topo, q, qk, topo1 = np.empty(shape=(nrow, ncol), dtype='object'), 
     shape=(nrow, ncol), dtype='object')
 
 fig = plt.figure(figsize=(wi, hi))
-gs1 = gridspec.GridSpec(5, 2, left=0.06, bottom=0.024, right=0.545,
-                        top=0.97, hspace=0.07, wspace=0.07, width_ratios=[1, 1], height_ratios=[1, 1, 1, 1, 1])
-gs2 = gridspec.GridSpec(5, 1, left=0.655, bottom=0.024, right=0.89,
-                        top=0.97, hspace=0.07, wspace=0.07, height_ratios=[1, 1, 1, 1, 1])
+gs1 = gridspec.GridSpec(3, 2, left=0.06, bottom=0.024, right=0.545,
+                        top=0.97, hspace=0.07, wspace=0.07, width_ratios=[1, 1], height_ratios=[1, 1, 1])
+gs2 = gridspec.GridSpec(3, 1, left=0.655, bottom=0.024, right=0.89,
+                        top=0.97, hspace=0.07, wspace=0.07, height_ratios=[1, 1, 1])
 
 level1 = MaxNLocator(nbins=20).tick_values(0, 20)
 cmap1 = prcp(20)
@@ -160,20 +140,15 @@ cmap3 = prcp(20)
 norm3 = BoundaryNorm(level3, ncolors=cmap3.N, clip=True)
 tick3 = np.linspace(0, 100, 6, endpoint=True)
 
-level4 = MaxNLocator(nbins=20).tick_values(0, 40)
+level4 = MaxNLocator(nbins=20).tick_values(0, 200)
 cmap4 = prcp(20)
 norm4 = BoundaryNorm(level4, ncolors=cmap4.N, clip=True)
-tick4 = np.linspace(0, 40, 5, endpoint=True)
+tick4 = np.linspace(0, 200, 5, endpoint=True)
 
-level5 = MaxNLocator(nbins=24).tick_values(0, 600)
-cmap5 = custom_seq_cmap(24, cmc.roma_r, 0, 0)
-norm5 = BoundaryNorm(level5, ncolors=cmap5.N, clip=True)
-tick5 = np.linspace(0, 600, 7, endpoint=True)
-
-cmaps1 = [cmap2, cmap1, cmap3, cmap4, cmap5]
-norms1 = [norm2, norm1, norm3, norm4, norm5]
-levels1 = [level2, level1, level3, level4, level5]
-ticks1 = [tick2, tick1, tick3, tick4, tick5]
+cmaps1 = [cmap2, cmap1, cmap3, cmap4]
+norms1 = [norm2, norm1, norm3, norm4]
+levels1 = [level2, level1, level3, level4]
+ticks1 = [tick2, tick1, tick3, tick4]
 
 level1 = MaxNLocator(nbins=20).tick_values(-60, 60)
 cmap1 = drywet(21, cmc.vik_r)
@@ -195,15 +170,10 @@ cmap4 = drywet(21, cmc.vik_r)
 norm4 = matplotlib.colors.Normalize(vmin=-60, vmax=60)
 tick4 = np.linspace(-60, 60, 5, endpoint=True)
 
-level5 = MaxNLocator(nbins=20).tick_values(-300, 300)
-cmap5 = custom_div_cmap(21, cmc.vik)
-norm5 = matplotlib.colors.TwoSlopeNorm(vmin=-300, vcenter=0., vmax=300)
-tick5 = [-300, -200, -100, 0, 100, 200, 300]
-
-cmaps2 = [cmap2, cmap1, cmap3, cmap4, cmap5]
-norms2 = [norm2, norm1, norm3, norm4, norm5]
-levels2 = [level2, level1, level3, level4, level5]
-ticks2 = [tick2, tick1, tick3, tick4, tick5]
+cmaps2 = [cmap2, cmap1, cmap3, cmap4]
+norms2 = [norm2, norm1, norm3, norm4]
+levels2 = [level2, level1, level3, level4]
+ticks2 = [tick2, tick1, tick3, tick4]
 
 
 for i in range(len(vars)):
@@ -211,27 +181,25 @@ for i in range(len(vars)):
     cmap, norm, level = cmaps1[i], norms1[i], levels1[i]
     for j in range(2):
         sim = sims[j]
-        axs[i, j] = fig.add_subplot(gs1[i, j], projection=rot_pole_crs04)
+        axs[i, j] = fig.add_subplot(gs1[i, j], projection=rot_pole_crs)
         axs[i, j] = plotcosmo04_notick(axs[i, j])
-        cs[i, j] = axs[i, j].pcolormesh(rlon04, rlat04, data[sim][var],
-                                        cmap=cmap, norm=norm, shading="auto", transform=rot_pole_crs04)
+        cs[i, j] = axs[i, j].pcolormesh(rlon, rlat, data[sim][var],
+                                        cmap=cmap, norm=norm, shading="auto", transform=rot_pole_crs)
     cmap, norm, level = cmaps2[i], norms2[i], levels2[i]
     for j in range(2):
-        axs[i, 2] = fig.add_subplot(gs2[i, 0], projection=rot_pole_crs04)
+        axs[i, 2] = fig.add_subplot(gs2[i, 0], projection=rot_pole_crs)
         axs[i, 2] = plotcosmo04_notick(axs[i, 2])
-        cs[i, 2] = axs[i, 2].pcolormesh(rlon04, rlat04, data['diff'][var],
-                                        cmap=cmap, norm=norm, shading="auto", transform=rot_pole_crs04)
-        topo[i, 2] = axs[i, 2].contour(lon_, lat_, hsurf_diff, levels=[500], colors='darkgreen', linewidths=1,
-                                       transform=ccrs.PlateCarree())
+        cs[i, 2] = axs[i, 2].pcolormesh(rlon, rlat, data['diff'][var],
+                                        cmap=cmap, norm=norm, shading="auto", transform=rot_pole_crs)
 
 for j in range(2):
     sim = sims[j]
-    q[0, j] = axs[0, j].quiver(rlon04[::20], rlat04[::20], data[sim]['IUQ'][::20, ::20],
-                            data[sim]['IVQ'][::20, ::20], color='black', scale=2000, headaxislength=3.5,
+    q[0, j] = axs[0, j].quiver(rlon[::10], rlat[::10], data[sim]['IUQ'][::10, ::10],
+                            data[sim]['IVQ'][::10, ::10], color='black', scale=2000, headaxislength=3.5,
                             headwidth=5, minshaft=0)
 
-q[0, 2] = axs[0, 2].quiver(rlon04[::20], rlat04[::20], data['diff']['IUQ'][::20, ::20],
-                        data['diff']['IVQ'][::20, ::20], color='black', scale=1000,
+q[0, 2] = axs[0, 2].quiver(rlon[::10], rlat[::10], data['diff']['IUQ'][::10, ::10],
+                        data['diff']['IVQ'][::10, ::10], color='black', scale=1000,
                         headaxislength=3.5, headwidth=5, minshaft=0)
 
 for i in range(nrow):
@@ -241,9 +209,9 @@ for i in range(nrow):
     axs[i, 0].text(-0.01, 0.05, '20°N', ha='right', va='center', transform=axs[i, 0].transAxes, fontsize=13)
 
 for j in range(ncol):
-    axs[4, j].text(0.06, -0.02, '90°E', ha='center', va='top', transform=axs[4, j].transAxes, fontsize=13)
-    axs[4, j].text(0.46, -0.02, '100°E', ha='center', va='top', transform=axs[4, j].transAxes, fontsize=13)
-    axs[4, j].text(0.86, -0.02, '110°E', ha='center', va='top', transform=axs[4, j].transAxes, fontsize=13)
+    axs[2, j].text(0.06, -0.02, '90°E', ha='center', va='top', transform=axs[2, j].transAxes, fontsize=13)
+    axs[2, j].text(0.46, -0.02, '100°E', ha='center', va='top', transform=axs[2, j].transAxes, fontsize=13)
+    axs[2, j].text(0.86, -0.02, '110°E', ha='center', va='top', transform=axs[2, j].transAxes, fontsize=13)
 
 for i in range(nrow):
     for j in range(ncol):
@@ -252,13 +220,13 @@ for i in range(nrow):
                            transform=axs[i, j].transAxes, fontsize=13)
         t.set_bbox(dict(facecolor='white', alpha=0.7, pad=1, edgecolor='none'))
 
-titles = ['CTRL04', 'TRED04', 'TRED04-CTRL04']
+titles = ['PD', 'LGM', 'PD-LGM']
 for j in range(ncol):
     title = titles[j]
     axs[0, j].set_title(f'{title}', pad=5, fontsize=14, loc='center')
 
-extends = ['max', 'neither', 'neither', 'neither', "max"]
-xlabels = ['kg m$^{-1}$ s$^{-1}$', 'mm d$^{-1}$', 'mm d$^{-1}$', 'mm h$^{-1}$', 'J kg$^{-1}$']
+extends = ['max', 'neither', 'neither', 'neither']
+xlabels = ['kg m$^{-1}$ s$^{-1}$', 'mm d$^{-1}$', 'mm d$^{-1}$', 'mm d$^{-1}$']
 for i in range(nrow):
     extend = extends[i]
     tick = ticks1[i]
@@ -271,7 +239,7 @@ for i in range(nrow):
     axs[i, 1].text(1.35, 0.5, f'{xlabel}', ha='left', va='center', transform=axs[i, 1].transAxes, fontsize=13, rotation="vertical")
     # cbar.ax.set_xlabel(f'{xlabel}', fontsize=13)
 
-xlabels = ['kg m$^{-1}$ s$^{-1}$', '%', '%', '%', '%']
+xlabels = ['kg m$^{-1}$ s$^{-1}$', '%', '%', '%']
 for i in range(nrow):
     extend = extends[i]
     tick = ticks2[i]
@@ -283,21 +251,10 @@ for i in range(nrow):
     cbar.ax.minorticks_off()
     axs[i, 2].text(1.35, 0.5, f'{xlabel}', ha='left', va='center', transform=axs[i, 2].transAxes, fontsize=13, rotation="vertical")
 
-gl_spac = 1
-gl = axs[0, 0].gridlines(draw_labels=False, dms=True, x_inline=False, y_inline=False, linewidth=1,
-                      color='grey', alpha=0.5, linestyle='--')
-gl.xlocator = mticker.FixedLocator(range(-180, 180 + gl_spac, gl_spac))
-gl.ylocator = mticker.FixedLocator(range(-90, 90 + gl_spac, gl_spac))
-
-x_values = np.array([88, 113])
-y_values = np.array([26, 29.7])
-lines1 = lines.Line2D(x_values, y_values, color='k', linestyle="-", linewidth=0.5, transform=rot_pole_crs04, zorder=110)
-axs[0, 0].plot(x_values, y_values, color='k', linestyle="-", linewidth=0.5, transform=ccrs.PlateCarree())
-
 plt.show()
-plotpath = "/project/pr133/rxiang/figure/paper1/results/extreme/"
-fig.savefig(plotpath + 'grid.png', dpi=500)
-# fig.savefig(plotpath + 'extreme1.png', dpi=500)
+plotpath = "/project/pr133/rxiang/figure/paper2/results/lgm/"
+fig.savefig(plotpath + 'extreme.png', dpi=500)
+
 plt.close(fig)
 
 

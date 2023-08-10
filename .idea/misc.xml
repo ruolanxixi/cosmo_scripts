@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="ProjectRootManager" version="2" project-jdk-name="Remote Python 3.10.0 (sftp://rxiang@daint.cscs.ch:22/users/rxiang/miniconda3/envs/rxiang/bin/python)" project-jdk-type="Python SDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="Remote Python 3.10.10 (sftp://rxiang@daint.cscs.ch:22/project/pr133/rxiang/miniconda3/envs/rxiang/bin/python3.10)" project-jdk-type="Python SDK" />
+  <component name="PyPackaging">
+    <option name="earlyReleasesAsUpgrades" value="true" />
+  </component>
 </project>

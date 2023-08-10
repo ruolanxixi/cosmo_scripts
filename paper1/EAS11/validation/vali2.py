@@ -22,6 +22,7 @@ import numpy.ma as ma
 
 font = {'size': 13}
 matplotlib.rc('font', **font)
+plt.rcParams['axes.facecolor'] = 'lightgrey'
 
 # -------------------------------------------------------------------------------
 # read data

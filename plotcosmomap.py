@@ -13,6 +13,7 @@ import matplotlib.ticker as mticker
 from cartopy.mpl.ticker import (LongitudeFormatter, LatitudeFormatter,
                                 LongitudeLocator, LatitudeLocator)
 import xarray as xr
+import pickle
 
 
 def add_gridline_labels(ax, labels_set=None, side=None):  # 'top', 'bottom', 'left', 'right'
@@ -132,72 +133,57 @@ def plotcosmo(ax):
 
 
 def plotcosmo_notick(ax):
-    """
-    A function to draw the background map for plotting CCLM output.
-            The output-map will be ploted on a rotated pole grid.
-
-            Args:
-                    infile: an xarray data array or a structure that contains lat and lon data
-
-                    ax: axes
-
-                    plabels (optional): label definition for parallels
-
-                    mlabels (optional): labels for meridians
-
-                    additional optional arguments with default are resolution of the coastlines, linewidth for meridians and the fontsize of the labels. additional text and line **kwargs can also be passed
-
-            Returns:
-                    m: the basemap map projection (rotated pole) used in CCLM
-
-            Example usage:
-                    from plotcosmomap import plotcosmomap
-
-                    mydata=xr.open_dataset('mypath')
-
-                    m, xi, yi = plotcosmomap(mydata); m.pcolormesh(xi, yi, mydata, cmap='plasma')
-    """
 
     ax.set_extent([65, 173, 7, 61], crs=ccrs.PlateCarree())  # for extended 12km domain
     ax.add_feature(cfeature.COASTLINE)
     ax.add_feature(cfeature.BORDERS, linestyle=':')
     ax.add_feature(cfeature.LAKES, alpha=0.5)
 
-    gl = ax.gridlines(draw_labels=False, dms=True, x_inline=False, y_inline=False, linewidth=1,
-                      color='grey', alpha=0.7, linestyle='--')
+    gl = ax.gridlines(draw_labels=False, dms=True, x_inline=False, y_inline=False, linewidth=0.7,
+                      color='gray', alpha=0.7, linestyle='--')
     gl.xlocator = mticker.FixedLocator([60, 80, 100, 120, 140, 160, 180])
     gl.ylocator = mticker.FixedLocator([0, 10, 20, 30, 40, 50, 60])
 
     return ax
 
 
+def plotcosmo_notick_lgm(ax, diff=False):
+
+    ax.set_extent([65, 173, 7, 61], crs=ccrs.PlateCarree())  # for extended 12km domain
+    ax.add_feature(cfeature.LAKES, alpha=0.5)
+
+    with open('/project/pr133/rxiang/data/extpar/lgm_contour.pkl', 'rb') as file:
+        contours_rlatrlon = pickle.load(file)
+
+    # loaded_contours_rlatrlon now contains the list
+
+    if diff:
+        ax.add_feature(cfeature.COASTLINE, linestyle='--')
+        ax.add_feature(cfeature.BORDERS, linestyle=':')
+        for contour in contours_rlatrlon:
+            ax.plot(contour[:, 0], contour[:, 1], c='black', linewidth=1)
+    else:
+        for contour in contours_rlatrlon:
+            ax.plot(contour[:, 0], contour[:, 1], c='black', linewidth=1)
+
+    gl = ax.gridlines(draw_labels=False, dms=True, x_inline=False, y_inline=False, linewidth=0.7,
+                      color='gray', alpha=0.7, linestyle='--')
+    gl.xlocator = mticker.FixedLocator([60, 80, 100, 120, 140, 160, 180])
+    gl.ylocator = mticker.FixedLocator([0, 10, 20, 30, 40, 50, 60])
+
+    return ax
+
+
+def plotcosmo_notick_nogrid(ax):
+
+    ax.set_extent([65, 173, 7, 61], crs=ccrs.PlateCarree())  # for extended 12km domain
+    ax.add_feature(cfeature.COASTLINE)
+    ax.add_feature(cfeature.BORDERS, linestyle=':')
+    ax.add_feature(cfeature.LAKES, alpha=0.5)
+    return ax
+
+
 def plotcosmo04(ax):
-    """
-    A function to draw the background map for plotting CCLM output.
-            The output-map will be ploted on a rotated pole grid.
-
-            Args:
-                    infile: an xarray data array or a structure that contains lat and lon data
-
-                    ax: axes
-
-                    plabels (optional): label definition for parallels
-
-                    mlabels (optional): labels for meridians
-
-                    additional optional arguments with default are resolution of the coastlines, linewidth for meridians and the fontsize of the labels. additional text and line **kwargs can also be passed
-
-            Returns:
-                    m: the basemap map projection (rotated pole) used in CCLM
-
-            Example usage:
-                    from plotcosmomap import plotcosmomap
-
-                    mydata=xr.open_dataset('mypath')
-
-                    m, xi, yi = plotcosmomap(mydata); m.pcolormesh(xi, yi, mydata, cmap='plasma')
-    """
-
     ax.set_extent([89, 112.5, 22.2, 39], crs=ccrs.PlateCarree())  # for extended 12km domain
     # ax.add_feature(cfeature.LAND)
     # ax.stock_img()
@@ -239,36 +225,37 @@ def plotcosmo04(ax):
 
 
 def plotcosmo04_notick(ax):
-    """
-    A function to draw the background map for plotting CCLM output.
-            The output-map will be ploted on a rotated pole grid.
-
-            Args:
-                    infile: an xarray data array or a structure that contains lat and lon data
-
-                    ax: axes
-
-                    plabels (optional): label definition for parallels
-
-                    mlabels (optional): labels for meridians
-
-                    additional optional arguments with default are resolution of the coastlines, linewidth for meridians and the fontsize of the labels. additional text and line **kwargs can also be passed
-
-            Returns:
-                    m: the basemap map projection (rotated pole) used in CCLM
-
-            Example usage:
-                    from plotcosmomap import plotcosmomap
-
-                    mydata=xr.open_dataset('mypath')
-
-                    m, xi, yi = plotcosmomap(mydata); m.pcolormesh(xi, yi, mydata, cmap='plasma')
-    """
 
     ax.set_extent([89, 112.5, 22.2, 39], crs=ccrs.PlateCarree())  # for extended 12km domain
     ax.add_feature(cfeature.COASTLINE)
     ax.add_feature(cfeature.BORDERS, linestyle=':')
     ax.add_feature(cfeature.LAKES, alpha=0.5)
+
+    gl = ax.gridlines(draw_labels=False, dms=True, x_inline=False, y_inline=False, linewidth=1,
+                      color='grey', alpha=0.5, linestyle='--')
+    gl.xlocator = mticker.FixedLocator([90, 100, 110, 120])
+    gl.ylocator = mticker.FixedLocator([20, 25, 30, 35, 40])
+
+    return ax
+
+
+def plotcosmo04_notick_lgm(ax, diff=False):
+    ax.set_extent([89, 112.5, 22.2, 39], crs=ccrs.PlateCarree())  # for extended 12km domain
+    ax.add_feature(cfeature.LAKES, alpha=0.5)
+
+    with open('/project/pr133/rxiang/data/extpar/lgm_contour.pkl', 'rb') as file:
+        contours_rlatrlon = pickle.load(file)
+
+    # loaded_contours_rlatrlon now contains the list
+
+    if diff:
+        ax.add_feature(cfeature.COASTLINE, linestyle='--')
+        ax.add_feature(cfeature.BORDERS, linestyle=':')
+        for contour in contours_rlatrlon:
+            ax.plot(contour[:, 0], contour[:, 1], c='black', linewidth=1)
+    else:
+        for contour in contours_rlatrlon:
+            ax.plot(contour[:, 0], contour[:, 1], c='black', linewidth=1)
 
     gl = ax.gridlines(draw_labels=False, dms=True, x_inline=False, y_inline=False, linewidth=1,
                       color='grey', alpha=0.5, linestyle='--')

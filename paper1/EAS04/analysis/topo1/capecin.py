@@ -104,9 +104,9 @@ for i in range(2):
         cs[j, i] = axs[j, i].pcolormesh(rlon04, rlat04, data[sim][var], norm=norm, cmap=cmap,
                                          shading="auto", transform=rot_pole_crs04)
 
-level1 = MaxNLocator(nbins=20).tick_values(-30, 300)
+level1 = MaxNLocator(nbins=20).tick_values(-300, 300)
 cmap1 = custom_div_cmap(21, cmc.vik)
-norm1 = matplotlib.colors.TwoSlopeNorm(vmin=-30, vcenter=0., vmax=300)
+norm1 = matplotlib.colors.TwoSlopeNorm(vmin=-300, vcenter=0., vmax=300)
 
 level2 = MaxNLocator(nbins=20).tick_values(-60, 60)
 cmap2 = custom_div_cmap(21, cmc.vik)
@@ -138,7 +138,7 @@ for i in range(nrow):
     cbar.ax.tick_params(labelsize=13)
     cbar.ax.minorticks_off()
 
-tick1 = [-30, -20, -10, 0, 100, 200, 300]
+tick1 = [-300, -200, -100, 0, 100, 200, 300]
 tick2 = np.linspace(-60, 60, 7, endpoint=True)
 ticks = [tick1, tick2]
 for i in range(nrow):
