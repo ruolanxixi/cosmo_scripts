@@ -45,6 +45,9 @@ for s in range(len(sims)):
     snow = ds['W_SNOW'].values[...]
     fsnow = compute_fsnow(snow)
     nsnow = np.sum(fsnow > 0.5, axis=0)
+    nsnow_xarray = xr.DataArray(nsnow, name='nsnow')
+    nsnow_xarray.to_netcdf(f'/project/pr133/rxiang/data/forzili/nsnow_COSMO_EAS11_{sim}.nc')
+
     data[sim]['W_SNOW'] = np.ma.masked_where(nsnow < 1, nsnow)
 
 data['diff'] = {}

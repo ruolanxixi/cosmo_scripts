@@ -46,7 +46,8 @@ def compute_pvalue(ctrl, topo):
 # Data
 ###############################################################################
 sims = ['ctrl', 'lgm']
-path = "/project/pr133/rxiang/data/cosmo/"
+path1 = "/project/pr133/rxiang/data/cosmo/"
+path2 = "/scratch/snx3000/rxiang/data/cosmo/"
 
 data = {}
 labels = ['PD', 'LGM', 'LGM - PD']
@@ -59,6 +60,10 @@ vars = ['TOT_PREC', 'IUQ', 'IVQ', 'TQF', 'FI500', 'FI850', 'U200', 'V200', 'WS20
 for s in range(len(sims)):
     sim = sims[s]
     data[sim] = {}
+    if sim == 'ctrl':
+        path = path1
+    else:
+        path = path2
     ds = xr.open_dataset(f'{path}' + f'EAS11_{sim}/monsoon/TOT_PREC/' + f'01-05.TOT_PREC.smr.yearmean.nc')
     smr = ds['TOT_PREC'].values[...]
     data[sim]['TOT_PREC'] = smr
@@ -115,15 +120,15 @@ for s in range(len(sims)):
 data['diff'] = {}
 for v in range(len(vars)):
     var = vars[v]
-    data['diff'][var] = data['lgm_ssu'][var] - data['ctrl'][var]
+    data['diff'][var] = data['lgm'][var] - data['ctrl'][var]
 # %%
 # load topo
 ds = xr.open_dataset('/project/pr133/rxiang/data/extpar/extpar_EAS_ext_12km_merit_unmod_topo.nc')
 hsurf_ctrl = ds['HSURF'].values[:, :]
 ds.close()
 ds = xr.open_dataset('/project/pr133/rxiang/data/extpar/old/extpar_EAS_ext_12km_merit_adj.nc')
-hsurf_lgm_ssu = ds['HSURF'].values[:, :]
-hsurf_diff = ndimage.gaussian_filter(hsurf_ctrl - hsurf_lgm_ssu, sigma=3, order=0)
+hsurf_lgm = ds['HSURF'].values[:, :]
+hsurf_diff = ndimage.gaussian_filter(hsurf_ctrl - hsurf_lgm, sigma=3, order=0)
 hsurf_ctrl = ndimage.gaussian_filter(hsurf_ctrl, sigma=3, order=0)
 lat_ = ds["lat"].values
 lon_ = ds["lon"].values
@@ -132,31 +137,31 @@ ds.close()
 ###############################################################################
 # %% Compute p-value
 ###############################################################################
-# p1, corr_p1 = compute_pvalue(data['ctrl']['TOT_PREC'], data['lgm_ssu']['TOT_PREC'])
+# p1, corr_p1 = compute_pvalue(data['ctrl']['TOT_PREC'], data['lgm']['TOT_PREC'])
 # mask1 = np.full_like(p1, fill_value=np.nan)
 # mask1[p1 > 0.05] = 1
-# np.save('/project/pr133/rxiang/data/cosmo/sgnfctt/lgm_ssu_TOT_PREC.npy', mask1)
+# np.save('/project/pr133/rxiang/data/cosmo/sgnfctt/lgm_TOT_PREC.npy', mask1)
 #
-# p2, corr_p2 = compute_pvalue(data['ctrl']['TQF'], data['lgm_ssu']['TQF'])
+# p2, corr_p2 = compute_pvalue(data['ctrl']['TQF'], data['lgm']['TQF'])
 # mask2 = np.full_like(p2, fill_value=np.nan)
 # mask2[p2 > 0.05] = 1
-# np.save('/project/pr133/rxiang/data/cosmo/sgnfctt/lgm_ssu_TQF.npy', mask2)
+# np.save('/project/pr133/rxiang/data/cosmo/sgnfctt/lgm_TQF.npy', mask2)
 #
-# p3, corr_p3 = compute_pvalue(data['ctrl']['FI850'], data['lgm_ssu']['FI850'])
+# p3, corr_p3 = compute_pvalue(data['ctrl']['FI850'], data['lgm']['FI850'])
 # mask3 = np.full_like(p3, fill_value=np.nan)
 # mask3[p3 > 0.05] = 1
-# np.save('/project/pr133/rxiang/data/cosmo/sgnfctt/lgm_ssu_FI850.npy', mask3)
+# np.save('/project/pr133/rxiang/data/cosmo/sgnfctt/lgm_FI850.npy', mask3)
 # #
-# p4, corr_p4 = compute_pvalue(data['ctrl']['FI200'], data['lgm_ssu']['FI200'])
+# p4, corr_p4 = compute_pvalue(data['ctrl']['FI200'], data['lgm']['FI200'])
 # mask4 = np.full_like(p4, fill_value=np.nan)
 # mask4[p4 > 0.05] = 1
-# np.save('/project/pr133/rxiang/data/cosmo/sgnfctt/lgm_ssu_FI200.npy', mask4)
+# np.save('/project/pr133/rxiang/data/cosmo/sgnfctt/lgm_FI200.npy', mask4)
 
-# mask1 = np.load('/project/pr133/rxiang/data/cosmo/sgnfctt/lgm_ssu_TOT_PREC.npy')
-# mask2 = np.load('/project/pr133/rxiang/data/cosmo/sgnfctt/lgm_ssu_TQF.npy')
-# mask3 = np.load('/project/pr133/rxiang/data/cosmo/sgnfctt/lgm_ssu_FI850.npy')
-# mask4 = np.load('/project/pr133/rxiang/data/cosmo/sgnfctt/lgm_ssu_FI200.npy')
-# mask5 = np.load('/project/pr133/rxiang/data/cosmo/sgnfctt/lgm_ssu_CLCT.npy')
+# mask1 = np.load('/project/pr133/rxiang/data/cosmo/sgnfctt/lgm_TOT_PREC.npy')
+# mask2 = np.load('/project/pr133/rxiang/data/cosmo/sgnfctt/lgm_TQF.npy')
+# mask3 = np.load('/project/pr133/rxiang/data/cosmo/sgnfctt/lgm_FI850.npy')
+# mask4 = np.load('/project/pr133/rxiang/data/cosmo/sgnfctt/lgm_FI200.npy')
+# mask5 = np.load('/project/pr133/rxiang/data/cosmo/sgnfctt/lgm_CLCT.npy')
 
 
 ###############################################################################
@@ -164,7 +169,7 @@ ds.close()
 ###############################################################################
 [pole_lat, pole_lon, lat, lon, rlat, rlon, rot_pole_crs] = pole()
 rlon_, rlat_ = np.meshgrid(rlon, rlat)
-sims = ['ctrl', 'lgm_ssu', 'diff']
+sims = ['ctrl', 'lgm', 'diff']
 # fig = plt.figure(figsize=(11, 9.2))
 fig = plt.figure(figsize=(11, 7.4))
 # gs1 = gridspec.GridSpec(5, 2, left=0.05, bottom=0.03, right=0.585,
@@ -191,7 +196,7 @@ for i in range(nrow):
     axs[i, 0] = plotcosmo_notick(axs[i, 0])
     axs[i, 1] = fig.add_subplot(gs1[i, 1], projection=rot_pole_crs)
     axs[i, 1] = plotcosmo_notick_lgm(axs[i, 1], diff=False)
-    axs[i, 2] = fig.add_subplot(gs2[0, 0], projection=rot_pole_crs)
+    axs[i, 2] = fig.add_subplot(gs2[i, 0], projection=rot_pole_crs)
     axs[i, 2] = plotcosmo_notick_lgm(axs[i, 2], diff=True)
 
 # # plot topo_diff
@@ -224,7 +229,7 @@ for j in range(ncol):
                     pivot='middle', color='black', length=4.5, linewidth=0.6,
                     sizes=dict(emptybarb=0.07, spacing=0.2))
 # --
-# p, corr_p = compute_pvalue(data['ctrl']['TOT_PREC'], data['lgm_ssu']['TOT_PREC'])
+# p, corr_p = compute_pvalue(data['ctrl']['TOT_PREC'], data['lgm']['TOT_PREC'])
 # mask = np.full_like(p, fill_value=np.nan)
 # mask[p > 0.05] = 1
 # ha = axs[0, 2].contourf(rlon, rlat, mask1, levels=1, colors='none', hatches=['////'], rasterized=True, zorder=101)
@@ -268,7 +273,7 @@ for j in range(ncol):
 
 
 # --
-# p, corr_p = compute_pvalue(data['ctrl']['TQF'], data['lgm_ssu']['TQF'])
+# p, corr_p = compute_pvalue(data['ctrl']['TQF'], data['lgm']['TQF'])
 # mask = np.full_like(p, fill_value=np.nan)
 # mask[p > 0.05] = 1
 # ha = axs[1, 2].contourf(rlon, rlat, mask2, levels=1, colors='none', hatches=['////'], rasterized=True, zorder=101)
@@ -313,7 +318,7 @@ cbar.ax.tick_params(labelsize=13)
 #                     pivot='middle', color='black', length=4.5, linewidth=0.6,
 #                     sizes=dict(emptybarb=0.07, spacing=0.2))
 # # --
-# # p, corr_p = compute_pvalue(data['ctrl']['FI'], data['lgm_ssu']['FI'])
+# # p, corr_p = compute_pvalue(data['ctrl']['FI'], data['lgm']['FI'])
 # # mask = np.full_like(p, fill_value=np.nan)
 # # mask[p > 0.05] = 1
 # ha = axs[2, 2].contourf(rlon, rlat, mask3, levels=1, colors='none', hatches=['////'], rasterized=True, zorder=101)
@@ -364,14 +369,14 @@ for j in range(ncol):
 # cmap = plt.cm.gray
 # axs[3, 0].contourf(lon_, lat_, mask_ctrl, cmap=cmap, transform=ccrs.PlateCarree(), zorder=300)
 
-# mask_lgm_ssu = hsurf_lgm_ssu
-# mask_lgm_ssu[mask_lgm_ssu < 1500] = np.nan
-# mask_lgm_ssu[mask_lgm_ssu >= 1500] = 1
+# mask_lgm = hsurf_lgm
+# mask_lgm[mask_lgm < 1500] = np.nan
+# mask_lgm[mask_lgm >= 1500] = 1
 # cmap = plt.cm.gray
-# axs[3, 1].contourf(lon_, lat_, mask_lgm_ssu, cmap=cmap, transform=ccrs.PlateCarree(), zorder=300)
+# axs[3, 1].contourf(lon_, lat_, mask_lgm, cmap=cmap, transform=ccrs.PlateCarree(), zorder=300)
 # axs[3, 2].contourf(lon_, lat_, mask_ctrl, cmap=cmap, transform=ccrs.PlateCarree(), zorder=300)
 # --
-# p, corr_p = compute_pvalue(data['ctrl']['FI'], data['lgm_ssu']['FI'])
+# p, corr_p = compute_pvalue(data['ctrl']['FI'], data['lgm']['FI'])
 # mask = np.full_like(p, fill_value=np.nan)
 # mask[p > 0.05] = 1
 # ha = axs[3, 2].contourf(rlon, rlat, mask3, levels=1, colors='none', hatches=['////'], rasterized=True, zorder=101)

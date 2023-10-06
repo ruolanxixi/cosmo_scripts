@@ -15,7 +15,7 @@ import numpy.ma as ma
 from matplotlib.colors import BoundaryNorm
 from matplotlib.ticker import MaxNLocator
 from mycolor import custom_div_cmap, cbr_wet, cbr_drywet, drywet, custom_seq_cmap_
-from plotcosmomap import plotcosmo_notick, pole, plotcosmo_notick_nogrid
+from plotcosmomap import plotcosmo_notick, pole, plotcosmo_notick_nogrid, plotcosmo_notick_lgm
 import matplotlib.colors as colors
 import scipy.ndimage as ndimage
 from scipy.stats import mannwhitneyu
@@ -47,7 +47,8 @@ def compute_pvalue(ctrl, topo):
 # Data
 ###############################################################################
 sims = ['ctrl', 'lgm']
-path = "/project/pr133/rxiang/data/cosmo/"
+path1 = "/project/pr133/rxiang/data/cosmo/"
+path2 = "/scratch/snx3000/rxiang/data/cosmo/"
 
 data = {}
 labels = ['PD', 'LGM', 'LGM - PD']
@@ -60,10 +61,14 @@ vars = ['TOT_PREC', 'T_2M', 'IUQ', 'IVQ', 'TQF', 'FI500', 'U500', 'V500', 'WS500
 for s in range(len(sims)):
     sim = sims[s]
     data[sim] = {}
+    if sim == 'ctrl':
+        path = path1
+    else:
+        path = path2
     ds = xr.open_dataset(f'{path}' + f'EAS11_{sim}/monsoon/TOT_PREC/' + f'01-05.TOT_PREC.wtr.yearmean.nc')
     wtr = ds['TOT_PREC'].values[...]
     data[sim]['TOT_PREC'] = wtr
-    ds = xr.open_dataset(f'{path}' + f'EAS11_lgm_ssu/monsoon/T_2M/' + f'01-05.T_2M.wtr.yearmean.nc')
+    ds = xr.open_dataset(f'{path}' + f'EAS11_lgm/monsoon/T_2M/' + f'01-05.T_2M.wtr.yearmean.nc')
     wtr = ds['T_2M'].values[...]
     data[sim]['T_2M'] = wtr
     ds = xr.open_dataset(f'{path}' + f'EAS11_{sim}/monsoon/IVT/' + f'01-05.IVT.wtr.yearmean.nc')
@@ -100,41 +105,41 @@ for s in range(len(sims)):
 data['diff'] = {}
 for v in range(len(vars)):
     var = vars[v]
-    data['diff'][var] = data['lgm_ssu'][var] - data['ctrl'][var]
+    data['diff'][var] = data['lgm'][var] - data['ctrl'][var]
 
 ###############################################################################
 # %% Compute p-value
 ###############################################################################
-# p1, corr_p1 = compute_pvalue(data['ctrl']['TOT_PREC'], data['lgm_ssu']['TOT_PREC'])
+# p1, corr_p1 = compute_pvalue(data['ctrl']['TOT_PREC'], data['lgm']['TOT_PREC'])
 # mask1 = np.full_like(p1, fill_value=np.nan)
 # mask1[p1 > 0.05] = 1
-# np.save('/project/pr133/rxiang/data/cosmo/sgnfctt/lgm_ssu_TOT_PREC_wtr.npy', mask1)
+# np.save('/project/pr133/rxiang/data/cosmo/sgnfctt/lgm_TOT_PREC_wtr.npy', mask1)
 #
-# # p2, corr_p2 = compute_pvalue(data['ctrl']['TQF'], data['lgm_ssu']['TQF'])
+# # p2, corr_p2 = compute_pvalue(data['ctrl']['TQF'], data['lgm']['TQF'])
 # # mask2 = np.full_like(p2, fill_value=np.nan)
 # # mask2[p2 > 0.05] = 1
-# # np.save('/project/pr133/rxiang/data/cosmo/sgnfctt/lgm_ssu_TQF_wtr.npy', mask2)
+# # np.save('/project/pr133/rxiang/data/cosmo/sgnfctt/lgm_TQF_wtr.npy', mask2)
 #
-# p3, corr_p3 = compute_pvalue(data['ctrl']['PMSL'], data['lgm_ssu']['PMSL'])
+# p3, corr_p3 = compute_pvalue(data['ctrl']['PMSL'], data['lgm']['PMSL'])
 # mask3 = np.full_like(p3, fill_value=np.nan)
 # mask3[p3 > 0.05] = 1
-# np.save('/project/pr133/rxiang/data/cosmo/sgnfctt/lgm_ssu_PMSL_wtr.npy', mask3)
+# np.save('/project/pr133/rxiang/data/cosmo/sgnfctt/lgm_PMSL_wtr.npy', mask3)
 #
-# p4, corr_p4 = compute_pvalue(data['ctrl']['FI'], data['lgm_ssu']['FI'])
+# p4, corr_p4 = compute_pvalue(data['ctrl']['FI'], data['lgm']['FI'])
 # mask4 = np.full_like(p4, fill_value=np.nan)
 # mask4[p4 > 0.05] = 1
-# np.save('/project/pr133/rxiang/data/cosmo/sgnfctt/lgm_ssu_FI500_wtr.npy', mask4)
+# np.save('/project/pr133/rxiang/data/cosmo/sgnfctt/lgm_FI500_wtr.npy', mask4)
 
-# mask1 = np.load('/project/pr133/rxiang/data/cosmo/sgnfctt/lgm_ssu_TOT_PREC_wtr.npy')
-# mask3 = np.load('/project/pr133/rxiang/data/cosmo/sgnfctt/lgm_ssu_PMSL_wtr.npy')
-# mask4 = np.load('/project/pr133/rxiang/data/cosmo/sgnfctt/lgm_ssu_FI500_wtr.npy')
+# mask1 = np.load('/project/pr133/rxiang/data/cosmo/sgnfctt/lgm_TOT_PREC_wtr.npy')
+# mask3 = np.load('/project/pr133/rxiang/data/cosmo/sgnfctt/lgm_PMSL_wtr.npy')
+# mask4 = np.load('/project/pr133/rxiang/data/cosmo/sgnfctt/lgm_FI500_wtr.npy')
 
 ###############################################################################
 # %% Plot
 ###############################################################################
 [pole_lat, pole_lon, lat, lon, rlat, rlon, rot_pole_crs] = pole()
 rlon_, rlat_ = np.meshgrid(rlon, rlat)
-sims = ['ctrl', 'lgm_ssu', 'diff']
+sims = ['ctrl', 'lgm', 'diff']
 fig = plt.figure(figsize=(11, 7.5))
 gs1 = gridspec.GridSpec(4, 2, left=0.05, bottom=0.03, right=0.585,
                         top=0.96, hspace=0.05, wspace=0.05,
@@ -149,11 +154,12 @@ axs, cs, ct, topo, q = np.empty(shape=(nrow, ncol), dtype='object'), np.empty(sh
                        np.empty(shape=(nrow, ncol), dtype='object')
 
 for i in range(nrow):
-    for j in range(ncol - 1):
-        axs[i, j] = fig.add_subplot(gs1[i, j], projection=rot_pole_crs)
-        axs[i, j] = plotcosmo_notick(axs[i, j])
+    axs[i, 0] = fig.add_subplot(gs1[i, 0], projection=rot_pole_crs)
+    axs[i, 0] = plotcosmo_notick(axs[i, 0])
+    axs[i, 1] = fig.add_subplot(gs1[i, 1], projection=rot_pole_crs)
+    axs[i, 1] = plotcosmo_notick_lgm(axs[i, 1], diff=False)
     axs[i, 2] = fig.add_subplot(gs2[i, 0], projection=rot_pole_crs)
-    axs[i, 2] = plotcosmo_notick_nogrid(axs[i, 2])
+    axs[i, 2] = plotcosmo_notick_lgm(axs[i, 2], diff=True)
 
 # plot topo_diff
 # for i in range(nrow):

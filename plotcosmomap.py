@@ -163,6 +163,7 @@ def plotcosmo_notick_lgm(ax, diff=False):
         for contour in contours_rlatrlon:
             ax.plot(contour[:, 0], contour[:, 1], c='black', linewidth=1)
     else:
+        ax.add_feature(cfeature.BORDERS, linestyle=':')
         for contour in contours_rlatrlon:
             ax.plot(contour[:, 0], contour[:, 1], c='black', linewidth=1)
 

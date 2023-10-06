@@ -60,6 +60,7 @@ temp_prod = {
 
 # Compute monthly precipitation for products and regions
 regions = ["ET", "HM", "HMU", "HMC", "HMUS", "HMUN"]
+seasons = ['DJF', 'MAM', 'JJA', 'SON']
 months_num = np.arange(1, 13)
 mask_rainy = (months_num >= 5) & (months_num <= 9)  # rainy season (MJJAS)
 mask_dry = (months_num <= 3) | (months_num >= 11)  # dry season (NDJFM)

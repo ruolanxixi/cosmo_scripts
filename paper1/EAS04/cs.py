@@ -180,10 +180,13 @@ for j in range(len(sims)):
     ctf[2, j] = axs[2, j].contourf(cross['lon'], cross['height'], cross['ept'], levels=level3, cmap=cmaps[2], norm=BoundaryNorm(level3, ncolors=cmaps[2].N, clip=True), extend='both')
 
     ct[0, j] = axs[0, j].contour(cross['lon'], cross['height'], ndimage.gaussian_filter1d(cross['t_wind'], sigma=3, order=0, axis=1),
-                                 levels=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], colors='black', linewidths=1.2)
-    clabel = axs[0, j].clabel(ct[0, j], inline=True, fontsize=13, levels=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], use_clabeltext=True)
+                                 levels=[-7, -5, -3, -1, 1, 3, 5, 7, 9, 11, 13, 15], colors='black', linewidths=1.2)
+    clabel = axs[0, j].clabel(ct[0, j], inline=True, fontsize=13, levels=[-7, -5, -3, -1, 1, 3, 5, 7, 9, 11, 13, 15], use_clabeltext=True)
+    # clabel2 = axs[0, j].clabel(ct[0, j], inline=True, fontsize=13,
+    #                            manual=[(91, 12000), (91, 7000), (92, 7000), (93, 6000), (98, 7000), (105, 5000), (104, 8500), (107, 8000), (110, 9200)], use_clabeltext=True)
     clabel2 = axs[0, j].clabel(ct[0, j], inline=True, fontsize=13,
-                               manual=[(91, 7000), (92, 7000), (93, 6000), (98, 7000), (105, 5000), (104, 8500), (107, 8000), (110, 9200)], use_clabeltext=True)
+                               manual=[(90, 12000), (91, 11000), (93, 10000), (94, 9000), (95, 7000), (105, 5000),
+                                       (104, 12000), (107, 8500)], use_clabeltext=True)
     for l in clabel:
         l.set_rotation(0)
     for l in clabel2:

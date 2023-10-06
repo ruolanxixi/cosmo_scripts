@@ -36,12 +36,12 @@ data = {}
 for s in range(len(sims)):
     sim = sims[s]
     data[sim] = {}
-    ds = xr.open_dataset(f'{path}' + f'EAS11_{sim}/monsoon/T_2M/' + '01-05.T_2M.cpm.nc')
-    tmp = np.mean(ds['T_2M'].values[...], axis=0) - 273.15
-    data[sim]['T_2M'] = tmp
+    ds = xr.open_dataset(f'{path}' + f'EAS11_{sim}/monsoon/TOT_PREC/' + '01-05.TOT_PREC.cpm.nc')
+    tmp = np.mean(ds['TOT_PREC'].values[...], axis=0)
+    data[sim]['TOT_PREC'] = tmp
 
 data['diff'] = {}
-data['diff']['T_2M'] = data['lgm']['T_2M'] - data['ctrl']['T_2M']
+data['diff']['TOT_PREC'] = data['lgm']['TOT_PREC'] - data['ctrl']['TOT_PREC']
 
 ###############################################################################
 # %% Plot
@@ -69,13 +69,12 @@ axs[0, 1] = plotcosmo_notick_lgm(axs[0, 1], diff=False)
 axs[0, 2] = fig.add_subplot(gs2[0, 0], projection=rot_pole_crs)
 axs[0, 2] = plotcosmo_notick_lgm(axs[0, 2], diff=False)
 
-levels1 = MaxNLocator(nbins=100).tick_values(-20, 20)
-cmap1 = cmc.roma_r
+levels1 = MaxNLocator(nbins=20).tick_values(0, 20)
+cmap1 = cmc.davos_r
 norm1 = BoundaryNorm(levels1, ncolors=cmap1.N, clip=True)
-levels2 = MaxNLocator(nbins=50).tick_values(-10, 0)
-# cmap2 = drywet(20, cmc.vik_r)
-cmap2 = cmc.davos
-norm2 = BoundaryNorm(levels2, ncolors=cmap2.N, clip=True)
+levels2 = MaxNLocator(nbins=11).tick_values(-10, 10)
+cmap2 = drywet(25, cmc.vik_r)
+norm2 = colors.TwoSlopeNorm(vmin=-6., vcenter=0., vmax=6.)
 # norm2 = colors.TwoSlopeNorm(vmin=-10., vcenter=0., vmax=10.)
 # --
 levels = [levels1, levels1, levels2]
@@ -86,16 +85,16 @@ for j in range(ncol):
     sim = sims[j]
     cmap = cmaps[j]
     norm = norms[j]
-    cs[0, j] = axs[0, j].pcolormesh(rlon, rlat, data[sim]['T_2M'], cmap=cmap, norm=norm, shading="auto")
+    cs[0, j] = axs[0, j].pcolormesh(rlon, rlat, data[sim]['TOT_PREC'], cmap=cmap, norm=norm, shading="auto")
 
 cax = fig.add_axes(
     [axs[0, 1].get_position().x1 + 0.01, axs[0, 1].get_position().y0, 0.015, axs[0, 1].get_position().height])
-cbar = fig.colorbar(cs[0, 1], cax=cax, orientation='vertical', extend='both', ticks=[-20, -10, 0, 10, 20])
+cbar = fig.colorbar(cs[0, 1], cax=cax, orientation='vertical', extend='max', ticks=[0, 5, 10, 15, 20])
 cbar.ax.minorticks_off()
 cbar.ax.tick_params(labelsize=13)
 cax = fig.add_axes(
     [axs[0, 2].get_position().x1 + 0.01, axs[0, 2].get_position().y0, 0.015, axs[0, 2].get_position().height])
-cbar = fig.colorbar(cs[0, 2], cax=cax, orientation='vertical', extend='min', ticks=[-10, -8, -6, -4, -2, 0])
+cbar = fig.colorbar(cs[0, 2], cax=cax, orientation='vertical', extend='both', ticks=[-6, -3, 0, 3, 6])
 cbar.ax.minorticks_off()
 cbar.ax.tick_params(labelsize=13)
 # --
@@ -120,11 +119,11 @@ for j in range(ncol):
     axs[0, j].text(0.92, -0.02, '160°E', ha='center', va='top', transform=axs[0, j].transAxes, fontsize=13)
 
 plotpath = "/project/pr133/rxiang/figure/paper2/results/lgm/"
-fig.savefig(plotpath + 't2m.png', dpi=500, transparent='True')
+fig.savefig(plotpath + 'pr.png', dpi=500, transparent='True')
 plt.show()
 plt.close()
 
-# %%
+# # %%
 # [pole_lat, pole_lon, lat, lon, rlat, rlon, rot_pole_crs] = pole()
 # rlon_, rlat_ = np.meshgrid(rlon, rlat)
 # sims = ['ctrl', 'lgm', 'diff']
@@ -136,25 +135,25 @@ plt.close()
 #                         top=0.96, hspace=0.05, wspace=0.05)
 # ncol = 3  # edit here
 # nrow = 1
-#
+# 
 # axs, cs, ct, topo, q = np.empty(shape=(nrow, ncol), dtype='object'), np.empty(shape=(nrow, ncol), dtype='object'), \
 #                        np.empty(shape=(nrow, ncol), dtype='object'), np.empty(shape=(nrow, ncol), dtype='object'), \
 #                        np.empty(shape=(nrow, ncol), dtype='object')
-#
+# 
 # axs[0, 0] = fig.add_subplot(gs1[0, 0], projection=rot_pole_crs)
 # axs[0, 0] = plotcosmo04_notick(axs[0, 0])
 # axs[0, 1] = fig.add_subplot(gs1[0, 1], projection=rot_pole_crs)
 # axs[0, 1] = plotcosmo04_notick_lgm(axs[0, 1], diff=False)
 # axs[0, 2] = fig.add_subplot(gs2[0, 0], projection=rot_pole_crs)
 # axs[0, 2] = plotcosmo04_notick_lgm(axs[0, 2], diff=True)
-#
+# 
 # # --
 # for j in range(ncol):
 #     sim = sims[j]
 #     cmap = cmaps[j]
 #     norm = norms[j]
-#     cs[0, j] = axs[0, j].pcolormesh(rlon, rlat, data[sim]['T_2M'], cmap=cmap, norm=norm, shading="auto")
-#
+#     cs[0, j] = axs[0, j].pcolormesh(rlon, rlat, data[sim]['TOT_PREC'], cmap=cmap, norm=norm, shading="auto")
+# 
 # cax = fig.add_axes(
 #     [axs[0, 1].get_position().x1 + 0.01, axs[0, 1].get_position().y0, 0.015, axs[0, 1].get_position().height])
 # cbar = fig.colorbar(cs[0, 1], cax=cax, orientation='vertical', extend='both', ticks=[-20, -10, 0, 10, 20])
@@ -176,12 +175,12 @@ plt.close()
 #     axs[i, 0].text(-0.01, 0.57, '30°N', ha='right', va='center', transform=axs[i, 0].transAxes, fontsize=13)
 #     axs[i, 0].text(-0.01, 0.31, '25°N', ha='right', va='center', transform=axs[i, 0].transAxes, fontsize=13)
 #     axs[i, 0].text(-0.01, 0.05, '20°N', ha='right', va='center', transform=axs[i, 0].transAxes, fontsize=13)
-#
+# 
 # for j in range(ncol):
 #     axs[0, j].text(0.06, -0.02, '90°E', ha='center', va='top', transform=axs[0, j].transAxes, fontsize=13)
 #     axs[0, j].text(0.46, -0.02, '100°E', ha='center', va='top', transform=axs[0, j].transAxes, fontsize=13)
 #     axs[0, j].text(0.86, -0.02, '110°E', ha='center', va='top', transform=axs[0, j].transAxes, fontsize=13)
-#
+# 
 # plotpath = "/project/pr133/rxiang/figure/paper2/results/lgm/"
 # fig.savefig(plotpath + 't2m_local.png', dpi=500, transparent='True')
 # plt.show()
