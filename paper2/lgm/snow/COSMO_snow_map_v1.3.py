@@ -20,11 +20,15 @@ from dask.diagnostics import ProgressBar
 # import subprocess
 # from utilities import remap
 import matplotlib.ticker as mticker
+import cmcrameri.cm as cmc
+import numpy.ma as ma
+from matplotlib.colors import BoundaryNorm
+from matplotlib.ticker import MaxNLocator
 
 mpl.style.use("classic")
 
 # Paths to folders
-path_temp = "/scratch/snx3000/csteger/Temp/BECCY_snow/"
+path_temp = "/project/pr133/rxiang/data/BECCY_snow/"
 path_cosmo = "/project/pr133/rxiang/data/cosmo/"
 path_echam5 = "/project/pr133/rxiang/data/echam5_raw/"
 path_era5 = "/project/pr133/csteger/Data/Observations/ERA5/Data_raw/"
@@ -154,7 +158,7 @@ data_scd["ERA5"] = {"scd": sc.sum(axis=0) / 5.0,
 ds.close()
 
 # COSMO 0.11 / 0.04 deg
-cosmo_run = {"COSMO_CTRL": path_cosmo + "EAS11_ctrl/24h/W_SNOW/0?_W_SNOW.nc",
+cosmo_run = {"COSMO CTRL": path_cosmo + "EAS11_ctrl/24h/W_SNOW/0?_W_SNOW.nc",
              "cosmo11lgm": path_cosmo + "EAS11_lgm/24h/W_SNOW/0?_W_SNOW.nc"}
 for i in cosmo_run.keys():
     ds = xr.open_mfdataset(cosmo_run[i])
@@ -184,15 +188,15 @@ for i in cosmo_run.keys():
 # files = sorted(glob.glob(path_echam5
 #                          + "PI/output_raw/e007_2_101[3-7]??.01.nc"))
 # ds = xr.open_mfdataset(files, decode_times=False)
-# ds["sn"].to_netcdf(path_temp + "ECHAM5_PI_sn_5years.nc")
+# ds["sn"].to_netcdf(path_temp + "ECHAM5 PI_sn_5years.nc")
 # files = sorted(glob.glob(path_echam5
 #                          + "LGM/output_raw/e009_101[4-8]??.01.nc"))
 # ds = xr.open_mfdataset(files, decode_times=False)
 # ds["sn"].to_netcdf(path_temp + "ECHAM5_LGM_sn_5years.nc")
 
 # ECHAM5
-for i in ("ECHAM5_PI", "echam5_lgm"):
-    if i == "ECHAM5_PI":
+for i in ("ECHAM5 PI", "echam5_lgm"):
+    if i == "ECHAM5 PI":
         ds = xr.open_mfdataset(path_echam5 + "PI/input/T159_jan_surf.nc")
         oro_std = ds["OROSTD"].values  # [m]
         ds.close()
@@ -268,15 +272,24 @@ data_scd["ESA-CCI"] = {"scd": (data_scd["ESA-CCI_avhrr"]["scd"]
                        "y": data_scd["ESA-CCI_avhrr"]["y"],
                        "crs": ccrs.PlateCarree()}
 
+prod = ["COSMO CTRL", "ECHAM5 PI", "ERA5", "ESA-CCI", "IMS", "TPSCE"]
+for i in prod:
+    data_scd[i]["scd"] = np.ma.masked_where(data_scd[i]["scd"] < 1, data_scd[i]["scd"])
+
+
 # Colormap
-levels = np.append(np.array([5.0]), np.arange(25.0, 275.0, 25.0))
-cmap = cm.lapaz_r
-# cmap = cm.batlowW_r
-norm = mpl.colors.BoundaryNorm(levels, ncolors=cmap.N, extend="both")
+# levels = np.append(np.array([5.0]), np.arange(25.0, 275.0, 25.0))
+# cmap = cm.lapaz_r
+# # cmap = cm.batlowW_r
+# norm = mpl.colors.BoundaryNorm(levels, ncolors=cmap.N, extend="both")
+
+levels = MaxNLocator(nbins=100).tick_values(0, 250)
+cmap = cmc.roma_r
+norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)
 
 # %%
 # Asia
-prod = ["COSMO_CTRL", "ECHAM5_PI", "ERA5", "IMS"]  # ~present-day
+prod = ["COSMO CTRL", "ECHAM5 PI", "ERA5", "IMS"]  # ~present-day
 index = ['a', 'b', 'c', 'd']
 # prod = ["echam5_lgm", "cosmo11lgm"]  # LGM
 fig = plt.figure(figsize=(9, 6), dpi=150)
@@ -284,19 +297,19 @@ gs = gridspec.GridSpec(3, 2, left=0.06, bottom=0.065, right=0.99, top=0.95,
                        hspace=0.18, wspace=0.05,
                        height_ratios=[1.0, 1.0, 0.06])
 for ind_i, i in enumerate(prod):
-    ax = plt.subplot(gs[ind_i], projection=data_scd["COSMO_CTRL"]["crs"])
+    ax = plt.subplot(gs[ind_i], projection=data_scd["COSMO CTRL"]["crs"])
     ax.set_facecolor((0.76, 0.76, 0.76))
     cs = plt.pcolormesh(data_scd[i]["x"], data_scd[i]["y"], data_scd[i]["scd"],
                    transform=data_scd[i]["crs"], cmap=cmap, norm=norm)
     ax.add_feature(feature.BORDERS, linestyle="-", linewidth=0.6)
     ax.add_feature(feature.COASTLINE, linestyle="-", linewidth=0.6)
-    ax.set_aspect("auto")
+    # ax.set_aspect("auto")
     gl = ax.gridlines(draw_labels=False, dms=True, x_inline=False, y_inline=False, linewidth=1,
                       color='grey', alpha=0.7, linestyle='--')
     gl.xlocator = mticker.FixedLocator([60, 80, 100, 120, 140, 160, 180])
     gl.ylocator = mticker.FixedLocator([0, 10, 20, 30, 40, 50, 60])
-    ax.set_extent([-52.0, 34.0, -2.0, 40.0], crs=data_scd["COSMO_CTRL"]["crs"])
-    if i == "COSMO_CTRL" or i == "ERA5":
+    ax.set_extent([-52.0, 34.0, -2.0, 40.0], crs=data_scd["COSMO CTRL"]["crs"])
+    if i == "COSMO CTRL" or i == "ERA5":
         ax.text(-0.008, 0.94, '50°N', ha='right', va='center', transform=ax.transAxes, fontsize=12)
         ax.text(-0.008, 0.66, '40°N', ha='right', va='center', transform=ax.transAxes, fontsize=12)
         ax.text(-0.008, 0.38, '30°N', ha='right', va='center', transform=ax.transAxes, fontsize=12)
@@ -320,8 +333,9 @@ for ind_i, i in enumerate(prod):
 #                                orientation="horizontal")
 # ax = plt.subplot(gs[-1, -1])
 cax = fig.add_axes([ax.get_position().x0-0.238, ax.get_position().y0-0.06, ax.get_position().width, 0.02])
-cb = fig.colorbar(cs, cax=cax, ticks=levels, orientation="horizontal", extend='both')
+cb = fig.colorbar(cs, cax=cax, ticks=[0, 50, 100, 150, 200, 250], orientation="horizontal", extend='max')
 cb.ax.tick_params(labelsize=11)
+cb.ax.minorticks_off()
 plt.xlabel("Snow cover duration [days]", fontsize=11)
 # -----------------------------------------------------------------------------
 plt.show()
@@ -331,7 +345,8 @@ plt.close(fig)
 
 # %%
 # Eastern Tibetan Plateau
-prod = ["COSMO_CTRL", "ECHAM5_PI", "ERA5",
+# plt.rcParams['axes.facecolor'] = 'lightgrey'
+prod = ["COSMO CTRL", "ECHAM5 PI", "ERA5",
         "ESA-CCI", "IMS", "TPSCE"]
 index = ['a', 'b', 'c', 'd', 'e', 'f']
 # prod = ["echam5_lgm", "cosmo11lgm"]  # LGM
@@ -340,20 +355,20 @@ gs = gridspec.GridSpec(3, 3, left=0.048, bottom=0.06, right=0.988, top=0.95,
                        hspace=0.18, wspace=0.05,
                        height_ratios=[1.0, 1.0, 0.08])
 for ind_i, i in enumerate(prod):
-    ax = plt.subplot(gs[ind_i], projection=data_scd["COSMO_CTRL"]["crs"])
+    ax = plt.subplot(gs[ind_i], projection=data_scd["COSMO CTRL"]["crs"])
     ax.set_facecolor((0.76, 0.76, 0.76))
     plt.pcolormesh(data_scd[i]["x"], data_scd[i]["y"], data_scd[i]["scd"],
                    transform=data_scd[i]["crs"], cmap=cmap, norm=norm)
     ax.add_feature(feature.BORDERS, linestyle="-", linewidth=0.6)
     ax.add_feature(feature.COASTLINE, linestyle="-", linewidth=0.6)
-    ax.set_aspect("auto")
-    ax.set_extent([-26.5, -9.0, -2.0, 14.0], crs=data_scd["COSMO_CTRL"]["crs"])
+    # ax.set_aspect("auto")
+    ax.set_extent([-26.5, -9.0, -2.0, 14.0], crs=data_scd["COSMO CTRL"]["crs"])
     gl = ax.gridlines(draw_labels=False, dms=True, x_inline=False, y_inline=False, linewidth=1,
                       color='grey', alpha=0.5, linestyle='--')
     gl.xlocator = mticker.FixedLocator([85, 90, 95, 100, 105])
     gl.ylocator = mticker.FixedLocator([20, 25, 30, 35, 40])
 
-    if i == "COSMO_CTRL" or i == "ESA-CCI":
+    if i == "COSMO CTRL" or i == "ESA-CCI":
         ax.text(-0.01, 0.72, '35°N', ha='right', va='center', transform=ax.transAxes, fontsize=12)
         ax.text(-0.01, 0.40, '30°N', ha='right', va='center', transform=ax.transAxes, fontsize=12)
         ax.text(-0.01, 0.08, '25°N', ha='right', va='center', transform=ax.transAxes, fontsize=12)
@@ -367,8 +382,9 @@ for ind_i, i in enumerate(prod):
 
     if i == "IMS":
         cax = fig.add_axes([ax.get_position().x0-0.075, ax.get_position().y0 - 0.06, ax.get_position().width*1.5, 0.02])
-        cb = fig.colorbar(cs, cax=cax, ticks=levels, orientation="horizontal", extend='both')
+        cb = fig.colorbar(cs, cax=cax, ticks=[0, 50, 100, 150, 200, 250], orientation="horizontal", extend='max')
         cb.ax.tick_params(labelsize=11)
+        cb.ax.minorticks_off()
         plt.xlabel("Snow cover duration [days]", fontsize=11)
 
     id = index[ind_i]
@@ -383,6 +399,63 @@ plotpath = "/project/pr133/rxiang/figure/paper2/results/lgm/"
 fig.savefig(plotpath + 'snow_etp.png', dpi=500, transparent='True')
 plt.close(fig)
 #%%
+# %%
+# Eastern Tibetan Plateau
+plt.rcParams['axes.facecolor'] = 'lightgrey'
+prod = ["COSMO CTRL", "ECHAM5 PI", "ERA5",
+        "ESA-CCI", "IMS", "TPSCE"]
+index = ['a', 'b', 'c', 'd', 'e', 'f']
+# prod = ["echam5_lgm", "cosmo11lgm"]  # LGM
+fig = plt.figure(figsize=(10, 4.4), dpi=150)  # width, height
+gs = gridspec.GridSpec(3, 3, left=0.048, bottom=0.1, right=0.988, top=0.95,
+                       hspace=0.18, wspace=0.05,
+                       height_ratios=[1.0, 1.0, 0.08])
+for ind_i, i in enumerate(prod):
+    ax = plt.subplot(gs[ind_i], projection=data_scd["COSMO CTRL"]["crs"])
+    ax.set_facecolor((0.76, 0.76, 0.76))
+    cs = plt.pcolormesh(data_scd[i]["x"], data_scd[i]["y"], data_scd[i]["scd"],
+                   transform=data_scd[i]["crs"], cmap=cmap, norm=norm)
+    ax.add_feature(feature.BORDERS, linestyle="-", linewidth=0.6)
+    ax.add_feature(feature.COASTLINE, linestyle="-", linewidth=0.6)
+    # ax.set_aspect("auto")
+    ax.set_extent([-52.0, 34.0, -2.0, 40.0], crs=data_scd["COSMO CTRL"]["crs"])
+    gl = ax.gridlines(draw_labels=False, dms=True, x_inline=False, y_inline=False, linewidth=1,
+                      color='grey', alpha=0.5, linestyle='--')
+    gl.xlocator = mticker.FixedLocator([60, 80, 100, 120, 140, 160, 180])
+    gl.ylocator = mticker.FixedLocator([0, 10, 20, 30, 40, 50, 60])
+
+    if i == "COSMO CTRL" or i == "ESA-CCI":
+        ax.text(-0.008, 0.94, '50°N', ha='right', va='center', transform=ax.transAxes, fontsize=12)
+        ax.text(-0.008, 0.66, '40°N', ha='right', va='center', transform=ax.transAxes, fontsize=12)
+        ax.text(-0.008, 0.38, '30°N', ha='right', va='center', transform=ax.transAxes, fontsize=12)
+        ax.text(-0.008, 0.10, '20°N', ha='right', va='center', transform=ax.transAxes, fontsize=12)
+    if i == "ESA-CCI" or i == "IMS" or i == "TPSCE":
+        ax.text(0.22, -0.02, '100°E', ha='center', va='top', transform=ax.transAxes, fontsize=12)
+        ax.text(0.44, -0.02, '120°E', ha='center', va='top', transform=ax.transAxes, fontsize=12)
+        ax.text(0.66, -0.02, '140°E', ha='center', va='top', transform=ax.transAxes, fontsize=12)
+        ax.text(0.88, -0.02, '160°E', ha='center', va='top', transform=ax.transAxes, fontsize=12)
+
+    plt.title(i, fontsize=12, fontweight="bold", y=1.002)
+
+    if i == "IMS":
+        cax = fig.add_axes([ax.get_position().x0-0.075, ax.get_position().y0 - 0.08, ax.get_position().width*1.5, 0.03])
+        cb = fig.colorbar(cs, cax=cax, ticks=[0, 50, 100, 150, 200, 250], orientation="horizontal", extend='max')
+        cb.ax.tick_params(labelsize=11)
+        cb.ax.minorticks_off()
+        plt.xlabel("Snow cover duration [days]", fontsize=11)
+
+    id = index[ind_i]
+    t = ax.text(0.007, 0.988, f'({id})', ha='left', va='top',
+                transform=ax.transAxes, fontsize=12)
+    t.set_bbox(dict(facecolor='white', alpha=0.7, pad=1, edgecolor='none'))
+# -----------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
+plt.show()
+plotpath = "/project/pr133/rxiang/figure/paper2/results/lgm/"
+fig.savefig(plotpath + 'snow_validation.png', dpi=500, transparent='True')
+plt.close(fig)
+# %%
 ###############################################################################
 # Load and plot snow water equivalent (SWE)
 ###############################################################################
@@ -417,7 +490,7 @@ data_swe["ERA5"] = {"swe": swe,
 ds.close()
 
 # COSMO 0.11 / 0.04 deg
-cosmo_run = {"COSMO_CTRL": path_cosmo + "EAS11_ctrl/24h/W_SNOW/0?_W_SNOW.nc",
+cosmo_run = {"COSMO CTRL": path_cosmo + "EAS11_ctrl/24h/W_SNOW/0?_W_SNOW.nc",
              "cosmo11lgm": path_cosmo + "EAS11_lgm/24h/W_SNOW/0?_W_SNOW.nc"}
 for i in cosmo_run.keys():
     ds = xr.open_mfdataset(cosmo_run[i])
@@ -444,9 +517,9 @@ for i in cosmo_run.keys():
     ds.close()
 
 # ECHAM5
-for i in ("ECHAM5_PI", "echam5_lgm"):
-    if i == "ECHAM5_PI":
-        ds = xr.open_dataset(path_temp + "ECHAM5_PI_sn_5years.nc")
+for i in ("ECHAM5 PI", "echam5_lgm"):
+    if i == "ECHAM5 PI":
+        ds = xr.open_dataset(path_temp + "ECHAM5 PI_sn_5years.nc")
     else:
         ds = xr.open_dataset(path_temp + "ECHAM5_LGM_sn_5years.nc")
     # ------------ glacier mask (-> perennial snow accumulation) --------------
@@ -478,14 +551,14 @@ cmap_glacier = mpl.colors.ListedColormap(["darkorange"])
 norm_glacier = mpl.colors.BoundaryNorm([0.5, 1.5], cmap_glacier.N)
 
 # Eastern Tibetan Plateau
-prod = ["ECHAM5_PI", "ERA5", "COSMO_CTRL"]
+prod = ["ECHAM5 PI", "ERA5", "COSMO CTRL"]
 # prod = ["echam5_lgm", "cosmo11lgm"]  # LGM
 fig = plt.figure(figsize=(8, 6.0), dpi=150)  # width, height
 gs = gridspec.GridSpec(3, 2, left=0.1, bottom=0.1, right=0.9, top=0.9,
                        hspace=0.16, wspace=0.05,
                        height_ratios=[1.0, 1.0, 0.08])
 for ind_i, i in enumerate(prod):
-    ax = plt.subplot(gs[ind_i], projection=data_swe["COSMO_CTRL"]["crs"])
+    ax = plt.subplot(gs[ind_i], projection=data_swe["COSMO CTRL"]["crs"])
     ax.set_facecolor((0.76, 0.76, 0.76))
     plt.pcolormesh(data_swe[i]["x"], data_swe[i]["y"], data_swe[i]["swe"],
                    transform=data_swe[i]["crs"], cmap=cmap, norm=norm)
@@ -497,7 +570,7 @@ for ind_i, i in enumerate(prod):
     ax.add_feature(feature.BORDERS, linestyle="-", linewidth=0.6)
     ax.add_feature(feature.COASTLINE, linestyle="-", linewidth=0.6)
     ax.set_aspect("auto")
-    ax.set_extent([-26.5, -9.0, -2.0, 14.0], crs=data_scd["COSMO_CTRL"]["crs"])
+    ax.set_extent([-26.5, -9.0, -2.0, 14.0], crs=data_scd["COSMO CTRL"]["crs"])
     plt.title(i, fontsize=10, fontweight="bold", y=1.002)
 # -----------------------------------------------------------------------------
 ax = plt.subplot(gs[-1, :1])

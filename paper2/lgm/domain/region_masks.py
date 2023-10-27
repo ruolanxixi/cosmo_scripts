@@ -35,7 +35,7 @@ path_out = "/project/pr133/rxiang/data/region_masks/"
 ###############################################################################
 # Define regions in rotated latitude/longitude coordinates
 ###############################################################################
-
+# %%
 # Load CTR04 topography
 ds = xr.open_dataset("/project/pr133/rxiang/data/extpar/"
                      + "extpar_BECCY_4.4km_merit_unmod_topo.nc")
@@ -58,6 +58,10 @@ regions["ET"] = utilities.grid.polygon_rectangular(box, spacing=0.01)
 # Eastern Tibet
 box = (-19.0, -6.67, -9.0, 6.0)
 regions["HM"] = utilities.grid.polygon_rectangular(box, spacing=0.01)
+box = (-25.0, -2.0, -19.0, 2.0)
+regions["SHM"] = utilities.grid.polygon_rectangular(box, spacing=0.01)
+box = (-6.0, -7.0, 2.0, 0.0)
+regions["SEC"] = utilities.grid.polygon_rectangular(box, spacing=0.01)
 # Hengduan Mountains
 
 # Get borders of certain countries
@@ -107,10 +111,10 @@ regions["HMUN"] = geom_split.geoms[1]  # North
 #         regions[i] = pickle.load(file)
 
 ###############################################################################
-# Plot regions
+# %% Plot regions
 ###############################################################################
 
-# Colormap
+# # Colormap
 # levels = np.arange(0.0, 6500.0, 500.0)
 # ticks = np.arange(0.0, 6500.0, 500.0)
 # cmap = utilities.plot.truncate_colormap(cm.bukavu, 0.5, 1.0)
@@ -119,55 +123,77 @@ regions["HMUN"] = geom_split.geoms[1]  # North
 # # ticks = np.arange(0.0, 22.0, 2.0)
 # # cmap = cm.lapaz_r
 # # norm = mpl.colors.BoundaryNorm(levels, ncolors=cmap.N, extend="max")
-#
+# #
 # # Map plot
-# fig = plt.figure(figsize=(9, 8), dpi=200)
-# gs = gridspec.GridSpec(1, 2, left=0.1, bottom=0.1, right=0.9, top=0.9,
-#                        hspace=0.05, wspace=0.07, width_ratios=[1, 0.05])
+# fig = plt.figure(figsize=(9, 6.5), dpi=200)
+# gs = gridspec.GridSpec(1, 1, left=0.1, bottom=0.12, right=0.95, top=0.97,
+#                        hspace=0.05, wspace=0.07)
 # # -----------------------------------------------------------------------------
 # ax = plt.subplot(gs[0], projection=crs_rot_pole)
 # ax.set_facecolor(cm.bukavu(0.4))
-# data_plot = np.ma.masked_where(lsm < 0.5, topo)
+# # data_plot = np.ma.masked_where(lsm < 0.5, topo)
 # # data_plot = precip
-# plt.pcolormesh(rlon, rlat, data_plot, cmap=cmap, norm=norm,
+# cs = plt.pcolormesh(rlon, rlat, topo, cmap=cmap, norm=norm,
 #                transform=crs_rot_pole)
-# poly_plot = PolygonPatch(regions["ET"], facecolor="none",
-#                          edgecolor="black", lw=2.5, ls="--",
+# poly_plot = PolygonPatch(regions["SHM"], facecolor="none",
+#                          edgecolor="red", lw=2.5, ls="--",
 #                          transform=crs_rot_pole, zorder=3)
 # ax.add_patch(poly_plot)
 # poly_plot = PolygonPatch(regions["HM"], facecolor="none",
-#                          edgecolor="black", lw=2.5, ls="--",
+#                          edgecolor="red", lw=2.5, ls="--",
 #                          transform=crs_rot_pole, zorder=3)
 # ax.add_patch(poly_plot)
-# for i in ["HMC", "HMUS", "HMUN"]:
-#     poly_plot = PolygonPatch(regions[i], facecolor="none",
-#                              edgecolor="orangered", lw=3.0, ls="-",
-#                              transform=crs_rot_pole, zorder=2)
-#     ax.add_patch(poly_plot)
+# poly_plot = PolygonPatch(regions["SEC"], facecolor="none",
+#                          edgecolor="red", lw=2.5, ls="--",
+#                          transform=crs_rot_pole, zorder=3)
+# ax.add_patch(poly_plot)
+# # for i in ["HMC", "HMUS", "HMUN"]:
+# #     poly_plot = PolygonPatch(regions[i], facecolor="none",
+# #                              edgecolor="orangered", lw=3.0, ls="-",
+# #                              transform=crs_rot_pole, zorder=2)
+# #     ax.add_patch(poly_plot)
 # # -----------------------------------------------------------------------------
-# ax.coastlines(resolution="10m")
-# bord_10m = cfeature.NaturalEarthFeature("cultural",
-#                                         "admin_0_boundary_lines_land",
-#                                         "10m",
-#                                         edgecolor="black",
-#                                         facecolor="none", zorder=1)
-# ax.add_feature(bord_10m)
-# ax.set_aspect("auto")
+# ax.add_feature(cfeature.OCEAN, zorder=2)
+# ax.add_feature(cfeature.COASTLINE, zorder=4)
+# # bord_10m = cfeature.NaturalEarthFeature("cultural",
+# #                                         "admin_0_boundary_lines_land",
+# #                                         "10m",
+# #                                         edgecolor="black",
+# #                                         facecolor="none", zorder=1)
+# # ax.add_feature(bord_10m)
+# ax.add_feature(cfeature.BORDERS, linestyle=':', lw=2)
+# ax.add_feature(cfeature.LAKES, alpha=0.5)
+# ax.set_extent([85, 123, 17, 37], crs=ccrs.PlateCarree())
+# ax.add_feature(cfeature.RIVERS)
 # gl = ax.gridlines(crs=ccrs.PlateCarree(),
 #                   xlocs=np.arange(0.0, 180.0, 5.0),
 #                   ylocs=np.arange(0.0, 90.0, 5.0),
-#                   linewidth=1, color="darkgrey", alpha=1.0, linestyle=":",
+#                   linewidth=1,
+#                   color='grey', alpha=0.5, linestyle='--',
 #                   draw_labels=True, dms=True, x_inline=False, y_inline=False)
+# label_style = {'size': 14}
+# gl.xlabel_style = label_style
+# gl.ylabel_style = label_style
 # gl.top_labels = False
 # gl.right_labels = False
 # # -----------------------------------------------------------------------------
-# ax = plt.subplot(gs[1])
-# cb = mpl.colorbar.ColorbarBase(ax, cmap=cmap, norm=norm,
-#                                ticks=ticks, orientation="vertical")
-# # -----------------------------------------------------------------------------
-# # plt.show()
-# fig.savefig(path_out + "Region_masks.png", dpi=200, bbox_inches="tight")
-# plt.close(fig)
+# # Regional labels settings
+# labels = {"HM": {"pos": (94.8, 31.7), "color": "black"},
+#           "SHM": {"pos": (88.6, 26.4), "color": "black"},
+#           "SEC": {"pos": (110.3, 27.2), "color": "black"}}
+# for i in ["HM", "SHM", "SEC"]:
+#     ax.text(*labels[i]["pos"], i, color=labels[i]["color"], fontsize=14, transform=ccrs.PlateCarree(), zorder=200, weight='bold')
+# # # -----------------------------------------------------------------------------
+# cax = fig.add_axes([ax.get_position().x0, ax.get_position().y0 - 0.08, ax.get_position().width, 0.025])
+# cbar = fig.colorbar(cs, cax=cax, orientation='horizontal', extend='max', ticks=ticks, label="[m]")
+# cbar.ax.tick_params(labelsize=14)
+# # ax = plt.subplot(gs[1])
+# # cb = mpl.colorbar.ColorbarBase(ax, cmap=cmap, norm=norm,
+# #                                ticks=ticks, orientation="horizontal")
+# # # -----------------------------------------------------------------------------
+# plt.show()
+# plotpath = "/project/pr133/rxiang/figure/paper2/results/lgm/"
+# fig.savefig(plotpath + 'precip_region.png', dpi=500, transparent=True)
 
 # Full names of regions
 regions_fn = {"ET": "Eastern Tibet",
@@ -175,7 +201,9 @@ regions_fn = {"ET": "Eastern Tibet",
               "HMU": "Hengduan Mountains upstream",
               "HMC": "Hengduan Mountains centre",
               "HMUS": "Hengduan Mountains upstream south",
-              "HMUN": "Hengduan Mountains upstream north"}
+              "HMUN": "Hengduan Mountains upstream north",
+              "SHM": "Southern Himalaya",
+              "SEC": "Southearn China"}
 
 ###############################################################################
 # %% Compute region masks for different products
@@ -207,13 +235,13 @@ products = {
     # "CTRL04": {"file": "/project/pr133/rxiang/data/cosmo/EAS04_ctrl/mon/"
     #                    + "TOT_PREC/2001-2005.TOT_PREC.nc",
     #            "geo_ref": CRS.from_user_input(crs_rot_pole)},
-    # "CTRL11": {"file": "/project/pr133/rxiang/data/cosmo/EAS11_ctrl/mon/"
-    #                    + "TOT_PREC/2001-2005.TOT_PREC.nc",
-    #            "geo_ref": CRS.from_user_input(crs_rot_pole)},
+    "CTRL11": {"file": "/project/pr133/rxiang/data/cosmo/EAS11_ctrl/mon/"
+                       + "TOT_PREC/2001-2005.TOT_PREC.nc",
+               "geo_ref": CRS.from_user_input(crs_rot_pole)}
     # -------------------------------------------------------------------------
-    "ECHAM5": {"file": "/project/pr133/rxiang/data/pgw/deltas/native/day/ECHAM5/"
-                           + "tas_piControl.nc",
-                   "geo_ref": CRS.from_epsg(4326)}
+    # "ECHAM5": {"file": "/project/pr133/rxiang/data/pgw/deltas/native/day/ECHAM5/"
+    #                        + "tas_piControl.nc",
+    #                "geo_ref": CRS.from_epsg(4326)}
     }
 
 # Loop through products
@@ -240,8 +268,6 @@ for i in products.keys():
     project = Transformer.from_crs(CRS.from_user_input(crs_rot_pole),
                                    products[i]["geo_ref"],
                                    always_xy=True).transform
-    y_start, y_end, y_points = y[0], y[-1], 240
-    y = np.linspace(y_start, y_end, y_points)
     x_edge, y_edge = np.meshgrid(*utilities.grid.coord_edges(x, y, atol=1e-04))
     region_masks = {}
     for j in regions.keys():

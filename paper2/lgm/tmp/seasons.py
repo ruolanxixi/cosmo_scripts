@@ -96,6 +96,10 @@ for idx, season in enumerate(seasons):
 ###############################################################################
 # %% Plot
 ###############################################################################
+mpl.rcParams["mathtext.fontset"] = "custom"
+# custom mathtext font (set default to Bitstream Vera Sans)
+mpl.rcParams["mathtext.default"] = "rm"
+mpl.rcParams["mathtext.rm"] = "Bitstream Vera Sans"
 
 bar_width = 0.15
 index = np.arange(len(models)) + 1
@@ -124,7 +128,7 @@ models = ('INM-CM4-8', 'MIROC-ES2L', 'MPI-ESM1-2-LR', 'AWI-ESM-1-1-LR', 'CESM2-W
 index = np.arange(8)
 # Configuring the plot
 # ax.set_xlabel('Models')
-ax.set_ylabel('2m Temperature')
+ax.set_ylabel('2m Temperature [$^{\circ} C$]')
 ax.set_xticks(index + 2*bar_width)
 ax.set_xticklabels(models, rotation=45)
 ax.set_xlim(0-bar_width, max(index + 2*bar_width) + 3*bar_width)

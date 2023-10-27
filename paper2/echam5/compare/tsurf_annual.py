@@ -24,12 +24,12 @@ matplotlib.rc('font', **font)
 # read data
 # %%
 sims = ['PI', 'PD', 'LGM', 'PLIO']
-mdpath = "/scratch/snx3000/rxiang/echam5"
+mdpath = "/project/pr133/rxiang/data/echam5"
 tsurf = {}
 fname = {'01': 'jan.nc', '07': 'jul.nc'}
 labels = {'PI': 'Pre-industrial', 'PD': 'Present day (1970-1995)', 'LGM': 'Last glacial maximum', 'PLIO': 'Mid-Pliocene'}
 month = {'01': 'JAN', '07': 'JUL'}
-colors = {'PI': 'darkorange', 'PD': 'steelblue', 'LGM': 'darkgreen', 'PLIO': 'darkslateblue'}
+colors = {'PI': '#f46d43', 'PD': 'steelblue', 'LGM': '#4393c3', 'PLIO': 'darkslateblue'}
 
 lat = xr.open_dataset(f'{mdpath}/LGM/analysis/tsurf/mon/jan.nc')['lat'].values[:]
 lon = xr.open_dataset(f'{mdpath}/LGM/analysis/tsurf/mon/jan.nc')['lon'].values[:]
@@ -42,6 +42,7 @@ mask_np = (lat_ > 10) & (lat_ < 40) & (lon_ > 160) & (lon_ < 220)
 mask_na_3d = np.broadcast_to(mask_na, data.shape)
 mask_np_3d = np.broadcast_to(mask_np, data.shape)
 
+sims = ['PI', 'LGM']
 for s in range(len(sims)):
     sim = sims[s]
     tsurf[sim] = {}
@@ -78,7 +79,7 @@ cf_labels = []
 
 lw = 2.
 textsize = 20.
-labelsize = 24.
+labelsize = 22.
 titlesize = 28.
 handlelength=2.
 
@@ -86,7 +87,7 @@ x = np.arange(0, 365, 1)
 
 for sim in sims:
     color = tsurf[sim]['color']
-    ax.plot(x, tsurf[sim]['tsurf']['na'][1:], lw=lw, color=color, label=tsurf[sim]['label'])
+    ax.plot(x, tsurf[sim]['tsurf']['np'][1:], lw=lw, color=color, label=tsurf[sim]['label'])
     cf_labels.append(tsurf[sim]['label'])
 
 # Labels, legend, scale, limits
@@ -96,8 +97,8 @@ ax.set_xticks(np.linspace(0, 365, 12, endpoint=True))
 ax.set_xticklabels(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])
 ax.legend(loc='best', frameon=False,  prop={'size': textsize}, handlelength=handlelength)
 ax.tick_params(axis='both', which='major', labelsize=22)
-ax.set_xlabel('Month', size=labelsize, labelpad=5)
-ax.set_ylabel('Surface temperature ($^{o}$C)', size=labelsize)
+# ax.set_xlabel('Month', size=labelsize, labelpad=5)
+ax.set_ylabel('Sea surface temperature ($^{o}$C)', size=labelsize)
 
 # Remove some lines
 ax.spines['top'].set_visible(False)
@@ -115,12 +116,10 @@ plt.grid(False)
 # plt.title('Summer wind speed at 500 hPa', fontsize=11)
 
 plt.show()
-plotpath = "/project/pr133/rxiang/figure/echam5/"
-fig.savefig(plotpath + 'sst_annual_na.png', dpi=500)
+plotpath = "/project/pr133/rxiang/figure/paper2/results/gm/"
+fig.savefig(plotpath + 'sst.png', dpi=500, transparent='True')
 plt.close(fig)
 
-#%%
-a = data*mask_na_3d
 
 
 

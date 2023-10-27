@@ -225,7 +225,7 @@ data_scf["esa-cci"] = (data_scf["esa-cci_avhrr"]
 
 # Plot (~present-day)
 colors = ("#762a83", "#2166ac", "#4393c3", "#b2182b", "#d6604d", "#f4a582")
-labels = {"era5": "ERA5", "cosmo11pd": "COSMO", "echam5_pi": "ECHAM5",
+labels = {"era5": "ERA5", "cosmo11pd": "COSMO CTRL", "echam5_pi": "ECHAM5 PI",
           "tpsce": "TPSCE", "ims": "IMS", "esa-cci": "ESA-CCI"}
 ta = np.asarray([dt.datetime(2001, 1, 1, 12)
                  + dt.timedelta(days=i) for i in range(365)])
@@ -258,18 +258,66 @@ plotpath = "/project/pr133/rxiang/figure/paper2/results/gm/"
 fig.savefig(plotpath + 'HM_Snow_PD.png', dpi=700, transparent=True)
 
 # %%
-# Plot (~present-day vs. LGM)
-colors = ("navy", "slateblue")
-labels = ("COSMO 0.11", "ECHAM5")
-plt.figure(dpi=150)
+font = {'size': 14}
+# Average ESA-CCI products (AVHRR and MODIS)
+data_scf["esa-cci"] = (data_scf["esa-cci_avhrr"]
+                       + data_scf["esa-cci_modis"]) / 2.0
+
+# Plot (~present-day)
+colors = ("#b2182b", "#d6604d", "#f4a582", "#762a83", "#2166ac", "#4393c3")
+labels = {"tpsce": "TPSCE", "ims": "IMS", "esa-cci": "ESA-CCI", "era5": "ERA5", "cosmo11pd": "COSMO CTRL", "echam5_pi": "ECHAM5 PI"}
+ta = np.asarray([dt.datetime(2001, 1, 1, 12)
+                 + dt.timedelta(days=i) for i in range(365)])
+fig = plt.figure(dpi=150)
 ax = plt.axes()
 # -----------------------------------------------------------------------------
-for ind_i, i in enumerate(("cosmo11pd", "echam5_pi")):
+data = np.empty((3, 365), dtype=np.float32)
+for ind_i, i in enumerate(("tpsce", "ims", "esa-cci")):
+    data[ind_i, :] = moving_average(data_scf[i] * 100.0, window=30)
+plt.fill_between(x=ta, y1=data.min(axis=0), y2=data.max(axis=0), color="grey",
+                 alpha=0.25)
+# -----------------------------------------------------------------------------
+for ind_i, i in enumerate(("tpsce", "ims", "esa-cci",
+                           "era5", "cosmo11pd", "echam5_pi")):
     plt.plot(ta, moving_average(data_scf[i] * 100.0, window=30),
-             color=colors[ind_i], ls="--", lw=1.8)
+             color=colors[ind_i], label=labels[i], lw=1.8)
+labels = ("COSMO PGW", "ECHAM5 LGM")
+colors = ("#2166ac", "#4393c3")
 for ind_i, i in enumerate(("cosmo11lgm", "echam5_lgm")):
     plt.plot(ta, moving_average(data_scf[i] * 100.0, window=30),
+             color=colors[ind_i], ls="--", label=labels[ind_i], lw=1.8)
+plt.legend(loc="upper center", bbox_to_anchor=(0.57, 0.99), frameon=False, fontsize=14, ncol=2)
+ax.xaxis.set_major_locator(MonthLocator())
+ax.xaxis.set_minor_locator(MonthLocator(bymonthday=15))
+ax.xaxis.set_major_formatter(NullFormatter())
+ax.xaxis.set_minor_formatter(DateFormatter("%b"))
+plt.xlim([dt.datetime(2001, 1, 1), dt.datetime(2002, 1, 1)])
+plt.ylabel("Snow cover extent [%]", fontsize=14)
+# plt.title('HM Snow', fontsize=14, fontweight="bold")
+ax.tick_params(axis='x', which='major', labelsize=14)
+ax.tick_params(axis='x', which='minor', labelsize=14)
+ax.tick_params(axis='y', labelsize=14)
+plt.show()
+plotpath = "/project/pr133/rxiang/figure/paper2/results/gm/"
+fig.savefig(plotpath + 'HM_Snow.png', dpi=700, transparent=True)
+
+# %%
+# Plot (~present-day vs. LGM)
+ta = np.asarray([dt.datetime(2001, 1, 1, 12)
+                 + dt.timedelta(days=i) for i in range(365)])
+colors = ("#2166ac", "#d6604d")
+labels = ("COSMO", "ECHAM5")
+fig = plt.figure(dpi=150)
+ax = plt.axes()
+# -----------------------------------------------------------------------------
+labels = ("COSMO CTRL", "ECHAM5 PI")
+for ind_i, i in enumerate(("cosmo11pd", "echam5_pi")):
+    plt.plot(ta, moving_average(data_scf[i] * 100.0, window=30),
              color=colors[ind_i], label=labels[ind_i], lw=1.8)
+labels = ("COSMO PGW", "ECHAM5 LGM")
+for ind_i, i in enumerate(("cosmo11lgm", "echam5_lgm")):
+    plt.plot(ta, moving_average(data_scf[i] * 100.0, window=30),
+             color=colors[ind_i], ls="--", label=labels[ind_i], lw=1.8)
 # -----------------------------------------------------------------------------
 # delta_cosmo = moving_average(data_scf["cosmo11lgm"] - data_scf["cosmo11pd"],
 #                              window=30)
@@ -278,16 +326,20 @@ for ind_i, i in enumerate(("cosmo11lgm", "echam5_lgm")):
 #                              window=30)
 # plt.plot(ta, delta_echam, color="slateblue", lw=1.8)
 # -----------------------------------------------------------------------------
-plt.legend(loc="upper center", frameon=False, fontsize=12, ncol=2)
+plt.legend(loc="upper center", frameon=False, fontsize=14, ncol=2)
 ax.xaxis.set_major_locator(MonthLocator())
 ax.xaxis.set_minor_locator(MonthLocator(bymonthday=15))
 ax.xaxis.set_major_formatter(NullFormatter())
 ax.xaxis.set_minor_formatter(DateFormatter("%b"))
 plt.xlim([dt.datetime(2001, 1, 1), dt.datetime(2002, 1, 1)])
-plt.ylabel("Snow cover extent [%]")
-plt.title(reg, fontsize=12, fontweight="bold")
+plt.ylabel("Snow cover extent [%]", fontsize=14)
+plt.title('HM Snow', fontsize=14, fontweight="bold")
+ax.tick_params(axis='x', which='major', labelsize=14)
+ax.tick_params(axis='x', which='minor', labelsize=14)
+ax.tick_params(axis='y', labelsize=14)
 plt.show()
-
+plotpath = "/project/pr133/rxiang/figure/paper2/results/gm/"
+fig.savefig(plotpath + 'HM_Snow_change.png', dpi=700, transparent=True)
 ###############################################################################
 # %% Load and plot snow water equivalent (SWE)
 ###############################################################################

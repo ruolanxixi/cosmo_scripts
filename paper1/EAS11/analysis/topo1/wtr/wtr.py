@@ -134,9 +134,9 @@ ds.close()
 # mask4[p4 > 0.05] = 1
 # np.save('/project/pr133/rxiang/data/cosmo/sgnfctt/topo1_FI500_wtr.npy', mask4)
 
-mask1 = np.load('/project/pr133/rxiang/data/cosmo/sgnfctt/topo1_TOT_PREC_wtr.npy')
-mask3 = np.load('/project/pr133/rxiang/data/cosmo/sgnfctt/topo1_PMSL_wtr.npy')
-mask4 = np.load('/project/pr133/rxiang/data/cosmo/sgnfctt/topo1_FI500_wtr.npy')
+# mask1 = np.load('/project/pr133/rxiang/data/cosmo/sgnfctt/topo1_TOT_PREC_wtr.npy')
+# mask3 = np.load('/project/pr133/rxiang/data/cosmo/sgnfctt/topo1_PMSL_wtr.npy')
+# mask4 = np.load('/project/pr133/rxiang/data/cosmo/sgnfctt/topo1_FI500_wtr.npy')
 
 ###############################################################################
 # %% Plot
@@ -167,7 +167,7 @@ for i in range(nrow):
 # plot topo_diff
 for i in range(nrow):
     axs[i, 2] = plotcosmo_notick(axs[i, 2])
-    topo[i, 2] = axs[i, 2].contour(lon_, lat_, hsurf_diff, levels=[500], colors='darkgreen', linewidths=1,
+    topo[i, 2] = axs[i, 2].contour(lon_, lat_, hsurf_diff, levels=[500], colors='darkgreen', linewidths=2,
                                    transform=ccrs.PlateCarree())
 
 axs[1, 2] = plotcosmo_notick(axs[1, 2])
@@ -190,7 +190,7 @@ for j in range(ncol):
     norm = norms[j]
     cs[0, j] = axs[0, j].pcolormesh(rlon, rlat, np.nanmean(data[sim]['TOT_PREC'], axis=0), cmap=cmap, norm=norm, shading="auto")
 # --
-ha = axs[0, 2].contourf(rlon, rlat, mask1, levels=1, colors='none', hatches=['////'], rasterized=True, zorder=101)
+# ha = axs[0, 2].contourf(rlon, rlat, mask1, levels=1, colors='none', hatches=['////'], rasterized=True, zorder=101)
 # --
 cax = fig.add_axes(
     [axs[0, 1].get_position().x1 + 0.01, axs[0, 1].get_position().y0, 0.015, axs[0, 1].get_position().height])
@@ -260,7 +260,7 @@ for j in range(ncol):
     norm = norms[j]
     cs[2, j] = axs[2, j].pcolormesh(rlon, rlat, np.nanmean(data[sim]['PMSL'], axis=0), cmap=cmap, norm=norm, shading="auto")
 # --
-ha = axs[2, 2].contourf(rlon, rlat, mask3, levels=1, colors='none', hatches=['////'], rasterized=True, zorder=101)
+# ha = axs[2, 2].contourf(rlon, rlat, mask3, levels=1, colors='none', hatches=['////'], rasterized=True, zorder=101)
 # --
 cax = fig.add_axes(
     [axs[2, 1].get_position().x1 + 0.01, axs[2, 1].get_position().y0, 0.015, axs[2, 1].get_position().height])
@@ -370,7 +370,7 @@ for j in range(ncol):
     for l in clabel:
         l.set_rotation(0)
 # --
-ha = axs[3, 2].contourf(rlon, rlat, mask3, levels=1, colors='none', hatches=['////'], rasterized=True, zorder=101)
+# ha = axs[3, 2].contourf(rlon, rlat, mask3, levels=1, colors='none', hatches=['////'], rasterized=True, zorder=101)
 # --
 cax = fig.add_axes(
     [axs[3, 1].get_position().x1 + 0.01, axs[3, 1].get_position().y0, 0.015, axs[3, 1].get_position().height])

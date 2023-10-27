@@ -38,7 +38,7 @@ prec_prod = {
                        + "TOT_PREC/2001-2005.TOT_PREC.nc",
                "var_name": "TOT_PREC",
                "units_in": "mm/day"},
-    "LGM": {"file": "/project/pr133/rxiang/data/cosmo/EAS11_lgm_ssu/mon/"
+    "LGM": {"file": "/project/pr133/rxiang/data/cosmo/EAS11_lgm/mon/"
                        + "TOT_PREC/2001-2005.TOT_PREC.nc",
                "var_name": "TOT_PREC",
                "units_in": "mm/day"},
@@ -51,7 +51,7 @@ temp_prod = {
                        + "T_2M/2001-2005.T_2M.nc",
                "var_name": "T_2M",
                "units_in": "K"},
-    "LGM": {"file": "/project/pr133/rxiang/data/cosmo/EAS11_lgm_ssu/mon/"
+    "LGM": {"file": "/project/pr133/rxiang/data/cosmo/EAS11_lgm/mon/"
                        + "T_2M/2001-2005.T_2M.nc",
                "var_name": "T_2M",
                "units_in": "K"},
@@ -218,9 +218,9 @@ gs = gridspec.GridSpec(3, 8, left=0.1, bottom=0.1, right=0.9, top=0.9,
 # -----------------------------------------------------------------------------
 ax = plt.subplot(gs[0, 0])
 for i in prec_prod.keys():
-    plt.plot(months_num, prec_prod_reg[i]["ET"][:12], color=cols[i],
+    plt.plot(months_num, prec_prod_reg[i]["HM"][:12], color=cols[i],
              zorder=3)
-    plt.scatter(months_num, prec_prod_reg[i]["ET"][:12], s=s_small,
+    plt.scatter(months_num, prec_prod_reg[i]["HM"][:12], s=s_small,
                 color=cols[i], label=i, zorder=3)
 plt.fill_between(x=[4.5, 9.5], y1=-0.5, y2=15.0, color="black", alpha=0.1)
 plt.xticks(months_num, months_char)
@@ -228,7 +228,7 @@ plt.text(x=6.0, y=9.3, s="Rainy season", fontsize=10)
 plt.ylabel("Precipitation [$mm \; d^{-1}$]", labelpad=5)
 plt.axis([0.7, 12.3, 0.0, 10.0])
 plt.yticks(np.arange(0, 12, 2), np.arange(0, 12, 2))
-plt.title("(a) Eastern Tibet", fontsize=12, fontweight="normal", y=1.01,
+plt.title("(a) Hengduan Mountains", fontsize=12, fontweight="normal", y=1.01,
           loc="left")
 plt.legend(loc="upper left", frameon=False, fontsize=10, ncol=1,
            scatterpoints=1)
@@ -328,7 +328,7 @@ for i in range(0, 2):
     plt.ylim([0.0, 6000.0])
 # -----------------------------------------------------------------------------
 plt.show()
-fig.savefig(path_out + "Precipitation_temperature.png", dpi=300,
-           bbox_inches="tight")
+# fig.savefig(path_out + "Precipitation_temperature.png", dpi=300,
+#            bbox_inches="tight")
 # fig.savefig(path_out + "Precipitation_temperature.pdf", bbox_inches="tight")
 # plt.close(fig)

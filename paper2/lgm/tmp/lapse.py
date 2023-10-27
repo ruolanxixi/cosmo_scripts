@@ -45,7 +45,7 @@ temp_prod = {
     #                    + "tas_lgm_mon.nc",
     #            "var_name": "tas",
     #            "units_in": "K"},
-    # -------------------------------------------------------------------------
+    # # -------------------------------------------------------------------------
     }
 
 # Load topographies
@@ -166,7 +166,7 @@ for i in temp_prod.keys():
 ###############################################################################
 # %% Plot
 ###############################################################################
-
+font = {'size': 14}
 # Settings
 cols = {"COSMO CTRL": "#f46d43", "COSMO PGW": "#4393c3", "ECHAM5-PI": "#f46d43", "ECHAM5-LGM": "#4393c3"}
 markers = {"COSMO CTRL": "o", "COSMO PGW": "o", "ECHAM5-PI": "x", "ECHAM5-LGM": "x"}
@@ -174,41 +174,41 @@ s = 50
 s_small = 30
 
 # Plot
-fig = plt.figure(figsize=(15, 4), dpi=300)
-gs = gridspec.GridSpec(1, 8, left=0.02, bottom=0.14, right=0.99, top=0.97,
+fig = plt.figure(figsize=(15, 4.3), dpi=300)
+gs = gridspec.GridSpec(1, 8, left=0.04, bottom=0.14, right=0.99, top=0.93,
                        hspace=0.05, wspace=0.0,
-                       width_ratios=[0.6, 0.12, 0.04, 0.04,
+                       width_ratios=[0.6, 0.12, 0.05, 0.04,
                                      0.2, 0.2, 0.2, 0.2])
 # -----------------------------------------------------------------------------
-months_char = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"]
+months_char = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 # -----------------------------------------------------------------------------
 ax = plt.subplot(gs[0, 0])
 for i in temp_prod.keys():
-    plt.plot(months_num, temp_prod_reg[i]["ET"][:12], color=cols[i],
+    plt.plot(months_num, temp_prod_reg[i]["HM"][:12], color=cols[i],
              zorder=3)
-    plt.scatter(months_num, temp_prod_reg[i]["ET"][:12], s=s_small, marker=markers[i],
+    plt.scatter(months_num, temp_prod_reg[i]["HM"][:12], s=s_small, marker=markers[i],
                 color=cols[i], label=i, zorder=3)
-plt.fill_between(x=[4.5, 9.5], y1=-11.0, y2=22.0, color="black", alpha=0.1)
-plt.xticks(months_num, months_char)
-plt.text(x=6.0, y=-4.8, s="Rainy season", fontsize=10)
-plt.ylabel("2m temperature [$^{\circ} C$]", labelpad=5)
-plt.yticks(np.arange(-4, 22, 2), np.arange(-4, 22, 2))
-plt.ylim([-6, 24])
-plt.axis([0.7, 12.3, -6.0, 22.0])
-# plt.title("(a) Seasonal cycle", fontsize=12, fontweight="normal", y=1.01,
-#           loc="left")
-plt.legend(loc="upper left", frameon=False, fontsize=10, ncol=1,
+# plt.fill_between(x=[4.5, 9.5], y1=-11.0, y2=22.0, color="black", alpha=0.1)
+plt.xticks(months_num, months_char, fontsize=14)
+# plt.text(x=6.0, y=-1.8, s="Rainy season", fontsize=14)
+plt.ylabel("2m temperature [$^{\circ} C$]", labelpad=5, fontsize=14)
+plt.yticks(np.arange(-2, 22, 2), np.arange(-2, 22, 2), fontsize=14)
+plt.ylim([-4, 24])
+plt.axis([0.7, 12.3, -4.0, 22.0])
+plt.title("(a)", fontsize=14, fontweight="normal", y=1.01,
+          loc="left")
+plt.legend(loc="upper left", frameon=False, fontsize=13, ncol=1,
            scatterpoints=1)
 # -----------------------------------------------------------------------------
 ax = plt.subplot(gs[0, 1])
 x_2 = np.arange(1, 5)
 x_ticks_2 = ["DJF", "MAM", "JJA", "SON"]
 for i in temp_prod.keys():
-    plt.scatter(x_2, temp_prod_reg[i]["ET"][12:], s=s, color=cols[i], marker=markers[i],
+    plt.scatter(x_2, temp_prod_reg[i]["HM"][12:], s=s, color=cols[i], marker=markers[i],
                 zorder=3)
-plt.xticks(x_2, x_ticks_2, rotation=90, fontsize=9)
-plt.yticks(np.arange(-4, 22, 2), [""] * 13)
-plt.axis([0.5, 4.5, -6.0, 22.0])
+plt.xticks(x_2, x_ticks_2, rotation=90, fontsize=13)
+plt.yticks(np.arange(-2, 22, 2), [""] * 12, fontsize=14)
+plt.axis([0.3, 4.7, -4.0, 22.0])
 # -----------------------------------------------------------------------------
 seas = ("DJF", "MAM", "JJA", "SON")
 pos_x = (4, 5, 6, 7)
@@ -221,18 +221,18 @@ for i in range(0, 4):
         plt.plot(temp_prod_elev[j][k], elev_bin, color=cols[j])
         plt.scatter(temp_prod_elev[j][k], elev_bin, s=s_small, marker=markers[j],
                     color=cols[j], label=j)
-    plt.text(x=0.5, y=0.94, s=seas[i], fontsize=10,
+    plt.text(x=0.5, y=0.94, s=seas[i], fontsize=14,
              horizontalalignment="center", verticalalignment="center",
              transform=ax.transAxes)
-    plt.xticks(np.arange(-20, 35, 10))
+    plt.xticks(np.arange(-20, 35, 10), fontsize=14)
     ax.set_xticks(np.arange(-25, 40, 10), minor=True)
     if i == 0:
-        plt.yticks(np.arange(0, 7000, 500), np.arange(0, 7.0, 0.5))
-        plt.xlabel(" " * 105 + "2m temperature [$^{\circ} C$]")
-        plt.ylabel("Elevation [km a.s.l.]", labelpad=7.5)
-        # plt.title("(b) Hengduan Mountains region", fontsize=12, fontweight="normal",
-        #           y=1.01,
-        #           loc="left")
+        plt.yticks(np.arange(0, 7000, 500), np.arange(0, 7.0, 0.5), fontsize=14)
+        plt.xlabel(" " * 105 + "2m temperature [$^{\circ} C$]", fontsize=14)
+        plt.ylabel("Elevation [km a.s.l.]", labelpad=7.5, fontsize=14)
+        plt.title("(b)", fontsize=14, fontweight="normal",
+                  y=1.01,
+                  loc="left")
     else:
         plt.yticks(np.arange(0, 7000, 500), "" * 14)
     plt.xlim(lim)

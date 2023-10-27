@@ -154,8 +154,8 @@ ax.text(0.86, -0.02, '110°E', ha='center', va='top', transform=ax.transAxes, fo
 
 plt.show()
 
-plotpath = "/project/pr133/rxiang/figure/paper2/results/lgm/"
-fig.savefig(plotpath + 'sim_domain_snow.png', dpi=500, transparent=True)
+# plotpath = "/project/pr133/rxiang/figure/paper2/results/lgm/"
+# fig.savefig(plotpath + 'sim_domain_snow.png', dpi=500, transparent=True)
 
 # # Save region polygons to disk
 # for i in ["ET_snow", "HM_snow"]:

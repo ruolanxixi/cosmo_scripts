@@ -22,6 +22,7 @@ from scipy.stats import mannwhitneyu
 from statsmodels.stats.multitest import multipletests
 from metpy.units import units
 import metpy.calc as mpcalc
+import pandas as pd
 
 mpl.style.use("classic")
 font = {'size': 14}
@@ -35,46 +36,57 @@ plt.rcParams['hatch.color'] = 'dimgrey'
 data = {}
 data['cosmo'] = {}
 dir = "/project/pr133/rxiang/data/cosmo/"
-data['cosmo']['ctrl'] = np.nanmean(xr.open_dataset(f'{dir}' + 'EAS11_ctrl/monsoon/TOT_PREC/' + '01-05.TOT_PREC.cpm.nc')['TOT_PREC'].values[...], axis=0)
-data['cosmo']['lgm'] = np.nanmean(xr.open_dataset(dir + 'EAS11_lgm/monsoon/TOT_PREC/' + '01-05.TOT_PREC.cpm.nc')['TOT_PREC'].values[...], axis=0)
+data['cosmo']['ctrl'] = np.nanmean(
+    xr.open_dataset(f'{dir}' + 'EAS11_ctrl/monsoon/T_2M/' + '01-05.T_2M.cpm.nc')['T_2M'].values[...],
+    axis=0) - 273.15
+data['cosmo']['lgm'] = np.nanmean(
+    xr.open_dataset(dir + 'EAS11_lgm/monsoon/T_2M/' + '01-05.T_2M.cpm.nc')['T_2M'].values[...], axis=0) - 273.15
 data['cosmo']['change'] = data['cosmo']['lgm'] - data['cosmo']['ctrl']
 
 # ECHAM5
 data['echam'] = {}
 dir = "/project/pr133/rxiang/data/pgw/deltas/native/day/ECHAM5/"
-data['echam']['ctrl'] = np.nanmean(xr.open_dataset(f'{dir}' + 'pr_piControl.nc')['pr'].values[...], axis=0) * 86400
-data['echam']['lgm'] = np.nanmean(xr.open_dataset(f'{dir}' + 'pr_lgm.nc')['pr'].values[...], axis=0) * 86400
+data['echam']['ctrl'] = np.nanmean(xr.open_dataset(f'{dir}' + 'ts_piControl.nc')['ts'].values[...], axis=0) - 273.15
+data['echam']['lgm'] = np.nanmean(xr.open_dataset(f'{dir}' + 'ts_lgm.nc')['ts'].values[...], axis=0) - 273.15
 data['echam']['change'] = data['echam']['lgm'] - data['echam']['ctrl']
-lat1 = xr.open_dataset(f'{dir}' + 'pr_lgm.nc')['lat'].values[...]
-lon1 = xr.open_dataset(f'{dir}' + 'pr_lgm.nc')['lon'].values[...]
+lat1 = xr.open_dataset(f'{dir}' + 'ts_lgm.nc')['lat'].values[...]
+lon1 = xr.open_dataset(f'{dir}' + 'ts_lgm.nc')['lon'].values[...]
 
 # PMIP
 data['pmip'] = {}
-dir = "/project/pr133/rxiang/data/pmip/"
-data['pmip']['ctrl'] = np.nanmean(xr.open_dataset(f'{dir}' + 'piControl/remap_fine/' + 'pr_Amon_PMIP4_piControl.nc')['pr'].values[...], axis=0) * 86400
-data['pmip']['lgm'] = np.nanmean(xr.open_dataset(f'{dir}' + 'lgm/remap_fine/' + 'pr_Amon_PMIP4_lgm.nc')['pr'].values[...], axis=0) * 86400
+dir = "/project/pr133/rxiang/data/pmip/var/ts/"
+data['pmip']['ctrl'] = np.nanmean(
+    xr.open_dataset(f'{dir}' + 'ts_Amon_PMIP4_piControl.nc')['ts'].values[...],
+    axis=0) - 273.15
+data['pmip']['lgm'] = np.nanmean(
+    xr.open_dataset(f'{dir}' + 'ts_Amon_PMIP4_lgm.nc')['ts'].values[...], axis=0) - 273.15
 data['pmip']['change'] = data['pmip']['lgm'] - data['pmip']['ctrl']
-lat2 = xr.open_dataset(f'{dir}' + 'piControl/remap_fine/' + 'pr_Amon_PMIP4_piControl.nc')['lat'].values[...]
-lon2 = xr.open_dataset(f'{dir}' + 'piControl/remap_fine/' + 'pr_Amon_PMIP4_piControl.nc')['lon'].values[...]
+lat2 = xr.open_dataset(f'{dir}' + 'ts_Amon_PMIP4_piControl.nc')['lat'].values[...]
+lon2 = xr.open_dataset(f'{dir}' + 'ts_Amon_PMIP4_piControl.nc')['lon'].values[...]
 
-#%% ---------------------------------------------------------------------
+# proxy
+df = pd.read_excel('/project/pr133/rxiang/script/mapping_cosmo/paper2/lgm/' + "tmp.xlsx", index_col=0)
+df_filtered = df[df["Reference"] != 'Liu (1988)']
+annt = df_filtered["TANN"].values
+
+# %% ---------------------------------------------------------------------
 # -- Plot
-labels = ['CTRL | PI', 'PGW | LGM', 'change']
-lefts = ['COSMO', 'ECHAM5', 'PMIP4']
-lb = [['a', 'b', 'c'], ['d', 'e', 'f'], ['g', 'h', 'i']]
-models = ['cosmo', 'echam', 'pmip']
+labels = ['CTRL | PI', 'PGW | LGM', 'PGW | LGM - CTRL | PI']
+lefts = ['COSMO', 'ECHAM5']
+lb = [['a', 'b', 'c'], ['d', 'e', 'f']]
+models = ['cosmo', 'echam']
 sims = ['ctrl', 'lgm', 'change']
 
 [pole_lat, pole_lon, lat, lon, rlat, rlon, rot_pole_crs] = pole()
 
-fig = plt.figure(figsize=(11, 5.7))
-gs1 = gridspec.GridSpec(3, 2, left=0.075, bottom=0.03, right=0.598,
-                        top=0.96, hspace=0.02, wspace=0.05,
-                        width_ratios=[1, 1], height_ratios=[1, 1, 1])
-gs2 = gridspec.GridSpec(3, 1, left=0.675, bottom=0.03, right=0.93,
-                        top=0.96, hspace=0.02, wspace=0.05)
+fig = plt.figure(figsize=(11, 3.9))
+gs1 = gridspec.GridSpec(2, 2, left=0.075, bottom=0.035, right=0.598,
+                        top=0.945, hspace=0.02, wspace=0.05,
+                        width_ratios=[1, 1], height_ratios=[1, 1])
+gs2 = gridspec.GridSpec(2, 1, left=0.675, bottom=0.035, right=0.93,
+                        top=0.945, hspace=0.02, wspace=0.05)
 ncol = 3  # edit here
-nrow = 3
+nrow = 2
 
 axs, cs, ct, topo, q = np.empty(shape=(nrow, ncol), dtype='object'), np.empty(shape=(nrow, ncol), dtype='object'), \
                        np.empty(shape=(nrow, ncol), dtype='object'), np.empty(shape=(nrow, ncol), dtype='object'), \
@@ -86,15 +98,15 @@ for i in range(nrow):
     axs[i, 1] = fig.add_subplot(gs1[i, 1], projection=rot_pole_crs)
     axs[i, 1] = plotcosmo_notick_lgm(axs[i, 1], diff=False)
     axs[i, 2] = fig.add_subplot(gs2[i, 0], projection=rot_pole_crs)
-    axs[i, 2] = plotcosmo_notick_lgm(axs[i, 2], diff=True)
+    axs[i, 2] = plotcosmo_notick_lgm(axs[i, 2], diff=False)
 
 # --
-levels1 = MaxNLocator(nbins=30).tick_values(0, 15)
-cmap1 = cmc.davos_r
+levels1 = MaxNLocator(nbins=40).tick_values(-20, 20)
+cmap1 = cmc.roma_r
 norm1 = BoundaryNorm(levels1, ncolors=cmap1.N, clip=True)
-levels2 = MaxNLocator(nbins=11).tick_values(-2, 2)
-cmap2 = drywet(25, cmc.vik_r)
-norm2 = colors.TwoSlopeNorm(vmin=-2., vcenter=0., vmax=2.)
+levels2 = MaxNLocator(nbins=20).tick_values(-10, 0)
+cmap2 = cmc.davos
+norm2 = BoundaryNorm(levels2, ncolors=cmap2.N, clip=True)
 # --
 levels = [levels1, levels1, levels2]
 norms = [norm1, norm1, norm2]
@@ -113,7 +125,14 @@ for i in range(nrow):
         sim = sims[j]
         cmap = cmaps[j]
         norm = norms[j]
-        cs[i, j] = axs[i, j].pcolormesh(lon_, lat_, data[model][sim], cmap=cmap, norm=norm, shading="auto", transform=transform_)
+        cs[i, j] = axs[i, j].pcolormesh(lon_, lat_, data[model][sim], cmap=cmap, norm=norm, shading="auto",
+                                        transform=transform_)
+
+# add proxy data
+lon = df_filtered["Longitude"].values
+lat = df_filtered["Latitude"].values
+axs[0, 2].scatter(lon, lat, c=annt, s=20, linewidths=0.5, cmap=cmap, norm=norm, transform=transform_)
+axs[1, 2].scatter(lon, lat, c=annt, s=20, linewidths=0.5, cmap=cmap, norm=norm, transform=transform_)
 
 for i in range(nrow):
     for j in range(ncol):
@@ -121,15 +140,17 @@ for i in range(nrow):
         t = axs[i, j].text(0.01, 0.985, f'({label})', ha='left', va='top',
                            transform=axs[i, j].transAxes, fontsize=14)
         t.set_bbox(dict(facecolor='white', alpha=0.7, pad=1, edgecolor='none'))
-        
+
 # --
 for i in range(nrow):
-    cax = fig.add_axes([axs[i, 1].get_position().x1+0.01, axs[i, 1].get_position().y0, 0.015, axs[i, 1].get_position().height])
-    cbar = fig.colorbar(cs[i, 1], cax=cax, orientation='vertical', extend='max')
+    cax = fig.add_axes(
+        [axs[i, 1].get_position().x1 + 0.01, axs[i, 1].get_position().y0, 0.015, axs[i, 1].get_position().height])
+    cbar = fig.colorbar(cs[i, 1], cax=cax, orientation='vertical', extend='both')
     cbar.ax.tick_params(labelsize=13)
     cbar.ax.minorticks_off()
-    cax = fig.add_axes([axs[i, 2].get_position().x1+0.01, axs[i, 2].get_position().y0, 0.015, axs[i, 2].get_position().height])
-    cbar = fig.colorbar(cs[i, 2], cax=cax, orientation='vertical', extend='both', ticks=[-2, -1, 0, 1, 2])
+    cax = fig.add_axes(
+        [axs[i, 2].get_position().x1 + 0.01, axs[i, 2].get_position().y0, 0.015, axs[i, 2].get_position().height])
+    cbar = fig.colorbar(cs[i, 2], cax=cax, orientation='vertical', extend='both', ticks=[0, -2, -4, -6, -8, -10])
     cbar.ax.tick_params(labelsize=13)
     cbar.ax.minorticks_off()
 # --
@@ -151,13 +172,17 @@ for i in range(nrow):
     axs[i, 0].text(-0.008, 0.05, '0°N', ha='right', va='center', transform=axs[i, 0].transAxes, fontsize=13)
 
 for j in range(ncol):
-    axs[nrow-1, j].text(0.12, -0.02, '80°E', ha='center', va='top', transform=axs[nrow-1, j].transAxes, fontsize=13)
-    axs[nrow-1, j].text(0.32, -0.02, '100°E', ha='center', va='top', transform=axs[nrow-1, j].transAxes, fontsize=13)
-    axs[nrow-1, j].text(0.52, -0.02, '120°E', ha='center', va='top', transform=axs[nrow-1, j].transAxes, fontsize=13)
-    axs[nrow-1, j].text(0.72, -0.02, '140°E', ha='center', va='top', transform=axs[nrow-1, j].transAxes, fontsize=13)
-    axs[nrow-1, j].text(0.92, -0.02, '160°E', ha='center', va='top', transform=axs[nrow-1, j].transAxes, fontsize=13)
+    axs[nrow - 1, j].text(0.12, -0.02, '80°E', ha='center', va='top', transform=axs[nrow - 1, j].transAxes, fontsize=13)
+    axs[nrow - 1, j].text(0.32, -0.02, '100°E', ha='center', va='top', transform=axs[nrow - 1, j].transAxes,
+                          fontsize=13)
+    axs[nrow - 1, j].text(0.52, -0.02, '120°E', ha='center', va='top', transform=axs[nrow - 1, j].transAxes,
+                          fontsize=13)
+    axs[nrow - 1, j].text(0.72, -0.02, '140°E', ha='center', va='top', transform=axs[nrow - 1, j].transAxes,
+                          fontsize=13)
+    axs[nrow - 1, j].text(0.92, -0.02, '160°E', ha='center', va='top', transform=axs[nrow - 1, j].transAxes,
+                          fontsize=13)
 
 plt.show()
-plotpath = "/project/pr133/rxiang/figure/paper2/results/lgm/"
-fig.savefig(plotpath + 'vali_pr.png', dpi=500)
+plotpath = "/project/pr133/rxiang/figure/paper2/results/gm/"
+fig.savefig(plotpath + 'tmp.png', dpi=500)
 plt.close(fig)
