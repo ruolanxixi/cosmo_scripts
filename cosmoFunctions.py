@@ -89,6 +89,35 @@ def haversine(latlon1, latlon2):
 # -------------------------------------------------------------------------------
 
 # -------------------------------------------------------------------------------
+
+def uvrot2uv_3D_py(u, v, lat, lon, pollat, pollon):
+    """
+    This routine converts the 3D wind components u and v from the rotated
+    system to the real geographical system.
+    https://github.com/COSMO-ORG/cosmo/blob/master/cosmo/src/utilities.f90
+    """
+
+    rad_in_deg = 0.0174532925
+
+    sinpol = np.sin(pollat * rad_in_deg)
+    cospol = np.cos(pollat * rad_in_deg)
+
+    lonp = (pollon - lon) * rad_in_deg
+    lat_rad = lat * rad_in_deg
+    arg1 = cospol * np.sin(lonp)
+    arg2 = sinpol * np.cos(lat_rad) - cospol * np.sin(lat_rad) * np.cos(lonp)
+    norm = 1. / np.sqrt(arg1 ** 2 + arg2 ** 2)
+
+    # convert u- and v- components
+    ugeo = u * arg2 * norm + v * arg1 * norm
+    vgeo = -u * arg1 * norm + v * arg2 * norm
+
+    return ugeo, vgeo
+
+
+# -------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # Haversine formula
 #
 def soilSaturation(soiltyp, w_so):
